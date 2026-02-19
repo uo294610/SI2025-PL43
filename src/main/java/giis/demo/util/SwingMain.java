@@ -1,12 +1,16 @@
 package giis.demo.util;
 
 import java.awt.EventQueue;
+
 import javax.swing.JFrame;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import giis.demo.tkrun.*;
+
+// Imports para el main
+import diego_asignarReporteros.*;
 
 /**
  * Punto de entrada principal que incluye botones para la ejecucion de las pantallas 
@@ -51,16 +55,9 @@ public class SwingMain {
 		frame.setBounds(0, 0, 287, 185);
 		frame.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 		
-		JButton btnEjecutarTkrun = new JButton("Ejecutar giis.demo.tkrun");
-		btnEjecutarTkrun.addActionListener(new ActionListener() { //NOSONAR codigo autogenerado
-			public void actionPerformed(ActionEvent e) {
-				CarrerasController controller=new CarrerasController(new CarrerasModel(), new CarrerasView());
-				controller.initController();
-			}
-		});
-		frame.getContentPane().setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS));
-		frame.getContentPane().add(btnEjecutarTkrun);
 		
+		frame.getContentPane().setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS));
+	
 			
 		JButton btnInicializarBaseDeDatos = new JButton("Inicializar Base de Datos en Blanco");
 		btnInicializarBaseDeDatos.addActionListener(new ActionListener() { //NOSONAR codigo autogenerado
@@ -80,6 +77,17 @@ public class SwingMain {
 			}
 		});
 		frame.getContentPane().add(btnCargarDatosIniciales);
+		
+		// Asignar Reporteros
+		JButton btnAsignarReporteros = new JButton("Asignar Reporteros");
+		btnAsignarReporteros.addActionListener(new ActionListener() { //NOSONAR codigo autogenerado
+			public void actionPerformed(ActionEvent e) {
+				ReporteroController controller = new ReporteroController(
+						new ReporteroModel(), 
+						new ReporteroView());
+			}
+		});
+		frame.getContentPane().add(btnAsignarReporteros);
 	}
 
 	public JFrame getFrame() { return this.frame; }

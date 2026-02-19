@@ -37,9 +37,9 @@ CREATE TABLE Evento (
 
 CREATE TABLE Reportaje (
     id INT PRIMARY KEY NOT NULL,
-    titulo VARCHAR(128) UNIQUE NOT NULL, -- HU 33603: Título único
-    evento_id INT UNIQUE NOT NULL,      -- Relación 1-1 con Evento
-    reportero_entrega_id INT NOT NULL,  -- Registro de quién entregó
+    titulo VARCHAR(128) UNIQUE NOT NULL, 
+    evento_id INT UNIQUE NOT NULL,      
+    reportero_entrega_id INT NOT NULL,  
     FOREIGN KEY (evento_id) REFERENCES Evento(id),
     FOREIGN KEY (reportero_entrega_id) REFERENCES Reportero(id)
 );
