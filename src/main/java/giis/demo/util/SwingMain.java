@@ -5,6 +5,7 @@ import java.awt.EventQueue;
 import javax.swing.JFrame;
 
 import diego_asignarReporteros_33602.*;
+import diego_ReportajesEvento_33607.*;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -89,6 +90,18 @@ public class SwingMain {
 			}
 		});
 		frame.getContentPane().add(btnAsignarReporteros);
+		
+		// Ver reportajes
+		JButton btnLeerReportajes = new JButton("Leer Reportajes (Empresas)");
+        btnLeerReportajes.addActionListener(new ActionListener() { 
+            public void actionPerformed(ActionEvent e) {
+                EmpresaController controller = new EmpresaController(
+                        new EmpresaModel(), 
+                        new EmpresaView());
+                controller.initController(); // ¡No te olvides de mí!
+            }
+        });
+        frame.getContentPane().add(btnLeerReportajes);
 	}
 
 	public JFrame getFrame() { return this.frame; }
