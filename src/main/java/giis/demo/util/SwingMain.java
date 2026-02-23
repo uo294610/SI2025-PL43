@@ -4,6 +4,9 @@ import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 
+import alex_GestionarOfrecimientos_33605.OfrecimientosController;
+import alex_GestionarOfrecimientos_33605.OfrecimientosModel;
+import alex_GestionarOfrecimientos_33605.OfrecimientosView;
 import diego_asignarReporteros_33602.*;
 import diego_ReportajesEvento_33607.*;
 
@@ -102,7 +105,23 @@ public class SwingMain {
             }
         });
         frame.getContentPane().add(btnLeerReportajes);
-	}
+	
+	
+	// Gestionar ofrecimientos
+	JButton btnGestionarOfrecimientos = new JButton("Gestionar Ofrecimientos");
+	btnGestionarOfrecimientos.addActionListener(new ActionListener() { 
+	    public void actionPerformed(ActionEvent e) {
+	        OfrecimientosModel model = new OfrecimientosModel();
+	        OfrecimientosView view = new OfrecimientosView();
+	        OfrecimientosController controller = new OfrecimientosController(model, view);
+	        
+	      
+	        controller.initController();
+	        controller.initView();
+	    }
+	});
+	frame.getContentPane().add(btnGestionarOfrecimientos);
+}
 
 	public JFrame getFrame() { return this.frame; }
 	
