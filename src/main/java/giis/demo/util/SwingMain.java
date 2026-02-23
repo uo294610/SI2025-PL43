@@ -3,14 +3,14 @@ package giis.demo.util;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
+
+import diego_asignarReporteros_33602.*;
+
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import giis.demo.tkrun.*;
-
-// Imports para el main
-import diego_asignarReporteros.*;
 
 /**
  * Punto de entrada principal que incluye botones para la ejecucion de las pantallas 

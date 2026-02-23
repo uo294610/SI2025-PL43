@@ -1,4 +1,4 @@
-package diego_asignarReporteros;
+package diego_asignarReporteros_33602;
 
 import javax.swing.*;
 import net.miginfocom.swing.MigLayout;
