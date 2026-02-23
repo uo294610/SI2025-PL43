@@ -26,7 +26,7 @@ public class ReporteroController {
         view.getTabEventos().addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
-                SwingUtil.exceptionWrapper(() -> getReporterosDisponibles());
+                SwingUtil.exceptionWrapper(() -> actualizarTablasReporteros());
             }
         });
 
@@ -67,18 +67,25 @@ public class ReporteroController {
         }
     }
 
-    private void getReporterosDisponibles() {
+    private void actualizarTablasReporteros() {
         int row = view.getTabEventos().getSelectedRow();
-        if (row < 0) return; // No hay nada seleccionado
+        if (row < 0) return; 
 
         int idAgencia = Integer.parseInt(view.getTxtAgenciaId().getText());
-        // Suponiendo que la columna 2 es la fecha (id=0, nombre=1, fecha=2)
+        int idEvento = Integer.parseInt(view.getTabEventos().getValueAt(row, 0).toString());
         String fechaEvento = view.getTabEventos().getValueAt(row, 2).toString(); 
 
+        // 1. Cargar disponibles
         List<ReporteroDTO> reporteros = model.getReporterosDisponibles(idAgencia, fechaEvento);
-        TableModel tmodel = SwingUtil.getTableModelFromPojos(reporteros, new String[] { "id", "nombre" });
-        view.getTabReporteros().setModel(tmodel);
+        TableModel tmodelDisp = SwingUtil.getTableModelFromPojos(reporteros, new String[] { "id", "nombre" });
+        view.getTabReporteros().setModel(tmodelDisp);
         SwingUtil.autoAdjustColumns(view.getTabReporteros());
+
+        // 2. Cargar asignados
+        List<ReporteroDTO> asignados = model.getReporterosAsignados(idEvento);
+        TableModel tmodelAsig = SwingUtil.getTableModelFromPojos(asignados, new String[] { "id", "nombre" });
+        view.getTabReporterosAsignados().setModel(tmodelAsig);
+        SwingUtil.autoAdjustColumns(view.getTabReporterosAsignados());
     }
 
     private void asignarReporteros() {
@@ -92,7 +99,6 @@ public class ReporteroController {
 
         int idEvento = Integer.parseInt(view.getTabEventos().getValueAt(rowEvento, 0).toString());
 
-        // Iterar sobre los reporteros seleccionados y asignarlos
         for (int row : rowsReporteros) {
             int idReportero = Integer.parseInt(view.getTabReporteros().getValueAt(row, 0).toString());
             model.asignarReportero(idEvento, idReportero);
@@ -100,7 +106,8 @@ public class ReporteroController {
 
         JOptionPane.showMessageDialog(view.getFrame(), "Asignación realizada con éxito.");
         
-        // Refrescar la pantalla (el evento ya no debería salir en la lista superior)
-        getEventosSinAsignar();
+        // EN LUGAR DE ACTUALIZAR LA TABLA DE EVENTOS, ACTUALIZAMOS LOS REPORTEROS
+        // Así ves cómo pasan de una tabla a otra sin perder de vista el evento.
+        actualizarTablasReporteros(); 
     }
 }

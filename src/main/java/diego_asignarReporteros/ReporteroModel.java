@@ -41,4 +41,15 @@ public class ReporteroModel {
         String sql = "INSERT INTO Asignacion (evento_id, reportero_id) VALUES (?, ?)";
         db.executeUpdate(sql, idEvento, idReportero);
     }
+    
+    /**
+     * Obtiene la lista de reporteros que ya están asignados a un evento específico.
+     */
+    public List<ReporteroDTO> getReporterosAsignados(int idEvento) {
+        String sql = "SELECT r.id, r.nombre FROM Reportero r "
+                   + "JOIN Asignacion a ON r.id = a.reportero_id "
+                   + "WHERE a.evento_id = ? "
+                   + "ORDER BY r.nombre";
+        return db.executeQueryPojo(ReporteroDTO.class, sql, idEvento);
+    }
 }
