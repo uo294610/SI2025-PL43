@@ -8,7 +8,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import giis.demo.tkrun.*;
 
-import nico_entregaEvento_33603.*;
 
 /**
  * Punto de entrada principal que incluye botones para la ejecucion de las pantallas 
@@ -83,24 +82,7 @@ public class SwingMain {
 		});
 		frame.getContentPane().add(btnCargarDatosIniciales);
 		
-		// // Entregar Reportaje (Historia #33603)
-		JButton btnEntregarReportaje = new JButton("Entregar Reportaje");
-		btnEntregarReportaje.addActionListener(new ActionListener() {
-		    public void actionPerformed(ActionEvent e) {
-		        // Instanciamos tu modelo de datos
-		        EntregaReportajeModel model = new EntregaReportajeModel();
-		        // Instanciamos tu vista basada en el prototipo
-		        EntregaReportajeView view = new EntregaReportajeView();
-		        
-		        // Creamos el controlador pasando el modelo, la vista y un ID de reportero 
-		        // (En un entorno real, este ID vendría del login del usuario)
-		        EntregaReportajeController controller = new EntregaReportajeController(model, view, 1);
-		        
-		        // Inicializamos el controlador para activar los listeners y mostrar la ventana
-		        controller.initController();
-		    }
-		});
-		frame.getContentPane().add(btnEntregarReportaje);
+		
 	}
 
 	public JFrame getFrame() { return this.frame; }
