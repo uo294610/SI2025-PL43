@@ -3,10 +3,9 @@ package diego_asignarReporteros;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
-import javax.swing.JOptionPane;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
-
+import javax.swing.table.DefaultTableModel;
+import javax.swing.JOptionPane;
 import giis.demo.util.SwingUtil;
 
 public class ReporteroController {
@@ -20,83 +19,88 @@ public class ReporteroController {
     }
 
     public void initController() {
-        // Cargar eventos al hacer clic en el botón superior
-        view.getBtnCargarEventos().addActionListener(e -> SwingUtil.exceptionWrapper(() -> cargarEventos()));
+        // Cargar eventos al pulsar el botón
+        view.getBtnCargarEventos().addActionListener(e -> SwingUtil.exceptionWrapper(() -> getEventosSinAsignar()));
 
-        // Al seleccionar un evento de la tabla superior, cargar los reporteros disponibles abajo
-        view.getTablaEventos().addMouseListener(new MouseAdapter() {
+        // Al seleccionar un evento, cargar reporteros disponibles
+        view.getTabEventos().addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
-                SwingUtil.exceptionWrapper(() -> cargarReporterosDisponibles());
+                SwingUtil.exceptionWrapper(() -> getReporterosDisponibles());
             }
         });
 
-        // Al pulsar el botón de asignar
-        view.getBtnAsignar().addActionListener(e -> SwingUtil.exceptionWrapper(() -> realizarAsignacion()));
+        // Asignar los reporteros seleccionados
+        view.getBtnAsignar().addActionListener(e -> SwingUtil.exceptionWrapper(() -> asignarReporteros()));
     }
 
     public void initView() {
-        cargarEventos(); // Carga inicial
         view.getFrame().setVisible(true);
+        // Limpiamos las tablas al inicio
+        view.getTabEventos().setModel(new DefaultTableModel());
+        view.getTabReporteros().setModel(new DefaultTableModel());
     }
 
-    private void cargarEventos() {
-        int idAgencia = Integer.parseInt(view.getIdAgencia());
-        List<EventoDisplayDTO> eventos = model.getEventosSinAsignar(idAgencia);
-        TableModel tmodel = SwingUtil.getTableModelFromPojos(eventos, new String[] { "id", "nombre", "fecha" });
-        view.getTablaEventos().setModel(tmodel);
-        SwingUtil.autoAdjustColumns(view.getTablaEventos());
-        
-        // Limpiamos la tabla de reporteros porque la selección de evento ha cambiado/desaparecido
-        view.getTablaReporteros().setModel(new DefaultTableModel());
-    }
+    private void getEventosSinAsignar() {
+        // 1. Chivato al principio del todo para saber si el botón funciona
+        System.out.println(">>> 1. ¡Clic detectado! Entrando al método...");
 
-    private void cargarReporterosDisponibles() {
-        int idAgencia = Integer.parseInt(view.getIdAgencia());
-        
-        // Obtenemos la fila seleccionada
-        int filaSeleccionada = view.getTablaEventos().getSelectedRow();
-        if (filaSeleccionada >= 0) {
-            // Sacamos la fecha del evento de la columna 2 (índice 2)
-            String fechaEvento = (String) view.getTablaEventos().getValueAt(filaSeleccionada, 2);
+        try {
+            int idAgencia = Integer.parseInt(view.getTxtAgenciaId().getText());
+            System.out.println(">>> 2. ID de la agencia leído correctamente: " + idAgencia);
+
+            // Si falla la Base de Datos, se romperá justo aquí y saltará al catch
+            List<EventoDTO> eventos = model.getEventosSinAsignar(idAgencia);
+            System.out.println(">>> 3. Consulta a la BD completada. Eventos: " + eventos.size());
+
+            TableModel tmodel = SwingUtil.getTableModelFromPojos(eventos, new String[] { "id", "nombre", "fecha" });
+            view.getTabEventos().setModel(tmodel);
+            SwingUtil.autoAdjustColumns(view.getTabEventos());
             
-            List<ReporteroDisplayDTO> reporteros = model.getReporterosDisponibles(idAgencia, fechaEvento);
-            TableModel tmodel = SwingUtil.getTableModelFromPojos(reporteros, new String[] { "id", "nombre" });
-            view.getTablaReporteros().setModel(tmodel);
-            SwingUtil.autoAdjustColumns(view.getTablaReporteros());
+            view.getTabReporteros().setModel(new DefaultTableModel());
+            System.out.println(">>> 4. Tablas actualizadas visualmente.");
+
+        } catch (Exception e) {
+            // Si hay un error silencioso, esto lo va a cazar sí o sí
+            System.err.println(">>> ¡BINGO! Hemos cazado un error:");
+            e.printStackTrace();
         }
     }
 
-    private void realizarAsignacion() {
-        int filaEvento = view.getTablaEventos().getSelectedRow();
-        int[] filasReporteros = view.getTablaReporteros().getSelectedRows();
+    private void getReporterosDisponibles() {
+        int row = view.getTabEventos().getSelectedRow();
+        if (row < 0) return; // No hay nada seleccionado
 
-        if (filaEvento < 0) {
-            JOptionPane.showMessageDialog(view.getFrame(), "Debes seleccionar un evento primero.");
+        int idAgencia = Integer.parseInt(view.getTxtAgenciaId().getText());
+        // Suponiendo que la columna 2 es la fecha (id=0, nombre=1, fecha=2)
+        String fechaEvento = view.getTabEventos().getValueAt(row, 2).toString(); 
+
+        List<ReporteroDTO> reporteros = model.getReporterosDisponibles(idAgencia, fechaEvento);
+        TableModel tmodel = SwingUtil.getTableModelFromPojos(reporteros, new String[] { "id", "nombre" });
+        view.getTabReporteros().setModel(tmodel);
+        SwingUtil.autoAdjustColumns(view.getTabReporteros());
+    }
+
+    private void asignarReporteros() {
+        int rowEvento = view.getTabEventos().getSelectedRow();
+        int[] rowsReporteros = view.getTabReporteros().getSelectedRows();
+
+        if (rowEvento < 0 || rowsReporteros.length == 0) {
+            JOptionPane.showMessageDialog(view.getFrame(), "Debe seleccionar 1 evento y al menos 1 reportero.");
             return;
         }
-        if (filasReporteros.length == 0) {
-            JOptionPane.showMessageDialog(view.getFrame(), "Debes seleccionar al menos un reportero.");
-            return;
-        }
 
-        // Obtener el ID del evento seleccionado
-        int idEvento = Integer.parseInt((String) view.getTablaEventos().getValueAt(filaEvento, 0));
+        int idEvento = Integer.parseInt(view.getTabEventos().getValueAt(rowEvento, 0).toString());
 
-        // Por cada reportero seleccionado, realizar el insert
-        StringBuilder asignados = new StringBuilder("Asignados con éxito:\n");
-        for (int filaRep : filasReporteros) {
-            int idReportero = Integer.parseInt((String) view.getTablaReporteros().getValueAt(filaRep, 0));
-            String nombreReportero = (String) view.getTablaReporteros().getValueAt(filaRep, 1);
-            
+        // Iterar sobre los reporteros seleccionados y asignarlos
+        for (int row : rowsReporteros) {
+            int idReportero = Integer.parseInt(view.getTabReporteros().getValueAt(row, 0).toString());
             model.asignarReportero(idEvento, idReportero);
-            asignados.append("- ").append(nombreReportero).append("\n");
         }
 
-        // Mostrar confirmación
-        JOptionPane.showMessageDialog(view.getFrame(), asignados.toString());
-
-        // Refrescar la vista (el evento desaparecerá porque ya tiene asignaciones)
-        cargarEventos();
+        JOptionPane.showMessageDialog(view.getFrame(), "Asignación realizada con éxito.");
+        
+        // Refrescar la pantalla (el evento ya no debería salir en la lista superior)
+        getEventosSinAsignar();
     }
 }

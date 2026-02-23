@@ -85,6 +85,7 @@ public class SwingMain {
 				ReporteroController controller = new ReporteroController(
 						new ReporteroModel(), 
 						new ReporteroView());
+				controller.initController();
 			}
 		});
 		frame.getContentPane().add(btnAsignarReporteros);

@@ -1,18 +1,11 @@
 package diego_asignarReporteros;
 
-import javax.swing.JFrame;
+import javax.swing.*;
 import net.miginfocom.swing.MigLayout;
-import javax.swing.JLabel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
-import javax.swing.JButton;
 
 public class ReporteroView {
-
     private JFrame frame;
-    private JTextField txtIdAgencia;
+    private JTextField txtAgenciaId;
     private JButton btnCargarEventos;
     private JTable tabEventos;
     private JTable tabReporteros;
@@ -26,48 +19,41 @@ public class ReporteroView {
         frame = new JFrame();
         frame.setTitle("Asignación de Reporteros");
         frame.setBounds(0, 0, 600, 500);
-        frame.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.getContentPane().setLayout(new MigLayout("", "[grow]", "[][][grow][][grow][]"));
 
-        JLabel lblAgencia = new JLabel("ID Agencia:");
-        frame.getContentPane().add(lblAgencia, "flowx,cell 0 0");
-
-        txtIdAgencia = new JTextField();
-        txtIdAgencia.setText("1"); // Valor por defecto (Agencia EFE en tu data.sql)
-        frame.getContentPane().add(txtIdAgencia, "cell 0 0");
-        txtIdAgencia.setColumns(10);
-
+        // Simulación de sesión de Agencia
+        frame.getContentPane().add(new JLabel("ID Agencia (Simulación):"), "flowx,cell 0 0");
+        txtAgenciaId = new JTextField("1"); // EFE por defecto
+        frame.getContentPane().add(txtAgenciaId, "cell 0 0, width 50!");
         btnCargarEventos = new JButton("Ver Eventos sin asignar");
         frame.getContentPane().add(btnCargarEventos, "cell 0 0");
 
-        JLabel lblEventos = new JLabel("Selecciona un Evento:");
-        frame.getContentPane().add(lblEventos, "cell 0 1");
-
+        // Tabla de Eventos
+        frame.getContentPane().add(new JLabel("1. Selecciona un Evento sin asignar:"), "cell 0 1");
         tabEventos = new JTable();
         tabEventos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tabEventos.setDefaultEditor(Object.class, null); // readonly
-        JScrollPane scrollEventos = new JScrollPane(tabEventos);
-        frame.getContentPane().add(scrollEventos, "cell 0 2,grow");
+        tabEventos.setDefaultEditor(Object.class, null); 
+        frame.getContentPane().add(new JScrollPane(tabEventos), "cell 0 2,grow");
 
-        JLabel lblReporteros = new JLabel("Reporteros Disponibles (Usa Ctrl/Cmd para selección múltiple):");
-        frame.getContentPane().add(lblReporteros, "cell 0 3");
-
+        // Tabla de Reporteros
+        frame.getContentPane().add(new JLabel("2. Reporteros Disponibles (Ctrl+Click para selección múltiple):"), "cell 0 3");
         tabReporteros = new JTable();
-        // IMPORTANTE: Permitir seleccionar varios reporteros a la vez
+        // Permite seleccionar varios reporteros a la vez
         tabReporteros.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        tabReporteros.setDefaultEditor(Object.class, null); // readonly
-        JScrollPane scrollReporteros = new JScrollPane(tabReporteros);
-        frame.getContentPane().add(scrollReporteros, "cell 0 4,grow");
+        tabReporteros.setDefaultEditor(Object.class, null);
+        frame.getContentPane().add(new JScrollPane(tabReporteros), "cell 0 4,grow");
 
-        btnAsignar = new JButton("Asignar Reporteros Seleccionados");
-        frame.getContentPane().add(btnAsignar, "cell 0 5,alignx right");
+        // Botón de acción
+        btnAsignar = new JButton("Asignar Reportero(s)");
+        frame.getContentPane().add(btnAsignar, "cell 0 5, align right");
     }
 
-    // Getters
+    // Getters para el controlador
     public JFrame getFrame() { return this.frame; }
-    public String getIdAgencia() { return this.txtIdAgencia.getText(); }
+    public JTextField getTxtAgenciaId() { return this.txtAgenciaId; }
     public JButton getBtnCargarEventos() { return this.btnCargarEventos; }
-    public JTable getTablaEventos() { return this.tabEventos; }
-    public JTable getTablaReporteros() { return this.tabReporteros; }
+    public JTable getTabEventos() { return this.tabEventos; }
+    public JTable getTabReporteros() { return this.tabReporteros; }
     public JButton getBtnAsignar() { return this.btnAsignar; }
 }

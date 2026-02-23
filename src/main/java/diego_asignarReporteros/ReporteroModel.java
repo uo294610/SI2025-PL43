@@ -7,34 +7,35 @@ public class ReporteroModel {
     private Database db = new Database();
 
     /**
-     * Obtiene la lista de eventos de una agencia que NO tienen ningún reportero asignado.
+     * Obtiene eventos de una agencia que NO tienen asignaciones.
      */
-    public List<EventoDisplayDTO> getEventosSinAsignar(int idAgencia) {
+    public List<EventoDTO> getEventosSinAsignar(int idAgencia) {
+ 
         String sql = "SELECT e.id, e.nombre, e.fecha "
                    + "FROM Evento e "
                    + "LEFT JOIN Asignacion a ON e.id = a.evento_id "
-                   + "WHERE e.agencia_id = ? AND a.reportero_id IS NULL";
-        return db.executeQueryPojo(EventoDisplayDTO.class, sql, idAgencia);
+                   + "WHERE e.agencia_id = ? "
+                   + "AND a.evento_id IS NULL "
+                   + "ORDER BY e.fecha";
+        return db.executeQueryPojo(EventoDTO.class, sql, idAgencia);
     }
 
     /**
-     * Obtiene los reporteros de una agencia que están disponibles para una fecha concreta.
-     * (No están asignados a ningún otro evento en esa misma fecha).
+     * Obtiene reporteros de la agencia que NO están asignados a ningún evento en esa fecha concreta.
      */
-    public List<ReporteroDisplayDTO> getReporterosDisponibles(int idAgencia, String fechaEvento) {
-        String sql = "SELECT r.id, r.nombre "
-                   + "FROM Reportero r "
-                   + "WHERE r.agencia_id = ? AND r.id NOT IN ("
-                   + "    SELECT a.reportero_id "
-                   + "    FROM Asignacion a "
-                   + "    INNER JOIN Evento ev ON a.evento_id = ev.id "
-                   + "    WHERE ev.fecha = ?"
-                   + ")";
-        return db.executeQueryPojo(ReporteroDisplayDTO.class, sql, idAgencia, fechaEvento);
+    public List<ReporteroDTO> getReporterosDisponibles(int idAgencia, String fechaEvento) {
+        String sql = "SELECT id, nombre FROM Reportero "
+                   + "WHERE agencia_id = ? "
+                   + "AND id NOT IN ("
+                   + "    SELECT a.reportero_id FROM Asignacion a "
+                   + "    JOIN Evento e ON a.evento_id = e.id "
+                   + "    WHERE e.fecha = ?"
+                   + ") ORDER BY nombre";
+        return db.executeQueryPojo(ReporteroDTO.class, sql, idAgencia, fechaEvento);
     }
 
     /**
-     * Asigna un reportero a un evento en la base de datos.
+     * Crea la asignación en la base de datos.
      */
     public void asignarReportero(int idEvento, int idReportero) {
         String sql = "INSERT INTO Asignacion (evento_id, reportero_id) VALUES (?, ?)";
