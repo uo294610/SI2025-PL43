@@ -9,7 +9,7 @@ import alex_GestionarOfrecimientos_33605.OfrecimientosModel;
 import alex_GestionarOfrecimientos_33605.OfrecimientosView;
 import diego_asignarReporteros_33602.*;
 import diego_ReportajesEvento_33607.*;
-
+import adrian_ofrecerReportajes_33604.*;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
@@ -121,6 +121,21 @@ public class SwingMain {
 	    }
 	});
 	frame.getContentPane().add(btnGestionarOfrecimientos);
+	
+	// Ofrecer Reportajes 
+	JButton btnOfrecerReportajes_33604 = new JButton("Ofrecer Reportajes");
+	btnOfrecerReportajes_33604.addActionListener(new ActionListener() { 
+	    public void actionPerformed(ActionEvent e) {
+	        OfrecimientoModel model = new OfrecimientoModel();
+	        OfrecimientoView view = new OfrecimientoView();
+	        OfrecimientoController controller = new OfrecimientoController(model, view);
+	        
+	        controller.initController();
+	        controller.initView();
+	    }
+	});
+	frame.getContentPane().add(btnOfrecerReportajes_33604);
+	
 }
 
 	public JFrame getFrame() { return this.frame; }
