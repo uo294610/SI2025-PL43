@@ -1,4 +1,4 @@
-package alex_GestionarOfrecimientos_33605;
+package alex_ModificarDecision_33611;
 
 import java.util.*;
 import giis.demo.util.Database;
@@ -7,21 +7,21 @@ public class OfrecimientosModel {
     private Database db = new Database();
 
     public List<Object[]> getListaEmpresas() {
-        // Obtenemos ID y Nombre para el combo
         return db.executeQueryArray("SELECT id, nombre FROM EmpresaComunicacion ORDER BY nombre");
     }
 
-    public List<OfrecimientosDTO> getOfrecimientosPendientes(int empresaId) {
-        String sql = "SELECT o.id, e.nombre AS evento, a.nombre AS agencia, e.fecha " +
+    public List<OfrecimientosDTO> getOfrecimientosFiltrados(int empresaId, boolean verDecididos) {
+        String clausula = verDecididos ? "IS NOT NULL" : "IS NULL";
+        String sql = "SELECT o.id, e.nombre AS evento, a.nombre AS agencia, e.fecha, o.decision " +
                      "FROM Ofrecimiento o " +
                      "JOIN Evento e ON o.evento_id = e.id " +
                      "JOIN AgenciaPrensa a ON e.agencia_id = a.id " +
-                     "WHERE o.decision IS NULL AND o.empresa_id = ? ORDER BY e.fecha ASC";
+                     "WHERE o.empresa_id = ? AND o.decision " + clausula + " ORDER BY e.fecha ASC";
         return db.executeQueryPojo(OfrecimientosDTO.class, sql, empresaId);
     }
 
     public OfrecimientoEntity getDetalleOfrecimiento(int id) {
-        String sql = "SELECT o.id, e.nombre AS evento, a.nombre AS agencia, e.fecha " +
+        String sql = "SELECT o.id, e.nombre AS evento, a.nombre AS agencia, e.fecha, o.acceso, o.decision " +
                      "FROM Ofrecimiento o " +
                      "JOIN Evento e ON o.evento_id = e.id " +
                      "JOIN AgenciaPrensa a ON e.agencia_id = a.id " +
@@ -31,9 +31,8 @@ public class OfrecimientosModel {
     }
 
     public void updateDecision(int id, String decision) {
-        int acceso = decision.equals("ACEPTADO") ? 1 : 0;
-        db.executeUpdate("UPDATE Ofrecimiento SET decision = ?, acceso = ? WHERE id = ?", decision, acceso, id);
+        // Solo actualizamos la decisión. 
+        // El acceso se queda como está (si es 0, permite seguir editando)
+        db.executeUpdate("UPDATE Ofrecimiento SET decision = ? WHERE id = ?", decision, id);
     }
 }
-
-

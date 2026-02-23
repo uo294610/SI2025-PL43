@@ -1,20 +1,19 @@
+
 package giis.demo.util;
 
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 
-import alex_GestionarOfrecimientos_33605.OfrecimientosController;
-import alex_GestionarOfrecimientos_33605.OfrecimientosModel;
-import alex_GestionarOfrecimientos_33605.OfrecimientosView;
+
 import diego_asignarReporteros_33602.*;
 import diego_ReportajesEvento_33607.*;
 import adrian_ofrecerReportajes_33604.*;
+import alex_ModificarDecision_33611.*;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import giis.demo.tkrun.*;
 
 /**
  * Punto de entrada principal que incluye botones para la ejecucion de las pantallas 
@@ -53,91 +52,74 @@ public class SwingMain {
 	/**
 	 * Initialize the contents of the frame.
 	 */
-	private void initialize() {
-		frame = new JFrame();
-		frame.setTitle("Main");
-		frame.setBounds(0, 0, 287, 185);
-		frame.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+		private void initialize() {
+			frame = new JFrame();
+			frame.setTitle("Main Menu - Gestión de Ofrecimientos");
+			frame.setBounds(0, 0, 350, 300); // Un poco más alto para los nuevos botones
+			frame.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+			frame.getContentPane().setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS));
 		
-		
-		frame.getContentPane().setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS));
-	
-			
-		JButton btnInicializarBaseDeDatos = new JButton("Inicializar Base de Datos en Blanco");
-		btnInicializarBaseDeDatos.addActionListener(new ActionListener() { //NOSONAR codigo autogenerado
-			public void actionPerformed(ActionEvent e) {
-				Database db=new Database();
+			// --- BOTONES DE BASE DE DATOS ---
+			JButton btnInicializarBaseDeDatos = new JButton("Inicializar Base de Datos en Blanco");
+			btnInicializarBaseDeDatos.addActionListener(e -> {
+				Database db = new Database();
 				db.createDatabase(false);
-			}
-		});
-		frame.getContentPane().add(btnInicializarBaseDeDatos);
-			
-		JButton btnCargarDatosIniciales = new JButton("Cargar Datos Iniciales para Pruebas");
-		btnCargarDatosIniciales.addActionListener(new ActionListener() { //NOSONAR codigo autogenerado
-			public void actionPerformed(ActionEvent e) {
-				Database db=new Database();
+			});
+			frame.getContentPane().add(btnInicializarBaseDeDatos);
+				
+			JButton btnCargarDatosIniciales = new JButton("Cargar Datos Iniciales para Pruebas");
+			btnCargarDatosIniciales.addActionListener(e -> {
+				Database db = new Database();
 				db.createDatabase(false);
 				db.loadDatabase();
-			}
-		});
-		frame.getContentPane().add(btnCargarDatosIniciales);
-		
-		// Asignar Reporteros
-		JButton btnAsignarReporteros = new JButton("Asignar Reporteros");
-		btnAsignarReporteros.addActionListener(new ActionListener() { //NOSONAR codigo autogenerado
-			public void actionPerformed(ActionEvent e) {
-				ReporteroController controller = new ReporteroController(
-						new ReporteroModel(), 
-						new ReporteroView());
+			});
+			frame.getContentPane().add(btnCargarDatosIniciales);
+			
+			// --- BOTONES DE FUNCIONALIDADES ---
+			
+			// Asignar Reporteros
+			JButton btnAsignarReporteros = new JButton("Asignar Reporteros");
+			btnAsignarReporteros.addActionListener(e -> {
+				ReporteroController controller = new ReporteroController(new ReporteroModel(), new ReporteroView());
 				controller.initController();
-			}
-		});
-		frame.getContentPane().add(btnAsignarReporteros);
+			});
+			frame.getContentPane().add(btnAsignarReporteros);
+			
+			// Ver reportajes
+			JButton btnLeerReportajes = new JButton("Leer Reportajes (Empresas)");
+			btnLeerReportajes.addActionListener(e -> {
+				EmpresaController controller = new EmpresaController(new EmpresaModel(), new EmpresaView());
+				controller.initController();
+			});
+			frame.getContentPane().add(btnLeerReportajes);
+			// Ofrecer Reportajes 
+			JButton btnOfrecerReportajes_33604 = new JButton("Ofrecer Reportajes");
+			btnOfrecerReportajes_33604.addActionListener(new ActionListener() { 
+				public void actionPerformed(ActionEvent e) {
+					OfrecimientoModel model = new OfrecimientoModel();
+					OfrecimientoView view = new OfrecimientoView();
+					OfrecimientoController controller = new OfrecimientoController(model, view);
+	        
+	        controller.initController();
+	        controller.initView();
+				}
+			});
+			frame.getContentPane().add(btnOfrecerReportajes_33604);
+	
+
+	
+			// Gestionar Ofrecimientos Actualizado
+			JButton btnGestionarOfrecimientosMod = new JButton("Gestionar Ofrecimientos");
+			btnGestionarOfrecimientosMod.addActionListener(e -> {
+				OfrecimientosController controller = new OfrecimientosController(new OfrecimientosModel(), new OfrecimientosView());
+				
+				controller.initController();
+				controller.initView();
+			});
+			frame.getContentPane().add(btnGestionarOfrecimientosMod);
 		
-		// Ver reportajes
-		JButton btnLeerReportajes = new JButton("Leer Reportajes (Empresas)");
-        btnLeerReportajes.addActionListener(new ActionListener() { 
-            public void actionPerformed(ActionEvent e) {
-                EmpresaController controller = new EmpresaController(
-                        new EmpresaModel(), 
-                        new EmpresaView());
-                controller.initController(); // ¡No te olvides de mí!
-            }
-        });
-        frame.getContentPane().add(btnLeerReportajes);
-	
-	
-	// Gestionar ofrecimientos
-	JButton btnGestionarOfrecimientos = new JButton("Gestionar Ofrecimientos");
-	btnGestionarOfrecimientos.addActionListener(new ActionListener() { 
-	    public void actionPerformed(ActionEvent e) {
-	        OfrecimientosModel model = new OfrecimientosModel();
-	        OfrecimientosView view = new OfrecimientosView();
-	        OfrecimientosController controller = new OfrecimientosController(model, view);
-	        
-	      
-	        controller.initController();
-	        controller.initView();
-	    }
-	});
-	frame.getContentPane().add(btnGestionarOfrecimientos);
-	
-	// Ofrecer Reportajes 
-	JButton btnOfrecerReportajes_33604 = new JButton("Ofrecer Reportajes");
-	btnOfrecerReportajes_33604.addActionListener(new ActionListener() { 
-	    public void actionPerformed(ActionEvent e) {
-	        OfrecimientoModel model = new OfrecimientoModel();
-	        OfrecimientoView view = new OfrecimientoView();
-	        OfrecimientoController controller = new OfrecimientoController(model, view);
-	        
-	        controller.initController();
-	        controller.initView();
-	    }
-	});
-	frame.getContentPane().add(btnOfrecerReportajes_33604);
-	
-}
+		}
 
 	public JFrame getFrame() { return this.frame; }
-	
-}
+	}
