@@ -55,8 +55,8 @@ public class SwingMain {
 
 		private void initialize() {
 			frame = new JFrame();
-			frame.setTitle("Main Menu - Gestión de Ofrecimientos");
-			frame.setBounds(0, 0, 350, 300); // Un poco más alto para los nuevos botones
+			frame.setTitle("Main Menu");
+			frame.setBounds(0, 0, 350, 300);
 			frame.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 			frame.getContentPane().setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS));
 		
@@ -93,6 +93,7 @@ public class SwingMain {
 				controller.initController();
 			});
 			frame.getContentPane().add(btnLeerReportajes);
+			
 			// Ofrecer Reportajes 
 			JButton btnOfrecerReportajes_33604 = new JButton("Ofrecer Reportajes");
 			btnOfrecerReportajes_33604.addActionListener(new ActionListener() { 
