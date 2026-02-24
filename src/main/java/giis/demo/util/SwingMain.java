@@ -5,7 +5,7 @@ import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 
-
+import nico_EntregarReportEvento.*;
 import diego_asignarReporteros_33602.*;
 import diego_ReportajesEvento_33607.*;
 import adrian_ofrecerReportajes_33604.*;
@@ -107,7 +107,22 @@ public class SwingMain {
 			});
 			frame.getContentPane().add(btnOfrecerReportajes_33604);
 	
-
+			// Entregar Reportaje (Historia #33603)
+			JButton btnEntregarReportaje = new JButton("Entregar Reportaje");
+			btnEntregarReportaje.addActionListener(new ActionListener() {
+			    public void actionPerformed(ActionEvent e) {
+			        // Instanciamos los componentes de tu paquete nico_entregaEvento_33603
+			        EntregaReportajeModel model = new EntregaReportajeModel();
+			        EntregaReportajeView view = new EntregaReportajeView();
+			        
+			        // Creamos el controlador pasando el modelo, la vista y el ID del reportero logueado (ej: 1)
+			        EntregaReportajeController controller = new EntregaReportajeController(model, view, 1);
+			        
+			        // Inicializamos la lógica del controlador
+			        controller.initController();
+			    }
+			});
+			frame.getContentPane().add(btnEntregarReportaje);
 	
 			// Gestionar Ofrecimientos Actualizado
 			JButton btnGestionarOfrecimientosMod = new JButton("Gestionar Ofrecimientos");
