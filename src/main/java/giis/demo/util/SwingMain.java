@@ -146,7 +146,27 @@ public class SwingMain {
 			});
 			frame.getContentPane().add(btnModificarEntrega);
 	
-
+			// // Restaurar Versión de Reportaje (Historia #33612)
+			JButton btnRestaurarVersion = new JButton("Restaurar Versión Reportaje");
+			btnRestaurarVersion.addActionListener(new ActionListener() {
+			    public void actionPerformed(ActionEvent e) {
+			        // 1. Instanciamos los componentes de tu NUEVO paquete
+			        nico_RestaurarVersionReport_33612.RestaurarVersionModel model = new nico_RestaurarVersionReport_33612.RestaurarVersionModel();
+			        nico_RestaurarVersionReport_33612.RestaurarVersionView view = new nico_RestaurarVersionReport_33612.RestaurarVersionView();
+			        
+			        // 2. Definimos IDs de prueba (Reportaje 1, Reportero 1)
+			        int idReportajePrueba = 1; 
+			        int idReporteroLogueadoPrueba = 1; 
+			        
+			        // 3. Creamos el controlador pasándole los IDs
+			        nico_RestaurarVersionReport_33612.RestaurarVersionController controller = new nico_RestaurarVersionReport_33612.RestaurarVersionController(model, view, idReportajePrueba, idReporteroLogueadoPrueba);
+			        
+			        // 4. Arrancamos la pantalla
+			        controller.initController();
+			    }
+			});
+			frame.getContentPane().add(btnRestaurarVersion);
+			
 			// Gestionar Ofrecimientos Actualizado
 			JButton btnGestionarOfrecimientosMod = new JButton("Gestionar Ofrecimientos");
 			btnGestionarOfrecimientosMod.addActionListener(e -> {
