@@ -3,7 +3,6 @@ package adrian_ofrecerReportajes_33604;
 import java.awt.event.*;
 import javax.swing.JOptionPane;
 import giis.demo.util.SwingUtil;
-import java.util.List;
 
 public class OfrecimientoController {
     private OfrecimientoModel model;
