@@ -9,6 +9,7 @@ import javax.swing.JFrame;
 import diego_asignarReporteros_33602.*;
 import diego_ReportajesEvento_33607.*;
 import adrian_ofrecerReportajes_33604.*;
+import alex_InformeEvento_33613.*;
 import alex_ModificarDecision_33611.*;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -108,8 +109,6 @@ public class SwingMain {
 			});
 			frame.getContentPane().add(btnOfrecerReportajes_33604);
 	
-
-	
 			// Gestionar Ofrecimientos Actualizado
 			JButton btnGestionarOfrecimientosMod = new JButton("Gestionar Ofrecimientos");
 			btnGestionarOfrecimientosMod.addActionListener(e -> {
@@ -119,8 +118,18 @@ public class SwingMain {
 				controller.initView();
 			});
 			frame.getContentPane().add(btnGestionarOfrecimientosMod);
-		
+			
+			// Generar informe .csv
+			JButton btnInformeEvento = new JButton("Generar Informe Eventos");
+			btnInformeEvento.addActionListener(e -> {
+			    InformeEventosController controller = new InformeEventosController(new InformeEventosModel(), new InformeEventosView());
+			    controller.initController();
+			    controller.initView();
+			});
+			frame.getContentPane().add(btnInformeEvento);
 		}
+
+		
 
 	public JFrame getFrame() { return this.frame; }
 	}

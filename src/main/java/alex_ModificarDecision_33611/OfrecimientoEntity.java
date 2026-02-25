@@ -11,7 +11,7 @@ public class OfrecimientoEntity {
     private String agencia;
     private String fecha;
     private String decision; // El campo que causaba el error
-    private int acceso;
+    private boolean acceso;
 
     public OfrecimientoEntity() {}
 
@@ -32,6 +32,6 @@ public class OfrecimientoEntity {
     public String getDecision() { return decision; }
     public void setDecision(String decision) { this.decision = decision; }
 
-    public int getAcceso() { return acceso; }
-    public void setAcceso(int acceso) { this.acceso = acceso; }
+    public boolean isAcceso() { return acceso; }
+    public void setAcceso(boolean acceso) { this.acceso = acceso; }
 }
