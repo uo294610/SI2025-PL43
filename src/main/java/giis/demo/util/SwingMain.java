@@ -9,7 +9,10 @@ import nico_EntregarReportEvento.*;
 import diego_asignarReporteros_33602.*;
 import diego_ReportajesEvento_33607.*;
 import adrian_ofrecerReportajes_33604.*;
+import adrian_modificarOfrecimiento_33609.*;
+import alex_InformeEvento_33613.*;
 import alex_ModificarDecision_33611.*;
+import adrian_distribuirReportajes_33606.*;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
@@ -108,6 +111,7 @@ public class SwingMain {
 			});
 			frame.getContentPane().add(btnOfrecerReportajes_33604);
 	
+
 			// Entregar Reportaje (Historia #33603)
 			JButton btnEntregarReportaje = new JButton("Entregar Reportaje");
 			btnEntregarReportaje.addActionListener(new ActionListener() {
@@ -142,6 +146,7 @@ public class SwingMain {
 			});
 			frame.getContentPane().add(btnModificarEntrega);
 	
+
 			// Gestionar Ofrecimientos Actualizado
 			JButton btnGestionarOfrecimientosMod = new JButton("Gestionar Ofrecimientos");
 			btnGestionarOfrecimientosMod.addActionListener(e -> {
@@ -151,8 +156,48 @@ public class SwingMain {
 				controller.initView();
 			});
 			frame.getContentPane().add(btnGestionarOfrecimientosMod);
+
+	// Distribuir Reportajes 
+	JButton btnDistribuir = new JButton("Distribuir Reportajes");
+	btnDistribuir.addActionListener(new ActionListener() { 
+	    public void actionPerformed(ActionEvent e) {
+	        DistribucionModel m = new DistribucionModel();
+	        DistribucionView v = new DistribucionView();
+	        DistribucionController c = new DistribucionController(m, v);
+	        c.initController();
+	        c.initView();
+	    }
+	});
+	frame.getContentPane().add(btnDistribuir);
+	
+
+	// Modificar Ofrecimientos 
+	JButton btnModificar = new JButton("Modificar Ofrecimientos");
+	btnModificar.addActionListener(new ActionListener() { 
+	    public void actionPerformed(ActionEvent e) {
+	        adrian_modificarOfrecimiento_33609.OfrecimientoModModel m = new adrian_modificarOfrecimiento_33609.OfrecimientoModModel();
+	        adrian_modificarOfrecimiento_33609.OfrecimientoModView v = new adrian_modificarOfrecimiento_33609.OfrecimientoModView();
+	        adrian_modificarOfrecimiento_33609.OfrecimientoModController c = new adrian_modificarOfrecimiento_33609.OfrecimientoModController(m, v);
+	        c.initController();
+	        c.initView();
+	    }
+	});
+	frame.getContentPane().add(btnModificar);
+	
+
+	
+	// Generar informe .csv
+	JButton btnInformeEvento = new JButton("Generar Informe Eventos");
+	btnInformeEvento.addActionListener(e -> {
+		InformeEventosController controller = new InformeEventosController(new InformeEventosModel(), new InformeEventosView());
+			    controller.initController();
+			    controller.initView();
+			});
+			frame.getContentPane().add(btnInformeEvento);
+}
+
 		
-		}
+
 
 	public JFrame getFrame() { return this.frame; }
 	}

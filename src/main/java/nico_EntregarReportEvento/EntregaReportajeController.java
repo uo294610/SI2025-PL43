@@ -2,8 +2,6 @@ package nico_EntregarReportEvento;
 
 import java.util.List;
 import javax.swing.JOptionPane;
-import javax.swing.table.TableModel;
-import giis.demo.util.SwingUtil;
 
 public class EntregaReportajeController {
     private EntregaReportajeModel model;
