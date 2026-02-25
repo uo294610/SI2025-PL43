@@ -1,9 +1,7 @@
 package nico_EntregarReportEvento;
 
-
 import javax.swing.*;
 import net.miginfocom.swing.MigLayout;
-import javax.swing.table.DefaultTableModel;
 
 public class EntregaReportajeView {
     private JFrame frame;
@@ -13,7 +11,7 @@ public class EntregaReportajeView {
     private JTextArea areaCuerpo;
     private JButton btnEntregar;
     private JButton btnCancelar;
-    private JLabel lblReportero;
+    private JComboBox<ReporteroDisplayDTO> cbReporteros;
 
     public EntregaReportajeView() {
         initialize();
@@ -24,20 +22,31 @@ public class EntregaReportajeView {
         frame.setTitle("Entregar Reportaje de Evento (#33603)");
         frame.setBounds(100, 100, 900, 550);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        // Usamos MigLayout para dividir la pantalla en dos columnas
+        
+        // Dividimos la pantalla: 2 columnas, 4 filas
         frame.getContentPane().setLayout(new MigLayout("", "[400px,grow][500px,grow]", "[][][grow][]"));
 
-        lblReportero = new JLabel("Reportero: Juan Pérez Fdez"); // Según tu prototipo
-        frame.getContentPane().add(lblReportero, "cell 0 0, gapbottom 10");
-
-        frame.getContentPane().add(new JLabel("Eventos Asignados (Pendientes):"), "cell 0 1");
+        // --- COLUMNA IZQUIERDA ---
         
+        // 1. Selector de Reportero (Celda 0,0)
+        // Usamos split 2 para que texto y desplegable compartan la fila
+        frame.getContentPane().add(new JLabel("Reportero:"), "cell 0 0, split 2, alignx left");
+        cbReporteros = new JComboBox<ReporteroDisplayDTO>();
+        frame.getContentPane().add(cbReporteros, "cell 0 0, growx");
+
+        // 2. Título de la tabla (Celda 0,1)
+        frame.getContentPane().add(new JLabel("Eventos Asignados (Pendientes):"), "cell 0 1, gaptop 10");
+
+        // 3. Tabla de eventos (Celda 0,2)
         tabEventos = new JTable();
         tabEventos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         JScrollPane scrollTable = new JScrollPane(tabEventos);
         frame.getContentPane().add(scrollTable, "cell 0 2, grow");
 
-        // Panel de Formulario (Derecha)
+
+        // --- COLUMNA DERECHA ---
+        
+        // 4. Panel del Formulario
         JPanel panelForm = new JPanel(new MigLayout("", "[][grow]", "[][][grow]"));
         panelForm.setBorder(BorderFactory.createTitledBorder("Contenido del Reportaje"));
         
@@ -56,8 +65,12 @@ public class EntregaReportajeView {
         JScrollPane scrollCuerpo = new JScrollPane(areaCuerpo);
         panelForm.add(scrollCuerpo, "cell 1 2, grow");
 
-        frame.getContentPane().add(panelForm, "cell 1 2, grow");
+        // Añadimos el panel a la celda 1,0 y le decimos que ocupe 3 filas hacia abajo (span y 3)
+        frame.getContentPane().add(panelForm, "cell 1 0 1 3, grow");
 
+
+        // --- FILA INFERIOR (Botones) ---
+        
         btnEntregar = new JButton("Entregar");
         frame.getContentPane().add(btnEntregar, "flowx, cell 1 3, alignx right, width 100!");
 
@@ -65,8 +78,9 @@ public class EntregaReportajeView {
         frame.getContentPane().add(btnCancelar, "cell 1 3, width 100!");
     }
 
-    // Getters para que el Controller pueda interactuar
+    // --- GETTERS ---
     public JFrame getFrame() { return frame; }
+    public JComboBox<ReporteroDisplayDTO> getCbReporteros() { return cbReporteros; }
     public JTable getTabEventos() { return tabEventos; }
     public JTextField getTxtTitulo() { return txtTitulo; }
     public JTextField getTxtSubtitulo() { return txtSubtitulo; }

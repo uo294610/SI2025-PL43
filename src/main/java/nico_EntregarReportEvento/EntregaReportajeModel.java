@@ -23,6 +23,10 @@ public class EntregaReportajeModel {
                      "AND e.id NOT IN (SELECT evento_id FROM Reportaje)";
         return db.executeQueryPojo(EventoResumenDTO.class, sql, idReportero);
     }
+    public List<ReporteroDisplayDTO> getListaReporteros() {
+        String sql = "SELECT id, nombre FROM Reportero";
+        return db.executeQueryPojo(ReporteroDisplayDTO.class, sql);
+    }
 
     /**
      * Comprueba si un título ya existe en el sistema.

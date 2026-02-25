@@ -17,23 +17,49 @@ public class EntregaReportajeController {
     }
 
     public void initController() {
-        // Carga inicial de datos
-        cargarEventos();
+        // 1. Llenamos el desplegable de reporteros primero
+        cargarReporteros();
         
-        // Listener para el botón Entregar
-        view.getBtnEntregar().addActionListener(e -> SwingUtil.exceptionWrapper(() -> guardarEntrega()));
-        
-        // Listener para Cancelar
-        view.getBtnCancelar().addActionListener(e -> view.getFrame().dispose());
+        // 2. Cargamos los eventos del primer reportero que salga seleccionado por defecto
+        cargarEventosPendientes();
+
+        // 3. ESTA ES LA MAGIA: Cada vez que cambies de reportero, se actualiza la tabla
+        view.getCbReporteros().addActionListener(e -> cargarEventosPendientes());
+
+        // 4. Listener para el botón de entregar
+        view.getBtnEntregar().addActionListener(e -> giis.demo.util.SwingUtil.exceptionWrapper(() -> guardarEntrega()));
 
         view.getFrame().setVisible(true);
     }
+    
+    private void cargarReporteros() {
+        List<ReporteroDisplayDTO> lista = model.getListaReporteros();
+        // Limpiamos por si acaso y añadimos uno a uno
+        view.getCbReporteros().removeAllItems(); 
+        for (ReporteroDisplayDTO rep : lista) {
+            view.getCbReporteros().addItem(rep);
+        }
+    }
 
-    private void cargarEventos() {
-        // Filtra eventos asignados al reportero sin entrega previa
-        List<EventoResumenDTO> eventos = model.getEventosPendientes(idReportero);
-        TableModel tmodel = SwingUtil.getTableModelFromPojos(eventos, new String[] {"id", "nombre", "fecha"});
+    private void cargarEventosPendientes() {
+        // 1. Miramos qué reportero está seleccionado ahora mismo en el JComboBox
+        ReporteroDisplayDTO repSeleccionado = (ReporteroDisplayDTO) view.getCbReporteros().getSelectedItem();
+        
+        // Si no hay ninguno seleccionado (al arrancar puede pasar), no hacemos nada
+        if (repSeleccionado == null) {
+            return;
+        }
+
+        // 2. Sacamos su ID real
+        int idSeleccionado = Integer.parseInt(repSeleccionado.getId());
+
+        // 3. Buscamos en base de datos LOS EVENTOS DE ESE ID
+        List<EventoResumenDTO> eventos = model.getEventosPendientes(idSeleccionado);
+        
+        // 4. Actualizamos la tabla
+        javax.swing.table.TableModel tmodel = giis.demo.util.SwingUtil.getTableModelFromPojos(eventos, new String[] {"id", "nombre", "fecha"});
         view.getTabEventos().setModel(tmodel);
+        giis.demo.util.SwingUtil.autoAdjustColumns(view.getTabEventos());
     }
 
     private void guardarEntrega() {
@@ -52,6 +78,18 @@ public class EntregaReportajeController {
         // Crear Entidades según el modelo relacional
         int idEvento = (int) view.getTabEventos().getValueAt(fila, 0);
         int nuevoIdRep = model.getUltimoId("Reportaje") + 1;
+        
+     // Recogemos el reportero que el usuario ha elegido en el desplegable
+        ReporteroDisplayDTO repSeleccionado = (ReporteroDisplayDTO) view.getCbReporteros().getSelectedItem();
+
+        if (repSeleccionado == null) {
+            JOptionPane.showMessageDialog(view.getFrame(), "Debe seleccionar un reportero del desplegable.");
+            return;
+        }
+
+        // Sacamos su ID real para guardarlo en la base de datos
+        int idReporteroSeleccionado = Integer.parseInt(repSeleccionado.getId());
+
 
         ReportajeEntity re = new ReportajeEntity();
         re.setId(nuevoIdRep);
