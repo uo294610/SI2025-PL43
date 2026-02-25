@@ -52,4 +52,25 @@ public class ReporteroModel {
                    + "ORDER BY r.nombre";
         return db.executeQueryPojo(ReporteroDTO.class, sql, idEvento);
     }
+    
+    /**
+     * Obtiene eventos de una agencia que SÍ tienen alguna asignación.
+     */
+    public List<EventoDTO> getEventosConAsignacion(int idAgencia) {
+        // Usamos DISTINCT para que no salga el evento repetido si tiene varios reporteros
+        String sql = "SELECT DISTINCT e.id, e.nombre, e.fecha "
+                   + "FROM Evento e "
+                   + "JOIN Asignacion a ON e.id = a.evento_id "
+                   + "WHERE e.agencia_id = ? "
+                   + "ORDER BY e.fecha";
+        return db.executeQueryPojo(EventoDTO.class, sql, idAgencia);
+    }
+
+    /**
+     * Elimina la asignación de un reportero a un evento.
+     */
+    public void eliminarAsignacion(int idEvento, int idReportero) {
+        String sql = "DELETE FROM Asignacion WHERE evento_id = ? AND reportero_id = ?";
+        db.executeUpdate(sql, idEvento, idReportero);
+    }
 }
