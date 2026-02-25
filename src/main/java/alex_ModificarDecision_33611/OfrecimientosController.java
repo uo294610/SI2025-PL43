@@ -72,11 +72,10 @@ public class OfrecimientosController {
         if (this.lastSelectedKey != null && !this.lastSelectedKey.isEmpty()) {
             OfrecimientoEntity ofr = model.getDetalleOfrecimiento(Integer.parseInt(this.lastSelectedKey));
             
-            // Mostramos los datos en la tabla de detalle
+           
             view.getDetalleEvento().setModel(SwingUtil.getRecordModelFromPojo(ofr, new String[]{"id", "evento", "agencia", "fecha", "decision"}));
             
-            // NUEVA LÓGICA: Solo se bloquea si el acceso es 1 (independientemente de la decisión)
-            boolean tieneAccesoReal = (ofr.getAcceso() == 1);
+            boolean tieneAccesoReal = (ofr.isAcceso() == true);
             
             view.getBtnAceptar().setEnabled(!tieneAccesoReal);
             view.getBtnRechazar().setEnabled(!tieneAccesoReal);

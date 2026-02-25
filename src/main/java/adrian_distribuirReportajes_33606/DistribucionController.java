@@ -3,7 +3,6 @@ package adrian_distribuirReportajes_33606;
 import java.awt.event.*;
 import javax.swing.JOptionPane;
 import giis.demo.util.SwingUtil;
-import java.util.List;
 
 public class DistribucionController {
 	private DistribucionModel model;

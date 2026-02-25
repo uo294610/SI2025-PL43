@@ -9,6 +9,7 @@ import nico_EntregarReportEvento.*;
 import diego_asignarReporteros_33602.*;
 import diego_ReportajesEvento_33607.*;
 import adrian_ofrecerReportajes_33604.*;
+import alex_InformeEvento_33613.*;
 import alex_ModificarDecision_33611.*;
 import adrian_distribuirReportajes_33606.*;
 import javax.swing.BoxLayout;
@@ -105,6 +106,28 @@ public class SwingMain {
 			    }
 			});
 			frame.getContentPane().add(btnEntregarReportaje);
+			
+			// Ver reportajes
+			JButton btnLeerReportajes = new JButton("Leer Reportajes (Empresas)");
+			btnLeerReportajes.addActionListener(e -> {
+				EmpresaController controller = new EmpresaController(new EmpresaModel(), new EmpresaView());
+				controller.initController();
+			});
+			frame.getContentPane().add(btnLeerReportajes);
+			
+			// Ofrecer Reportajes 
+			JButton btnOfrecerReportajes_33604 = new JButton("Ofrecer Reportajes");
+			btnOfrecerReportajes_33604.addActionListener(new ActionListener() { 
+				public void actionPerformed(ActionEvent e) {
+					OfrecimientoModel model = new OfrecimientoModel();
+					OfrecimientoView view = new OfrecimientoView();
+					OfrecimientoController controller = new OfrecimientoController(model, view);
+	        
+	        controller.initController();
+	        controller.initView();
+				}
+			});
+			frame.getContentPane().add(btnOfrecerReportajes_33604);
 	
 			// Gestionar Ofrecimientos Actualizado
 			JButton btnGestionarOfrecimientosMod = new JButton("Gestionar Ofrecimientos");
@@ -115,37 +138,7 @@ public class SwingMain {
 				controller.initView();
 			});
 			frame.getContentPane().add(btnGestionarOfrecimientosMod);
-		
 
-		
-
-		// Ver reportajes
-		JButton btnLeerReportajes = new JButton("Leer Reportajes (Empresas)");
-        btnLeerReportajes.addActionListener(new ActionListener() { 
-            public void actionPerformed(ActionEvent e) {
-                EmpresaController controller = new EmpresaController(
-                        new EmpresaModel(), 
-                        new EmpresaView());
-                controller.initController(); 
-            }
-        });
-        frame.getContentPane().add(btnLeerReportajes);
-	
-	
-	// Ofrecer Reportajes 
-	JButton btnOfrecerReportajes_33604 = new JButton("Ofrecer Reportajes");
-	btnOfrecerReportajes_33604.addActionListener(new ActionListener() { 
-	    public void actionPerformed(ActionEvent e) {
-	        OfrecimientoModel model = new OfrecimientoModel();
-	        OfrecimientoView view = new OfrecimientoView();
-	        OfrecimientoController controller = new OfrecimientoController(model, view);
-	        
-	        controller.initController();
-	        controller.initView();
-	    }
-	});
-	frame.getContentPane().add(btnOfrecerReportajes_33604);
-	
 	// Distribuir Reportajes 
 	JButton btnDistribuir = new JButton("Distribuir Reportajes");
 	btnDistribuir.addActionListener(new ActionListener() { 
@@ -159,8 +152,18 @@ public class SwingMain {
 	});
 	frame.getContentPane().add(btnDistribuir);
 	
-}
+			
+	// Generar informe .csv
+	JButton btnInformeEvento = new JButton("Generar Informe Eventos");
+	btnInformeEvento.addActionListener(e -> {
+		InformeEventosController controller = new InformeEventosController(new InformeEventosModel(), new InformeEventosView());
+			    controller.initController();
+			    controller.initView();
+			});
+			frame.getContentPane().add(btnInformeEvento);
+		}
 
+		
 
 	public JFrame getFrame() { return this.frame; }
 	}
