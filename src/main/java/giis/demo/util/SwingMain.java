@@ -123,6 +123,23 @@ public class SwingMain {
 			    }
 			});
 			frame.getContentPane().add(btnEntregarReportaje);
+			
+			// // Modificar Entrega de Reportaje (Historia #33610)
+			JButton btnModificarEntrega = new JButton("Modificar Entrega");
+			btnModificarEntrega.addActionListener(new ActionListener() {
+			    public void actionPerformed(ActionEvent e) {
+			        // Instanciamos los componentes de tu NUEVO paquete nico_ModificaEntrega_33610
+			        nico_ModificaEntrega_33610.ModificaEntregaModel model = new nico_ModificaEntrega_33610.ModificaEntregaModel();
+			        nico_ModificaEntrega_33610.ModificaEntregaView view = new nico_ModificaEntrega_33610.ModificaEntregaView();
+			        
+			        // Creamos el controlador (ya no hace falta pasar el ID porque se elige en el ComboBox)
+			        nico_ModificaEntrega_33610.ModificaEntregaController controller = new nico_ModificaEntrega_33610.ModificaEntregaController(model, view);
+			        
+			        // Inicializamos la lógica y mostramos la ventana
+			        controller.initController();
+			    }
+			});
+			frame.getContentPane().add(btnModificarEntrega);
 	
 			// Gestionar Ofrecimientos Actualizado
 			JButton btnGestionarOfrecimientosMod = new JButton("Gestionar Ofrecimientos");
