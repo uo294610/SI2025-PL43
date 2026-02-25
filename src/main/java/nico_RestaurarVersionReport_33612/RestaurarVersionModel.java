@@ -3,10 +3,15 @@ package nico_RestaurarVersionReport_33612;
 import java.util.List;
 import giis.demo.util.Database;
 import nico_EntregarReportEvento.VersionReportajeEntity;
+import nico_EntregarReportEvento.ReporteroDisplayDTO;
 
 public class RestaurarVersionModel {
     private Database db = new Database();
 
+    public List<ReporteroDisplayDTO> getListaReporteros() {
+        return db.executeQueryPojo(ReporteroDisplayDTO.class, "SELECT id, nombre FROM Reportero");
+    }
+    
     // 1. Obtener la información general del reportaje y del evento
     public List<Object[]> getDatosCabeceraReportaje(int idReportaje) {
         String sql = "SELECT e.nombre, r.titulo, r.reportero_entrega_id " +
