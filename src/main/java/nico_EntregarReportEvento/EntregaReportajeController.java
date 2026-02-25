@@ -73,5 +73,7 @@ public class EntregaReportajeController {
 
         JOptionPane.showMessageDialog(view.getFrame(), "¡Reportaje entregado correctamente!");
         view.getFrame().dispose();
+        
+        
     }
 }
