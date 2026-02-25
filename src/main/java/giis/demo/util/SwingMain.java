@@ -156,10 +156,8 @@ public class SwingMain {
 			        
 			        // 2. Definimos IDs de prueba (Reportaje 1, Reportero 1)
 			        int idReportajePrueba = 1; 
-			        int idReporteroLogueadoPrueba = 1; 
-			        
-			        // 3. Creamos el controlador pasándole los IDs
-			        nico_RestaurarVersionReport_33612.RestaurarVersionController controller = new nico_RestaurarVersionReport_33612.RestaurarVersionController(model, view, idReportajePrueba, idReporteroLogueadoPrueba);
+
+			        nico_RestaurarVersionReport_33612.RestaurarVersionController controller = new nico_RestaurarVersionReport_33612.RestaurarVersionController(model, view, idReportajePrueba);
 			        
 			        // 4. Arrancamos la pantalla
 			        controller.initController();
