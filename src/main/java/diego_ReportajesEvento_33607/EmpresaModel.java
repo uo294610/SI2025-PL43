@@ -16,7 +16,7 @@ public class EmpresaModel {
                    + "FROM Evento e "
                    + "JOIN Reportaje r ON e.id = r.evento_id "
                    + "JOIN Ofrecimiento o ON e.id = o.evento_id "
-                   + "WHERE o.empresa_id = ? AND o.acceso = 1 " 
+                   + "WHERE o.empresa_id = ? AND o.acceso = TRUE " 
                    + "ORDER BY e.fecha";
         return db.executeQueryPojo(EventoAccesoDTO.class, sql, idEmpresa);
     }

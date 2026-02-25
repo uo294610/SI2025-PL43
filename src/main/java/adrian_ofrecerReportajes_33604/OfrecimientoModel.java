@@ -25,7 +25,7 @@ public class OfrecimientoModel {
     // Registra el ofrecimiento generando el ID para evitar errores de restricción
     public void registrarOfrecimiento(String idEvento, String idEmpresa) {
         String sql = "INSERT INTO Ofrecimiento (id, evento_id, empresa_id, decision, acceso) " +
-                     "VALUES ((SELECT IFNULL(MAX(id), 0) + 1 FROM Ofrecimiento), ?, ?, NULL, 0)";
+                     "VALUES ((SELECT IFNULL(MAX(id), 0) + 1 FROM Ofrecimiento), ?, ?, NULL, FALSE)";
         db.executeUpdate(sql, idEvento, idEmpresa);
     }
 }
