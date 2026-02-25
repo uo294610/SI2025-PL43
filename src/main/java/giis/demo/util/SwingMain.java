@@ -10,6 +10,7 @@ import alex_GestionarOfrecimientos_33605.OfrecimientosView;
 import diego_asignarReporteros_33602.*;
 import diego_ReportajesEvento_33607.*;
 import adrian_ofrecerReportajes_33604.*;
+import adrian_modificarOfrecimiento_33609.*;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
@@ -135,6 +136,19 @@ public class SwingMain {
 	    }
 	});
 	frame.getContentPane().add(btnOfrecerReportajes_33604);
+	
+	// Modificar Ofrecimientos 
+	JButton btnModificar = new JButton("Modificar Ofrecimientos");
+	btnModificar.addActionListener(new ActionListener() { 
+	    public void actionPerformed(ActionEvent e) {
+	        adrian_modificarOfrecimiento_33609.OfrecimientoModModel m = new adrian_modificarOfrecimiento_33609.OfrecimientoModModel();
+	        adrian_modificarOfrecimiento_33609.OfrecimientoModView v = new adrian_modificarOfrecimiento_33609.OfrecimientoModView();
+	        adrian_modificarOfrecimiento_33609.OfrecimientoModController c = new adrian_modificarOfrecimiento_33609.OfrecimientoModController(m, v);
+	        c.initController();
+	        c.initView();
+	    }
+	});
+	frame.getContentPane().add(btnModificar);
 	
 }
 
