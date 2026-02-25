@@ -148,7 +148,7 @@ public class SwingMain {
 			frame.getContentPane().add(btnModificarEntrega);
 	
 			// // Restaurar Versión de Reportaje (Historia #33612)
-			JButton btnRestaurarVersion = new JButton("Restaurar Versión");
+			JButton btnRestaurarVersion = new JButton("Restaurar Versión de un Reportaje");
 			btnRestaurarVersion.addActionListener(new ActionListener() {
 			    public void actionPerformed(ActionEvent e) {
 			        
