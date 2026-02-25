@@ -115,28 +115,50 @@ public class ModificaEntregaController {
         String nuevoSub = view.getTxtSubtitulo().getText().trim();
         String nuevoCuerpo = view.getAreaCuerpo().getText().trim();
 
-        // Calcular qué ha cambiado para el registro
+        // 1. Detectar QUÉ ha cambiado exactamente
         String cambios = "";
-        if (!nuevoSub.equals(reportajeActual.getSubtitulo())) cambios += "subtítulo ";
-        if (!nuevoCuerpo.equals(reportajeActual.getCuerpo())) cambios += "cuerpo";
+        if (!nuevoSub.equals(reportajeActual.getSubtitulo())) {
+            cambios += "subtítulo";
+        }
+        if (!nuevoCuerpo.equals(reportajeActual.getCuerpo())) {
+            if (!cambios.isEmpty()) cambios += " y "; // Si ya cambió el subtítulo, añadimos "y"
+            cambios += "cuerpo";
+        }
         
+        // Si le dan al botón sin cambiar nada, avisamos y no hacemos nada
         if (cambios.isEmpty()) {
-            JOptionPane.showMessageDialog(view.getFrame(), "No has realizado ningún cambio.");
+            JOptionPane.showMessageDialog(view.getFrame(), "No has realizado ningún cambio en el subtítulo ni en el cuerpo.");
             return;
         }
 
-        // Crear NUEVA versión (Insert, no Update)
-        VersionReportajeEntity nuevaVersion = new VersionReportajeEntity();
+        // 2. Preparar el objeto con la fecha/hora exacta y el registro de cambios
+        nico_EntregarReportEvento.VersionReportajeEntity nuevaVersion = new nico_EntregarReportEvento.VersionReportajeEntity();
         nuevaVersion.setId(model.getUltimoId("VersionReportaje") + 1);
         nuevaVersion.setReportaje_id(reportajeActual.getReportaje_id());
         nuevaVersion.setSubtitulo(nuevoSub);
         nuevaVersion.setCuerpo(nuevoCuerpo);
-        nuevaVersion.setFecha_hora(new java.sql.Timestamp(System.currentTimeMillis()));
-        nuevaVersion.setQue_cambio("Se modificó: " + cambios.trim());
+        
+        // Capturamos el instante exacto del cambio
+        java.sql.Timestamp fechaHoraCambio = new java.sql.Timestamp(System.currentTimeMillis());
+        nuevaVersion.setFecha_hora(fechaHoraCambio);
+        
+        String registroCambio = "Se modificó: " + cambios;
+        nuevaVersion.setQue_cambio(registroCambio);
 
+        // Formateamos la fecha para que se lea bien en la pantalla
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        String fechaFormateada = sdf.format(fechaHoraCambio);
+
+        // 3. Enviar a base de datos y mostrar mensaje al usuario
         try {
             model.insertarNuevaVersion(nuevaVersion);
-            JOptionPane.showMessageDialog(view.getFrame(), "Cambios guardados. Se ha generado una nueva versión.");
+            
+            // Mensaje actualizado incluyendo la fecha y la hora
+            JOptionPane.showMessageDialog(view.getFrame(), 
+                "Cambios guardados. Se ha generado una nueva versión.\n" +
+                "Registro: " + registroCambio + "\n" +
+                "Fecha y hora: " + fechaFormateada);
+                
             limpiarFormulario();
             view.getTabEventos().clearSelection();
         } catch (Exception e) {
