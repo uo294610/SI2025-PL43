@@ -10,6 +10,7 @@ import diego_asignarReporteros_33602.*;
 import diego_ReportajesEvento_33607.*;
 import adrian_ofrecerReportajes_33604.*;
 import alex_ModificarDecision_33611.*;
+import adrian_distribuirReportajes_33606.*;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
@@ -85,28 +86,8 @@ public class SwingMain {
 				controller.initController();
 			});
 			frame.getContentPane().add(btnAsignarReporteros);
-			
-			// Ver reportajes
-			JButton btnLeerReportajes = new JButton("Leer Reportajes (Empresas)");
-			btnLeerReportajes.addActionListener(e -> {
-				EmpresaController controller = new EmpresaController(new EmpresaModel(), new EmpresaView());
-				controller.initController();
-			});
-			frame.getContentPane().add(btnLeerReportajes);
-			
-			// Ofrecer Reportajes 
-			JButton btnOfrecerReportajes_33604 = new JButton("Ofrecer Reportajes");
-			btnOfrecerReportajes_33604.addActionListener(new ActionListener() { 
-				public void actionPerformed(ActionEvent e) {
-					OfrecimientoModel model = new OfrecimientoModel();
-					OfrecimientoView view = new OfrecimientoView();
-					OfrecimientoController controller = new OfrecimientoController(model, view);
-	        
-	        controller.initController();
-	        controller.initView();
-				}
-			});
-			frame.getContentPane().add(btnOfrecerReportajes_33604);
+		
+
 	
 			// Entregar Reportaje (Historia #33603)
 			JButton btnEntregarReportaje = new JButton("Entregar Reportaje");
@@ -135,7 +116,51 @@ public class SwingMain {
 			});
 			frame.getContentPane().add(btnGestionarOfrecimientosMod);
 		
-		}
+
+		
+
+		// Ver reportajes
+		JButton btnLeerReportajes = new JButton("Leer Reportajes (Empresas)");
+        btnLeerReportajes.addActionListener(new ActionListener() { 
+            public void actionPerformed(ActionEvent e) {
+                EmpresaController controller = new EmpresaController(
+                        new EmpresaModel(), 
+                        new EmpresaView());
+                controller.initController(); 
+            }
+        });
+        frame.getContentPane().add(btnLeerReportajes);
+	
+	
+	// Ofrecer Reportajes 
+	JButton btnOfrecerReportajes_33604 = new JButton("Ofrecer Reportajes");
+	btnOfrecerReportajes_33604.addActionListener(new ActionListener() { 
+	    public void actionPerformed(ActionEvent e) {
+	        OfrecimientoModel model = new OfrecimientoModel();
+	        OfrecimientoView view = new OfrecimientoView();
+	        OfrecimientoController controller = new OfrecimientoController(model, view);
+	        
+	        controller.initController();
+	        controller.initView();
+	    }
+	});
+	frame.getContentPane().add(btnOfrecerReportajes_33604);
+	
+	// Distribuir Reportajes 
+	JButton btnDistribuir = new JButton("Distribuir Reportajes");
+	btnDistribuir.addActionListener(new ActionListener() { 
+	    public void actionPerformed(ActionEvent e) {
+	        DistribucionModel m = new DistribucionModel();
+	        DistribucionView v = new DistribucionView();
+	        DistribucionController c = new DistribucionController(m, v);
+	        c.initController();
+	        c.initView();
+	    }
+	});
+	frame.getContentPane().add(btnDistribuir);
+	
+}
+
 
 	public JFrame getFrame() { return this.frame; }
 	}
