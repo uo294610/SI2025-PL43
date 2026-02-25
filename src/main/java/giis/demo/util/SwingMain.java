@@ -4,6 +4,7 @@ package giis.demo.util;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 import nico_EntregarReportEvento.*;
 import diego_asignarReporteros_33602.*;
@@ -147,20 +148,31 @@ public class SwingMain {
 			frame.getContentPane().add(btnModificarEntrega);
 	
 			// // Restaurar Versión de Reportaje (Historia #33612)
-			JButton btnRestaurarVersion = new JButton("Restaurar Versión Reportaje");
+			JButton btnRestaurarVersion = new JButton("Restaurar Versión");
 			btnRestaurarVersion.addActionListener(new ActionListener() {
 			    public void actionPerformed(ActionEvent e) {
-			        // 1. Instanciamos los componentes de tu NUEVO paquete
-			        nico_RestaurarVersionReport_33612.RestaurarVersionModel model = new nico_RestaurarVersionReport_33612.RestaurarVersionModel();
-			        nico_RestaurarVersionReport_33612.RestaurarVersionView view = new nico_RestaurarVersionReport_33612.RestaurarVersionView();
 			        
-			        // 2. Definimos IDs de prueba (Reportaje 1, Reportero 1)
-			        int idReportajePrueba = 1; 
-
-			        nico_RestaurarVersionReport_33612.RestaurarVersionController controller = new nico_RestaurarVersionReport_33612.RestaurarVersionController(model, view, idReportajePrueba);
+			        // 1. Le pedimos al usuario (tú) que escriba el ID para probar
+			        String input = JOptionPane.showInputDialog(frame, "Introduce el ID del reportaje que quieres probar (ej. 1, 102...):");
 			        
-			        // 4. Arrancamos la pantalla
-			        controller.initController();
+			        if (input != null && !input.trim().isEmpty()) {
+			            try {
+			                int idReportajePrueba = Integer.parseInt(input.trim());
+			                
+			                // 2. Instanciamos los componentes
+			                nico_RestaurarVersionReport_33612.RestaurarVersionModel model = new nico_RestaurarVersionReport_33612.RestaurarVersionModel();
+			                nico_RestaurarVersionReport_33612.RestaurarVersionView view = new nico_RestaurarVersionReport_33612.RestaurarVersionView();
+			                
+			                // 3. Creamos el controlador pasándole el ID que has escrito
+			                nico_RestaurarVersionReport_33612.RestaurarVersionController controller = new nico_RestaurarVersionReport_33612.RestaurarVersionController(model, view, idReportajePrueba);
+			                
+			                // 4. Arrancamos la pantalla
+			                controller.initController();
+			                
+			            } catch (NumberFormatException ex) {
+			                JOptionPane.showMessageDialog(frame, "Por favor, introduce solo números.");
+			            }
+			        }
 			    }
 			});
 			frame.getContentPane().add(btnRestaurarVersion);
