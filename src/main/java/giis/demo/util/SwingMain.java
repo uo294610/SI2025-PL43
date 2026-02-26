@@ -152,21 +152,33 @@ public class SwingMain {
 			btnRestaurarVersion.addActionListener(new ActionListener() {
 			    public void actionPerformed(ActionEvent e) {
 			        
-			        // 1. Le pedimos al usuario (tú) que escriba el ID para probar
-			        String input = JOptionPane.showInputDialog(frame, "Introduce el ID del reportaje que quieres probar (ej. 1, 102...):");
+			        // 1. Pedimos el ID con el nuevo texto orientativo
+			        String input = JOptionPane.showInputDialog(frame, "Introduce el ID del reportaje que quieres probar (ej. 300, 301...):");
 			        
 			        if (input != null && !input.trim().isEmpty()) {
 			            try {
 			                int idReportajePrueba = Integer.parseInt(input.trim());
 			                
-			                // 2. Instanciamos los componentes
+			                // 2. Instanciamos SOLO el modelo primero para consultar a la base de datos
 			                nico_RestaurarVersionReport_33612.RestaurarVersionModel model = new nico_RestaurarVersionReport_33612.RestaurarVersionModel();
-			                nico_RestaurarVersionReport_33612.RestaurarVersionView view = new nico_RestaurarVersionReport_33612.RestaurarVersionView();
 			                
-			                // 3. Creamos el controlador pasándole el ID que has escrito
+			                // 3. VERIFICACIÓN PREVIA: ¿Existe este reportaje?
+			                java.util.List<Object[]> datos = model.getDatosCabeceraReportaje(idReportajePrueba);
+			                
+			                if (datos == null || datos.isEmpty()) {
+			                    // Si no existe, lanzamos el error y NO abrimos la pantalla (el return corta la ejecución)
+			                    JOptionPane.showMessageDialog(frame, 
+			                        "Aviso: No existe ningún reportaje con el ID " + idReportajePrueba + " en la base de datos.", 
+			                        "Reportaje no encontrado", 
+			                        JOptionPane.WARNING_MESSAGE);
+			                    return; 
+			                }
+			                
+			                // 4. Si el código llega hasta aquí, significa que SÍ existe. Instanciamos la vista y el controlador.
+			                nico_RestaurarVersionReport_33612.RestaurarVersionView view = new nico_RestaurarVersionReport_33612.RestaurarVersionView();
 			                nico_RestaurarVersionReport_33612.RestaurarVersionController controller = new nico_RestaurarVersionReport_33612.RestaurarVersionController(model, view, idReportajePrueba);
 			                
-			                // 4. Arrancamos la pantalla
+			                // 5. Arrancamos la pantalla de la historia
 			                controller.initController();
 			                
 			            } catch (NumberFormatException ex) {
