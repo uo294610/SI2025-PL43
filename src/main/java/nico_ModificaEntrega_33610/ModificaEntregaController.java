@@ -27,20 +27,17 @@ public class ModificaEntregaController {
     }
 
     private void configurarListeners() {
-        // Cuando cambias de reportero en el desplegable
         view.getCbReporteros().addActionListener(e -> recargarTabla());
-
-        // Cuando haces clic en los botones de radio (Filtros)
         view.getRdbtnPendientes().addActionListener(e -> cambiarModo(true));
         view.getRdbtnEntregados().addActionListener(e -> cambiarModo(false));
 
-        // Cuando haces clic en una fila de la tabla
         view.getTabEventos().getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) seleccionarEvento();
         });
 
-        // Guardar Cambio
+        // Eventos de los botones de Guardar y Entregar
         view.getBtnGuardarCambio().addActionListener(e -> guardarModificacion());
+        view.getBtnEntregar().addActionListener(e -> realizarNuevaEntrega()); // <-- NUEVA LÍNEA
         view.getBtnCancelar().addActionListener(e -> view.getFrame().dispose());
     }
 
@@ -166,6 +163,56 @@ public class ModificaEntregaController {
         }
     }
 
+ // NUEVO MÉTODO: Hacer la entrega desde cero si estamos en "Pendientes"
+    private void realizarNuevaEntrega() {
+        // 1. Validar que se haya seleccionado un evento de la tabla
+        int fila = view.getTabEventos().getSelectedRow();
+        if (fila < 0) {
+            JOptionPane.showMessageDialog(view.getFrame(), "Debe seleccionar un evento pendiente de la tabla.");
+            return;
+        }
+
+        // 2. Validar que el título NO esté vacío (Requisito fundamental)
+        String titulo = view.getTxtTitulo().getText().trim();
+        if (titulo.isEmpty()) {
+            JOptionPane.showMessageDialog(view.getFrame(), "El campo Título es obligatorio. No puede estar vacío.");
+            return;
+        }
+
+        // Extraemos los datos para guardar
+        int idEvento = (int) view.getTabEventos().getValueAt(fila, 0);
+        ReporteroDisplayDTO repCombo = (ReporteroDisplayDTO) view.getCbReporteros().getSelectedItem();
+        int idReportero = Integer.parseInt(repCombo.getId());
+        
+        String subtitulo = view.getTxtSubtitulo().getText().trim();
+        String cuerpo = view.getAreaCuerpo().getText().trim();
+
+        try {
+            // 3. Generamos IDs e insertamos primero en la tabla Reportaje
+            int nuevoIdReportaje = model.getUltimoId("Reportaje") + 1;
+            model.insertarReportaje(nuevoIdReportaje, titulo, idEvento, idReportero);
+
+            // 4. Creamos la primera Versión en la tabla VersionReportaje
+            VersionReportajeEntity nuevaVersion = new VersionReportajeEntity();
+            nuevaVersion.setId(model.getUltimoId("VersionReportaje") + 1);
+            nuevaVersion.setReportaje_id(nuevoIdReportaje);
+            nuevaVersion.setSubtitulo(subtitulo);
+            nuevaVersion.setCuerpo(cuerpo);
+            
+            nuevaVersion.setFecha_hora(new java.sql.Timestamp(System.currentTimeMillis()));
+            nuevaVersion.setQue_cambio("Versión inicial"); // Por ser la primera vez
+
+            model.insertarNuevaVersion(nuevaVersion);
+
+            // 5. Avisar al usuario y limpiar
+            JOptionPane.showMessageDialog(view.getFrame(), "¡Reportaje entregado correctamente!");
+            recargarTabla(); // Esto recargará la tabla de pendientes (y el evento desaparecerá porque ya está entregado)
+            
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(view.getFrame(), "Error al entregar: " + ex.getMessage());
+        }
+    }
+    
     private void limpiarFormulario() {
         view.getTxtTitulo().setText("");
         view.getTxtSubtitulo().setText("");

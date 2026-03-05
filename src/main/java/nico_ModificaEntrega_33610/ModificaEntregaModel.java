@@ -22,7 +22,7 @@ public class ModificaEntregaModel {
         return db.executeQueryPojo(EventoResumenDTO.class, sql, idReportero);
     }
 
-    // 3. NUEVO: Eventos ENTREGADOS (Con reportaje)
+    // 3. Eventos ENTREGADOS (Con reportaje)
     public List<EventoResumenDTO> getEventosEntregados(int idReportero) {
         String sql = "SELECT e.id, e.nombre, e.fecha FROM Evento e " +
                      "INNER JOIN Asignacion a ON e.id = a.evento_id " +
@@ -31,7 +31,7 @@ public class ModificaEntregaModel {
         return db.executeQueryPojo(EventoResumenDTO.class, sql, idReportero);
     }
 
-    // 4. NUEVO: Obtener los datos de la última versión de un reportaje
+    // 4. Obtener los datos de la última versión de un reportaje
     public ReportajeEdicionDTO getUltimaVersion(int idEvento) {
         String sql = "SELECT r.id as reportaje_id, r.reportero_entrega_id, r.titulo, v.subtitulo, v.cuerpo " +
                      "FROM Reportaje r " +
@@ -42,12 +42,18 @@ public class ModificaEntregaModel {
         return lista.isEmpty() ? null : lista.get(0);
     }
 
-    // 5. NUEVO: Insertar una nueva versión (Historial)
+    // 5. Insertar una nueva versión (Historial)
     public void insertarNuevaVersion(VersionReportajeEntity version) {
         String sql = "INSERT INTO VersionReportaje (id, reportaje_id, subtitulo, cuerpo, fecha_hora, que_cambio) " +
                      "VALUES (?, ?, ?, ?, ?, ?)";
         db.executeUpdate(sql, version.getId(), version.getReportaje_id(), version.getSubtitulo(), 
                          version.getCuerpo(), version.getFecha_hora(), version.getQue_cambio());
+    }
+    
+    // 6. Insertar el Reportaje inicial (para cuando estamos en Pendientes)
+    public void insertarReportaje(int idReportaje, String titulo, int idEvento, int idReportero) {
+        String sql = "INSERT INTO Reportaje (id, titulo, evento_id, reportero_entrega_id) VALUES (?, ?, ?, ?)";
+        db.executeUpdate(sql, idReportaje, titulo, idEvento, idReportero);
     }
 
     public int getUltimoId(String tabla) {

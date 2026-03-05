@@ -113,7 +113,8 @@ public class SwingMain {
 			frame.getContentPane().add(btnOfrecerReportajes_33604);
 	
 
-			// Entregar Reportaje (Historia #33603)
+			/*
+			 * // Entregar Reportaje (Historia #33603)
 			JButton btnEntregarReportaje = new JButton("Entregar Reportaje");
 			btnEntregarReportaje.addActionListener(new ActionListener() {
 			    public void actionPerformed(ActionEvent e) {
@@ -129,9 +130,10 @@ public class SwingMain {
 			    }
 			});
 			frame.getContentPane().add(btnEntregarReportaje);
+			*/
 			
 			// // Modificar Entrega de Reportaje (Historia #33610)
-			JButton btnModificarEntrega = new JButton("Modificar Entrega");
+			JButton btnModificarEntrega = new JButton("Entregar/Modificar Entrega");
 			btnModificarEntrega.addActionListener(new ActionListener() {
 			    public void actionPerformed(ActionEvent e) {
 			        // Instanciamos los componentes de tu NUEVO paquete nico_ModificaEntrega_33610
