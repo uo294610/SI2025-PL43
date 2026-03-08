@@ -8,7 +8,6 @@ import javax.swing.JFrame;
 import nico_EntregarReportEvento.*;
 import diego_asignarReporteros_33602.*;
 import diego_ReportajesEvento_33607.*;
-import adrian_ofrecerReportajes_33604.*;
 import adrian_modificarOfrecimiento_33609.*;
 import alex_InformeEvento_33613.*;
 import alex_ModificarDecision_33611.*;
@@ -97,20 +96,7 @@ public class SwingMain {
 			});
 			frame.getContentPane().add(btnLeerReportajes);
 			
-			// Ofrecer Reportajes 
-			JButton btnOfrecerReportajes_33604 = new JButton("Ofrecer Reportajes");
-			btnOfrecerReportajes_33604.addActionListener(new ActionListener() { 
-				public void actionPerformed(ActionEvent e) {
-					OfrecimientoModel model = new OfrecimientoModel();
-					OfrecimientoView view = new OfrecimientoView();
-					OfrecimientoController controller = new OfrecimientoController(model, view);
-	        
-	        controller.initController();
-	        controller.initView();
-				}
-			});
-			frame.getContentPane().add(btnOfrecerReportajes_33604);
-	
+		
 
 			// Entregar Reportaje (Historia #33603)
 			JButton btnEntregarReportaje = new JButton("Entregar Reportaje");
@@ -172,7 +158,7 @@ public class SwingMain {
 	
 
 	// Modificar Ofrecimientos 
-	JButton btnModificar = new JButton("Modificar Ofrecimientos");
+	JButton btnModificar = new JButton("Ofrecer/Modificar Ofrecimientos");
 	btnModificar.addActionListener(new ActionListener() { 
 	    public void actionPerformed(ActionEvent e) {
 	        adrian_modificarOfrecimiento_33609.OfrecimientoModModel m = new adrian_modificarOfrecimiento_33609.OfrecimientoModModel();
