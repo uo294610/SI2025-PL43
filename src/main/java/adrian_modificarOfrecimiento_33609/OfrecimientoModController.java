@@ -1,9 +1,10 @@
 package adrian_modificarOfrecimiento_33609;
 
 import java.awt.event.*;
-import javax.swing.JOptionPane;
-import giis.demo.util.SwingUtil;
 import java.util.List;
+import javax.swing.*;
+import javax.swing.table.*;
+import giis.demo.util.SwingUtil;
 
 public class OfrecimientoModController {
 	private OfrecimientoModModel model;
@@ -15,22 +16,37 @@ public class OfrecimientoModController {
 	}
 
 	public void initController() {
+		// Buscador de eventos
+		view.getTxtBuscar().addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				String texto = view.getTxtBuscar().getText();
+				DefaultTableModel tableModel = (DefaultTableModel) view.getTabEv().getModel();
+				TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
+				view.getTabEv().setRowSorter(sorter);
+				sorter.setRowFilter(RowFilter.regexFilter("(?i)" + texto));
+			}
+		});
+
 		view.getTabEv().addMouseListener(new MouseAdapter() {
 			public void mouseReleased(MouseEvent e) { cargarEmpresas(); }
 		});
 		
 		view.getCbFiltro().addActionListener(e -> {
-			// El botón "Quitar" solo tiene sentido si estamos viendo las que SÍ tienen ofrecimiento
-			view.getBtnQuitar().setEnabled(view.getCbFiltro().getSelectedIndex() == 0);
+			boolean sinOfrecimiento = view.getCbFiltro().getSelectedIndex() == 1;
+			view.getBtnOfrecer().setEnabled(sinOfrecimiento);
+			view.getBtnQuitar().setEnabled(!sinOfrecimiento);
 			cargarEmpresas();
 		});
 		
-		view.getBtnQuitar().addActionListener(e -> ejecutarAccion());
+		view.getBtnOfrecer().addActionListener(e -> ejecutarOfrecer());
+		view.getBtnQuitar().addActionListener(e -> ejecutarQuitar());
 	}
 
 	public void initView() {
-		var datos = model.getEventosAsignados();
+		var datos = model.getEventosConReportero();
 		view.getTabEv().setModel(SwingUtil.getTableModelFromPojos(datos, new String[]{"id","nombre","fecha","reportero"}));
+		view.getBtnOfrecer().setEnabled(false);
 		view.getFrame().setVisible(true);
 	}
 
@@ -47,30 +63,34 @@ public class OfrecimientoModController {
 		view.getTabEmp().setModel(SwingUtil.getTableModelFromPojos(empresasActuales, new String[]{"id","nombre","estado"}));
 	}
 
-	private void ejecutarAccion() {
+	private void ejecutarOfrecer() {
+		int fEv = view.getTabEv().getSelectedRow();
+		int fEmp = view.getTabEmp().getSelectedRow();
+		if (fEv < 0 || fEmp < 0) return;
+
+		model.insertarOfrecimiento(view.getTabEv().getValueAt(fEv, 0).toString(), empresasActuales.get(fEmp).getId());
+		JOptionPane.showMessageDialog(null, "Ofrecimiento enviado con éxito.");
+		cargarEmpresas();
+	}
+
+	private void ejecutarQuitar() {
 		int fEv = view.getTabEv().getSelectedRow();
 		int fEmp = view.getTabEmp().getSelectedRow();
 		if (fEv < 0 || fEmp < 0) return;
 
 		EmpresaModDTO empresa = empresasActuales.get(fEmp);
 
-		// REGLA 1: Si tiene acceso (acceso == 1), NO se puede tocar
-		if (empresa.getAcceso() == 1) {
-			JOptionPane.showMessageDialog(null, 
-				"Acción denegada: No se puede retirar el ofrecimiento porque la empresa ya tiene acceso al contenido.", 
-				"Error de Validación", JOptionPane.ERROR_MESSAGE);
+		if (empresa.getAcceso() == 1) { // Bloqueo
+			JOptionPane.showMessageDialog(null, "Acción denegada: Ya tiene acceso.", "Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 
-		// REGLA 2: Si aceptó (pero no tiene acceso), mandamos email
-		if ("ACEPTADO".equalsIgnoreCase(empresa.getEstado())) {
-			JOptionPane.showMessageDialog(null, 
-				"Se va a proceder a retirar el ofrecimiento. Se enviará un email automático a " + empresa.getNombre() + " notificando la baja.");
+		if (empresa.getEstado().toUpperCase().contains("ACEPTADO")) { // Email
+			JOptionPane.showMessageDialog(null, "Se enviará un email automático a " + empresa.getNombre() + " notificando la baja.");
 		}
 
-		String idEv = view.getTabEv().getValueAt(fEv, 0).toString();
-		model.eliminarOfrecimiento(idEv, empresa.getId());
-		JOptionPane.showMessageDialog(null, "Ofrecimiento eliminado con éxito.");
+		model.eliminarOfrecimiento(view.getTabEv().getValueAt(fEv, 0).toString(), empresa.getId());
+		JOptionPane.showMessageDialog(null, "Ofrecimiento eliminado.");
 		cargarEmpresas();
 	}
 }
