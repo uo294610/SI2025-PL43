@@ -98,25 +98,9 @@ public class SwingMain {
 			
 		
 
-			// Entregar Reportaje (Historia #33603)
-			JButton btnEntregarReportaje = new JButton("Entregar Reportaje");
-			btnEntregarReportaje.addActionListener(new ActionListener() {
-			    public void actionPerformed(ActionEvent e) {
-			        // Instanciamos los componentes de tu paquete nico_entregaEvento_33603
-			        EntregaReportajeModel model = new EntregaReportajeModel();
-			        EntregaReportajeView view = new EntregaReportajeView();
-			        
-			        // Creamos el controlador pasando el modelo, la vista y el ID del reportero logueado (ej: 1)
-			        EntregaReportajeController controller = new EntregaReportajeController(model, view, 1);
-			        
-			        // Inicializamos la lógica del controlador
-			        controller.initController();
-			    }
-			});
-			frame.getContentPane().add(btnEntregarReportaje);
 			
 			// // Modificar Entrega de Reportaje (Historia #33610)
-			JButton btnModificarEntrega = new JButton("Modificar Entrega");
+			JButton btnModificarEntrega = new JButton("Entregar/Modificar Entrega");
 			btnModificarEntrega.addActionListener(new ActionListener() {
 			    public void actionPerformed(ActionEvent e) {
 			        // Instanciamos los componentes de tu NUEVO paquete nico_ModificaEntrega_33610
