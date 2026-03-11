@@ -27,6 +27,7 @@ public class DistribucionController {
 
 	public void initView() {
 		var datos = model.getEventosConReportaje();
+		// Mostramos el ID, el nombre del evento y su estado de evaluación
 		view.getTabEv().setModel(SwingUtil.getTableModelFromPojos(datos, new String[]{"id", "nombreEvento", "estado"}));
 		view.getFrame().setVisible(true);
 	}
@@ -39,7 +40,15 @@ public class DistribucionController {
 	private void ejecutarDistribucion() {
 		int fEv = view.getTabEv().getSelectedRow();
 		int[] fEmps = view.getTabEmp().getSelectedRows();
-		if (fEv < 0 || fEmps.length == 0) return;
+		
+		if (fEv < 0) {
+			JOptionPane.showMessageDialog(null, "Por favor, selecciona un evento.");
+			return;
+		}
+		if (fEmps.length == 0) {
+			JOptionPane.showMessageDialog(null, "Selecciona al menos una empresa para dar acceso.");
+			return;
+		}
 
 		String idEv = view.getTabEv().getValueAt(fEv, 0).toString();
 		StringBuilder nombres = new StringBuilder();
@@ -51,8 +60,8 @@ public class DistribucionController {
 			nombres.append(nom).append(", ");
 		}
 
-		view.setTextoAcceso(nombres.toString()); // Cumple prototipo
-		JOptionPane.showMessageDialog(null, "Acceso concedido a las empresas seleccionadas.");
+		view.setTextoAcceso(nombres.toString()); 
+		JOptionPane.showMessageDialog(null, "Acceso concedido correctamente.");
 		cargarEmpresas(idEv);
 	}
 }
