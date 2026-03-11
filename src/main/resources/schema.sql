@@ -11,7 +11,6 @@ DROP TABLE IF EXISTS EmpresaComunicacion;
 DROP TABLE IF EXISTS AgenciaPrensa;
 DROP TABLE IF EXISTS Tematica;
 
-
 CREATE TABLE Tematica (
     id INT PRIMARY KEY NOT NULL,
     nombre VARCHAR(64) NOT NULL
@@ -50,10 +49,12 @@ CREATE TABLE Evento (
     FOREIGN KEY (tematica_id) REFERENCES Tematica(id)
 );
 
+
 CREATE TABLE Reportaje (
     id INT PRIMARY KEY NOT NULL,
     titulo VARCHAR(128) UNIQUE NOT NULL, 
     reportero_entrega_id INT NOT NULL,  
+    estado VARCHAR(32) NOT NULL,
     FOREIGN KEY (reportero_entrega_id) REFERENCES Reportero(id)
 );
 
@@ -99,5 +100,6 @@ CREATE TABLE Imagen (
     reportero_id INT NOT NULL,
     ruta_archivo VARCHAR(255) NOT NULL,
     estado VARCHAR(16) NOT NULL, 
+    tipo VARCHAR(16) NOT NULL, 
     FOREIGN KEY (reportero_id) REFERENCES Reportero(id)
 );
