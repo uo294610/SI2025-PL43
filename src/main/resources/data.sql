@@ -2,7 +2,7 @@ DELETE FROM Imagen;
 DELETE FROM Ofrecimiento;
 DELETE FROM Asignacion;
 DELETE FROM VersionReportaje;
-DELETE FROM EvaluacionReportaje; -- Nueva tabla
+DELETE FROM EvaluacionReportaje; 
 DELETE FROM Reportaje;
 DELETE FROM Evento;
 DELETE FROM Reportero;
@@ -10,7 +10,6 @@ DELETE FROM EmpresaComunicacion;
 DELETE FROM AgenciaPrensa;
 DELETE FROM Tematica;
 
--- Inserción de Temáticas
 INSERT INTO Tematica (id, nombre) VALUES 
     (1, 'Deportes'),
     (2, 'Entretenimiento'),
@@ -23,7 +22,6 @@ INSERT INTO AgenciaPrensa (id, nombre) VALUES
     (3, 'Associated Press'),
     (4, 'Europa Press');
 
--- Reporteros con Agencia (algunos) y Freelance (agencia_id = NULL)
 INSERT INTO Reportero (id, nombre, agencia_id, tipo, tematica_id) VALUES 
     (10, 'Diego Abella', 1, 'Básico', 1), 
     (11, 'Nicolás Villalobos', 1, 'Reportero gráfico', 1), 
@@ -39,7 +37,6 @@ INSERT INTO Reportero (id, nombre, agencia_id, tipo, tematica_id) VALUES
     (21, 'Laura Marcos', 4, 'Básico', 3),
     (22, 'David Bisbal', NULL, 'Camarógrafo', 2); 
 
--- Precios añadidos a los eventos
 INSERT INTO Evento (id, nombre, fecha, precio, agencia_id, tematica_id) VALUES 
     (100, 'Final Champions 2026', '2026-05-30', 5000.00, 1, 1),
     (101, 'Gala de los Goya', '2026-02-15', 3500.00, 1, 2),
@@ -68,13 +65,11 @@ INSERT INTO EmpresaComunicacion (id, nombre, tematica_id) VALUES
     (203, 'Grupo Prisa', 3),
     (204, 'Unidad Editorial', 1);
 
--- Reportaje ya no tiene evento_id
 INSERT INTO Reportaje (id, titulo, reportero_entrega_id) VALUES 
     (300, 'Crónica de una final épica', 10),
     (301, 'Glamour en la alfombra roja', 12),
     (302, 'Decisiones clave en la cumbre', 16);
 
--- NUEVAS INSERCIONES para conectar Reportajes con Eventos e indicar el estado
 INSERT INTO EvaluacionReportaje (id, reportaje_id, evento_id, estado) VALUES
     (700, 300, 100, 'aceptado'),
     (701, 301, 101, 'dudoso'),
@@ -93,8 +88,10 @@ INSERT INTO Ofrecimiento (id, evento_id, empresa_id, decision, acceso) VALUES
     (503, 101, 203, 'RECHAZADO', FALSE),
     (504, 106, 204, 'ACEPTADO', TRUE);
 
-INSERT INTO Imagen (id, reportero_id, ruta_archivo, estado) VALUES
-    (600, 11, '/img/champions_final_01.jpg', 'DEFINITIVA'),
-    (601, 11, '/img/champions_final_02_raw.jpg', 'BORRADOR'),
-    (602, 14, '/img/sainz_freelance_foto.jpg', 'DEFINITIVA'),
-    (603, 20, '/img/oscars_redcarpet.png', 'BORRADOR');
+INSERT INTO Imagen (id, reportero_id, ruta_archivo, estado, tipo) VALUES
+    (600, 11, '/img/champions_final_01.jpg', 'DEFINITIVA', 'imagen'),
+    (601, 11, '/img/champions_final_02_raw.jpg', 'BORRADOR', 'imagen'),
+    (602, 14, '/img/sainz_freelance_foto.jpg', 'DEFINITIVA', 'imagen'),
+    (603, 20, '/img/oscars_redcarpet.png', 'BORRADOR', 'imagen'),
+    (604, 12, '/video/goya_entrevistas.mp4', 'DEFINITIVA', 'video'), 
+    (605, 17, '/video/onu_declaraciones_raw.avi', 'BORRADOR', 'video'); 

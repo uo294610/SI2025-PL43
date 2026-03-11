@@ -1,4 +1,3 @@
-
 DROP TABLE IF EXISTS Imagen;
 DROP TABLE IF EXISTS Ofrecimiento;
 DROP TABLE IF EXISTS Asignacion;
@@ -99,5 +98,6 @@ CREATE TABLE Imagen (
     reportero_id INT NOT NULL,
     ruta_archivo VARCHAR(255) NOT NULL,
     estado VARCHAR(16) NOT NULL, 
+    tipo VARCHAR(16) NOT NULL,
     FOREIGN KEY (reportero_id) REFERENCES Reportero(id)
 );
