@@ -58,6 +58,13 @@ public class EmpresaController {
             view.getTxtTitulo().setText(reportaje.getTitulo());
             view.getTxtSubtitulo().setText(reportaje.getSubtitulo());
             view.getTxtCuerpo().setText(reportaje.getCuerpo());
+            
+            // --- NUEVO: Cargar Multimedia ---
+            List<MultimediaDTO> multimedia = model.getMultimediaDefinitiva(idEvento);
+            TableModel tmodelMedia = SwingUtil.getTableModelFromPojos(multimedia, new String[] { "ruta", "tipo" });
+            view.getTabMultimedia().setModel(tmodelMedia);
+            SwingUtil.autoAdjustColumns(view.getTabMultimedia());
+            
         } else {
             limpiarTextos();
             view.getTxtCuerpo().setText("No se encontró el contenido de este reportaje.");
@@ -68,5 +75,7 @@ public class EmpresaController {
         view.getTxtTitulo().setText("");
         view.getTxtSubtitulo().setText("");
         view.getTxtCuerpo().setText("");
+        // Limpiamos la tabla también al cambiar de evento/empresa
+        view.getTabMultimedia().setModel(new DefaultTableModel()); 
     }
 }
