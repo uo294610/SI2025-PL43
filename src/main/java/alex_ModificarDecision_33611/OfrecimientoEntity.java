@@ -10,13 +10,13 @@ public class OfrecimientoEntity {
     private String evento;
     private String agencia;
     private String fecha;
-    private String decision; // El campo que causaba el error
+    private String decision; 
     private boolean acceso;
 
     public OfrecimientoEntity() {}
 
-    // GETTERS Y SETTERS (Imprescindibles para SwingUtil)
-    
+    // GETTERS Y SETTERS 
+    	
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 

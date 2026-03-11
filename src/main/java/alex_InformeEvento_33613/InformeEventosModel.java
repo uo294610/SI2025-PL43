@@ -18,7 +18,7 @@ public class InformeEventosModel {
     public InformeDTO generarInforme(int idEvento) {
         InformeDTO informe = new InformeDTO();
 
-        // Reporteros asignados 
+        // Reporteros asignados
         String sqlRep = "SELECT r.nombre FROM Asignacion a " +
                         "JOIN Reportero r ON a.reportero_id = r.id " +
                         "WHERE a.evento_id = ?";
@@ -28,15 +28,15 @@ public class InformeEventosModel {
         informe.setReporterosAsignados(reporteros);
 
         // Entrega del reportaje
-        String sqlEnt = "SELECT r.nombre FROM Reportaje rep " +
-                        "JOIN Reportero r ON rep.reportero_entrega_id = r.id " + 
-                        "WHERE rep.evento_id = ?";
-        
+        String sqlEnt = "SELECT r.nombre FROM EvaluacionReportaje er " +
+                        "JOIN Reportaje rep ON er.reportaje_id = rep.id " +
+                        "JOIN Reportero r ON rep.reportero_entrega_id = r.id " +
+                        "WHERE er.evento_id = ?";
         
         List<Object[]> ent = db.executeQueryArray(sqlEnt, idEvento);
         if (!ent.isEmpty()) {
             informe.setTieneReportaje(true);
-            informe.setReporteroEntrega(ent.get(0)[0].toString());
+            informe.setReporteroEntrega(ent.get(0)[0].toString()); 
         } else {
             informe.setTieneReportaje(false);
             informe.setReporteroEntrega("");
@@ -45,7 +45,7 @@ public class InformeEventosModel {
         // Empresas con acceso
         String sqlAcc = "SELECT ec.nombre FROM Ofrecimiento o " +
                         "JOIN EmpresaComunicacion ec ON o.empresa_id = ec.id " +
-                        "WHERE o.evento_id = ? AND o.acceso = TRUE";
+                        "WHERE o.evento_id = ? AND o.acceso = 1";
         
         List<Object[]> acc = db.executeQueryArray(sqlAcc, idEvento);
         List<String> empresas = new ArrayList<>();

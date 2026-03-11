@@ -63,6 +63,7 @@ public class OfrecimientosController {
                                          : new String[]{"id", "evento", "agencia", "fecha"};
             
             view.getTablaOfrecimientos().setModel(SwingUtil.getTableModelFromPojos(datos, cols));
+            SwingUtil.autoAdjustColumns(view.getTablaOfrecimientos());
         }
         clearDetail();
     }
@@ -72,19 +73,20 @@ public class OfrecimientosController {
         if (this.lastSelectedKey != null && !this.lastSelectedKey.isEmpty()) {
             OfrecimientoEntity ofr = model.getDetalleOfrecimiento(Integer.parseInt(this.lastSelectedKey));
             
-           
-            view.getDetalleEvento().setModel(SwingUtil.getRecordModelFromPojo(ofr, new String[]{"id", "evento", "agencia", "fecha", "decision"}));
-            
-            boolean tieneAccesoReal = (ofr.isAcceso() == true);
-            
-            view.getBtnAceptar().setEnabled(!tieneAccesoReal);
-            view.getBtnRechazar().setEnabled(!tieneAccesoReal);
-            view.getBtnEliminar().setEnabled(!tieneAccesoReal);
-            
-            if (tieneAccesoReal) {
-                view.setMensajeDecision("BLOQUEADO: Acceso ya concedido por la agencia.");
-            } else {
-                view.setMensajeDecision("Editable: Puede modificar o eliminar la decisión.");
+            if (ofr != null) {
+                view.getDetalleEvento().setModel(SwingUtil.getRecordModelFromPojo(ofr, new String[]{"id", "evento", "agencia", "fecha", "decision"}));
+                
+                boolean tieneAccesoReal = ofr.isAcceso();
+                
+                view.getBtnAceptar().setEnabled(!tieneAccesoReal);
+                view.getBtnRechazar().setEnabled(!tieneAccesoReal);
+                view.getBtnEliminar().setEnabled(!tieneAccesoReal);
+                
+                if (tieneAccesoReal) {
+                    view.setMensajeDecision("BLOQUEADO: Acceso ya concedido por la agencia.");
+                } else {
+                    view.setMensajeDecision("Editable: Puede modificar o eliminar la decisión.");
+                }
             }
         }
     }
@@ -103,5 +105,6 @@ public class OfrecimientosController {
         view.getBtnAceptar().setEnabled(false);
         view.getBtnRechazar().setEnabled(false);
         view.getBtnEliminar().setEnabled(false);
+        view.setMensajeDecision("");
     }
 }

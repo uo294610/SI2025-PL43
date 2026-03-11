@@ -1,6 +1,6 @@
 package alex_ModificarDecision_33611;
 
-import java.util.*;
+import java.util.List;
 import giis.demo.util.Database;
 
 public class OfrecimientosModel {
@@ -10,29 +10,32 @@ public class OfrecimientosModel {
         return db.executeQueryArray("SELECT id, nombre FROM EmpresaComunicacion ORDER BY nombre");
     }
 
-    public List<OfrecimientosDTO> getOfrecimientosFiltrados(int empresaId, boolean verDecididos) {
-        String clausula = verDecididos ? "IS NOT NULL" : "IS NULL";
-        String sql = "SELECT o.id, e.nombre AS evento, a.nombre AS agencia, e.fecha, o.decision " +
+    public List<OfrecimientosDTO> getOfrecimientosFiltrados(int idEmpresa, boolean verDecididos) {
+        String condicion = verDecididos ? "o.decision IS NOT NULL" : "o.decision IS NULL";
+        
+        String sql = "SELECT o.id, ev.nombre as evento, ag.nombre as agencia, ev.fecha, o.decision " +
                      "FROM Ofrecimiento o " +
-                     "JOIN Evento e ON o.evento_id = e.id " +
-                     "JOIN AgenciaPrensa a ON e.agencia_id = a.id " +
-                     "WHERE o.empresa_id = ? AND o.decision " + clausula + " ORDER BY e.fecha ASC";
-        return db.executeQueryPojo(OfrecimientosDTO.class, sql, empresaId);
+                     "JOIN Evento ev ON o.evento_id = ev.id " +
+                     "JOIN AgenciaPrensa ag ON ev.agencia_id = ag.id " +
+                     "WHERE o.empresa_id = ? AND " + condicion + " " +
+                     "ORDER BY ev.fecha DESC";
+                     
+        return db.executeQueryPojo(OfrecimientosDTO.class, sql, idEmpresa);
     }
 
-    public OfrecimientoEntity getDetalleOfrecimiento(int id) {
-        String sql = "SELECT o.id, e.nombre AS evento, a.nombre AS agencia, e.fecha, o.acceso, o.decision " +
+    public OfrecimientoEntity getDetalleOfrecimiento(int idOfrecimiento) {
+        String sql = "SELECT o.id, ev.nombre as evento, ag.nombre as agencia, ev.fecha, o.decision, o.acceso " +
                      "FROM Ofrecimiento o " +
-                     "JOIN Evento e ON o.evento_id = e.id " +
-                     "JOIN AgenciaPrensa a ON e.agencia_id = a.id " +
+                     "JOIN Evento ev ON o.evento_id = ev.id " +
+                     "JOIN AgenciaPrensa ag ON ev.agencia_id = ag.id " +
                      "WHERE o.id = ?";
-        List<OfrecimientoEntity> lista = db.executeQueryPojo(OfrecimientoEntity.class, sql, id);
+                     
+        List<OfrecimientoEntity> lista = db.executeQueryPojo(OfrecimientoEntity.class, sql, idOfrecimiento);
         return lista.isEmpty() ? null : lista.get(0);
     }
 
-    public void updateDecision(int id, String decision) {
-        // Solo actualizamos la decisión. 
-        // El acceso se queda como está (si es 0, permite seguir editando)
-        db.executeUpdate("UPDATE Ofrecimiento SET decision = ? WHERE id = ?", decision, id);
+    public void updateDecision(int idOfrecimiento, String nuevaDecision) {
+        String sql = "UPDATE Ofrecimiento SET decision = ? WHERE id = ?";
+        db.executeUpdate(sql, nuevaDecision, idOfrecimiento);
     }
 }
