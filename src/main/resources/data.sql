@@ -65,10 +65,10 @@ INSERT INTO EmpresaComunicacion (id, nombre, tematica_id) VALUES
     (203, 'Grupo Prisa', 3),
     (204, 'Unidad Editorial', 1);
 
-INSERT INTO Reportaje (id, titulo, reportero_entrega_id) VALUES 
-    (300, 'Crónica de una final épica', 10),
-    (301, 'Glamour en la alfombra roja', 12),
-    (302, 'Decisiones clave en la cumbre', 16);
+INSERT INTO Reportaje (id, titulo, reportero_entrega_id, estado) VALUES 
+    (300, 'Crónica de una final épica', 10, 'DESCARGADO'),
+    (301, 'Glamour en la alfombra roja', 12, 'NODESCARGADO'),
+    (302, 'Decisiones clave en la cumbre', 16, 'DESCARGADO');
 
 INSERT INTO EvaluacionReportaje (id, reportaje_id, evento_id, estado) VALUES
     (700, 300, 100, 'aceptado'),
@@ -94,4 +94,4 @@ INSERT INTO Imagen (id, reportero_id, ruta_archivo, estado, tipo) VALUES
     (602, 14, '/img/sainz_freelance_foto.jpg', 'DEFINITIVA', 'imagen'),
     (603, 20, '/img/oscars_redcarpet.png', 'BORRADOR', 'imagen'),
     (604, 12, '/video/goya_entrevistas.mp4', 'DEFINITIVA', 'video'), 
-    (605, 17, '/video/onu_declaraciones_raw.avi', 'BORRADOR', 'video'); 
+    (605, 17, '/video/onu_declaraciones_raw.avi', 'BORRADOR', 'video');
