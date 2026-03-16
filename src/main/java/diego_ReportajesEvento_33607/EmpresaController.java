@@ -18,10 +18,8 @@ public class EmpresaController {
     }
 
     public void initController() {
-        // Cargar eventos
         view.getBtnCargarEventos().addActionListener(e -> SwingUtil.exceptionWrapper(() -> cargarEventos()));
 
-        // Cargar texto del reportaje al hacer clic en un evento
         view.getTabEventos().addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
@@ -44,7 +42,7 @@ public class EmpresaController {
         view.getTabEventos().setModel(tmodel);
         SwingUtil.autoAdjustColumns(view.getTabEventos());
         
-        limpiarTextos(); // Limpiamos la pantalla de lectura si cambiamos de empresa
+        limpiarTextos(); 
     }
 
     private void cargarReportaje() {
@@ -58,6 +56,16 @@ public class EmpresaController {
             view.getTxtTitulo().setText(reportaje.getTitulo());
             view.getTxtSubtitulo().setText(reportaje.getSubtitulo());
             view.getTxtCuerpo().setText(reportaje.getCuerpo());
+            
+            // Cargar la tabla multimedia
+            List<MultimediaDTO> multimedia = model.getMultimediaDefinitiva(idEvento);
+            TableModel tmodelMedia = SwingUtil.getTableModelFromPojos(multimedia, new String[] { "ruta", "tipo" });
+            view.getTabMultimedia().setModel(tmodelMedia);
+            SwingUtil.autoAdjustColumns(view.getTabMultimedia());
+            
+            // Actualizamos la BD a DESCARGADO al leerlo
+            model.marcarComoDescargado(idEvento);
+            
         } else {
             limpiarTextos();
             view.getTxtCuerpo().setText("No se encontró el contenido de este reportaje.");
@@ -68,5 +76,6 @@ public class EmpresaController {
         view.getTxtTitulo().setText("");
         view.getTxtSubtitulo().setText("");
         view.getTxtCuerpo().setText("");
+        view.getTabMultimedia().setModel(new DefaultTableModel()); 
     }
 }
