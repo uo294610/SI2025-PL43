@@ -10,13 +10,14 @@ public class OfrecimientoModController {
 	private OfrecimientoModModel model;
 	private OfrecimientoModView view;
 	private List<EmpresaModDTO> empresasActuales;
+	private List<EventoModDTO> eventosActuales; // Para guardar la lista y acceder al tematicaId
 
 	public OfrecimientoModController(OfrecimientoModModel m, OfrecimientoModView v) {
 		this.model = m; this.view = v;
 	}
 
 	public void initController() {
-		// Buscador de eventos
+		// Buscador 
 		view.getTxtBuscar().addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyReleased(KeyEvent e) {
@@ -28,8 +29,16 @@ public class OfrecimientoModController {
 			}
 		});
 
-		view.getTabEv().addMouseListener(new MouseAdapter() {
-			public void mouseReleased(MouseEvent e) { cargarEmpresas(); }
+		// Evento al seleccionar una fila de la tabla superior
+		view.getTabEv().getSelectionModel().addListSelectionListener(e -> {
+			if (!e.getValueIsAdjusting()) {
+				int f = view.getTabEv().getSelectedRow();
+				if (f >= 0) {
+					String nombreTematica = view.getTabEv().getValueAt(f, 4).toString(); // Columna 4 es Temática
+					view.getLblTematicaEvento().setText("Temática detectada: " + nombreTematica);
+					cargarEmpresas();
+				}
+			}
 		});
 		
 		view.getCbFiltro().addActionListener(e -> {
@@ -38,29 +47,49 @@ public class OfrecimientoModController {
 			view.getBtnQuitar().setEnabled(!sinOfrecimiento);
 			cargarEmpresas();
 		});
+
+		// Acción del Checkbox
+		view.getChkFiltrarTematica().addActionListener(e -> cargarEmpresas());
 		
 		view.getBtnOfrecer().addActionListener(e -> ejecutarOfrecer());
 		view.getBtnQuitar().addActionListener(e -> ejecutarQuitar());
 	}
 
 	public void initView() {
-		var datos = model.getEventosConReportero();
-		view.getTabEv().setModel(SwingUtil.getTableModelFromPojos(datos, new String[]{"id","nombre","fecha","reportero"}));
+		eventosActuales = model.getEventosConReportero();
+		// Añadimos "tematica" a las columnas para que se vea
+		view.getTabEv().setModel(SwingUtil.getTableModelFromPojos(eventosActuales, new String[]{"id","nombre","fecha","reportero", "tematica"}));
+		
+		// Por defecto empieza en "Con Ofrecimiento" (índice 0), así que desactivamos el botón de ofrecer
+		view.getCbFiltro().setSelectedIndex(0);
 		view.getBtnOfrecer().setEnabled(false);
 		view.getFrame().setVisible(true);
 	}
 
 	private void cargarEmpresas() {
-		int f = view.getTabEv().getSelectedRow();
-		if (f < 0) return;
-		String idEv = view.getTabEv().getValueAt(f, 0).toString();
+		int vistaFila = view.getTabEv().getSelectedRow();
+		if (vistaFila < 0) return;
+
+		// Convertimos el índice por si se ha usado el buscador
+		int modeloFila = view.getTabEv().convertRowIndexToModel(vistaFila);
+		EventoModDTO evSeleccionado = eventosActuales.get(modeloFila);
 		
-		if (view.getCbFiltro().getSelectedIndex() == 1) {
-			empresasActuales = model.getEmpresasSinOfrecimiento(idEv);
+		String idEv = evSeleccionado.getId();
+		int tematicaId = evSeleccionado.getTematicaId();
+		
+		boolean sinOfrecimiento = view.getCbFiltro().getSelectedIndex() == 1;
+		boolean filtrarPorTematica = view.getChkFiltrarTematica().isSelected();
+
+		if (sinOfrecimiento) {
+			if (filtrarPorTematica) empresasActuales = model.getEmpresasSinOfrecimientoPorTematica(idEv, tematicaId);
+			else empresasActuales = model.getEmpresasSinOfrecimiento(idEv);
 		} else {
-			empresasActuales = model.getEmpresasConOfrecimiento(idEv);
+			if (filtrarPorTematica) empresasActuales = model.getEmpresasConOfrecimientoPorTematica(idEv, tematicaId);
+			else empresasActuales = model.getEmpresasConOfrecimiento(idEv);
 		}
-		view.getTabEmp().setModel(SwingUtil.getTableModelFromPojos(empresasActuales, new String[]{"id","nombre","estado"}));
+		
+		// Añadimos "especialidad" a las columnas de la tabla de abajo
+		view.getTabEmp().setModel(SwingUtil.getTableModelFromPojos(empresasActuales, new String[]{"id","nombre","estado","especialidad"}));
 	}
 
 	private void ejecutarOfrecer() {
@@ -80,12 +109,12 @@ public class OfrecimientoModController {
 
 		EmpresaModDTO empresa = empresasActuales.get(fEmp);
 
-		if (empresa.getAcceso() == 1) { // Bloqueo
+		if (empresa.getAcceso() == 1) { 
 			JOptionPane.showMessageDialog(null, "Acción denegada: Ya tiene acceso.", "Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 
-		if (empresa.getEstado().toUpperCase().contains("ACEPTADO")) { // Email
+		if (empresa.getEstado().toUpperCase().contains("ACEPTADO")) {
 			JOptionPane.showMessageDialog(null, "Se enviará un email automático a " + empresa.getNombre() + " notificando la baja.");
 		}
 
