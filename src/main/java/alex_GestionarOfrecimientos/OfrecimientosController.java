@@ -18,14 +18,19 @@ public class OfrecimientosController {
     public void initController() {
         view.getCbEmpresas().addActionListener(e -> recargarComboTematicas());
         view.getChkFiltroEmpresa().addActionListener(e -> recargarComboTematicas());
+        
+        // Listener para los filtros
         view.getCbTematicas().addActionListener(e -> cargarTabla());
         view.getRdPendientes().addActionListener(e -> cargarTabla());
         view.getRdDecididos().addActionListener(e -> cargarTabla());
+        view.getBtnFiltrarPrecio().addActionListener(e -> cargarTabla());
 
+        // Listener para acciones
         view.getBtnAceptar().addActionListener(e -> procesarDecision("ACEPTADO"));
         view.getBtnRechazar().addActionListener(e -> procesarDecision("RECHAZADO"));
         view.getBtnEliminar().addActionListener(e -> procesarDecision(null));
 
+        // Listener de la tabla
         view.getTablaOfrecimientos().getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 comprobarEstadoFila();
@@ -42,9 +47,7 @@ public class OfrecimientosController {
     private void cargarEmpresas() {
         List<Object[]> empresas = model.getListaEmpresas();
         DefaultComboBoxModel<Object> m = new DefaultComboBoxModel<>();
-        for (Object[] emp : empresas) {
-            m.addElement(emp);
-        }
+        for (Object[] emp : empresas) m.addElement(emp);
         view.getCbEmpresas().setModel(m);
         
         view.getCbEmpresas().setRenderer(new ListaRenderer());
@@ -53,14 +56,11 @@ public class OfrecimientosController {
         recargarComboTematicas();
     }
 
-    // --- AQUÍ ESTÁ EL CAMBIO PRINCIPAL ---
     private void recargarComboTematicas() {
         Object[] empresa = (Object[]) view.getCbEmpresas().getSelectedItem();
         if (empresa == null) return;
         
         boolean filtroActivo = view.getChkFiltroEmpresa().isSelected();
-        
-        // 1. Activar o desactivar el desplegable según el Checkbox
         view.getCbTematicas().setEnabled(filtroActivo);
 
         List<Object[]> tematicas;
@@ -72,41 +72,50 @@ public class OfrecimientosController {
 
         DefaultComboBoxModel<Object> m = new DefaultComboBoxModel<>();
         m.addElement(new Object[]{0, "--- Todas ---"});
-        for (Object[] t : tematicas) {
-            m.addElement(t);
-        }
+        for (Object[] t : tematicas) m.addElement(t);
         
-        // Quitamos los listeners temporalmente para no recargar la tabla varias veces
         java.awt.event.ActionListener[] listeners = view.getCbTematicas().getActionListeners();
         for (java.awt.event.ActionListener l : listeners) view.getCbTematicas().removeActionListener(l);
         
         view.getCbTematicas().setModel(m);
+        if (!filtroActivo) view.getCbTematicas().setSelectedIndex(0); 
         
-        // 2. Si el filtro está desactivado, forzamos la selección a "Todas"
-        if (!filtroActivo) {
-            view.getCbTematicas().setSelectedIndex(0); 
-        }
-        
-        // Devolvemos los listeners
         for (java.awt.event.ActionListener l : listeners) view.getCbTematicas().addActionListener(l);
         
         cargarTabla();
     }
-    // --------------------------------------
 
     private void cargarTabla() {
         Object[] emp = (Object[]) view.getCbEmpresas().getSelectedItem();
         Object[] tem = (Object[]) view.getCbTematicas().getSelectedItem();
         if (emp == null || tem == null) return;
 
+        Double minPrecio = null;
+        Double maxPrecio = null;
+        
+        try {
+            String txtMin = view.getTxtPrecioMin().getText().trim();
+            if (!txtMin.isEmpty()) minPrecio = Double.parseDouble(txtMin);
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(view.getFrame(), "Formato de Precio Mínimo incorrecto.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        try {
+            String txtMax = view.getTxtPrecioMax().getText().trim();
+            if (!txtMax.isEmpty()) maxPrecio = Double.parseDouble(txtMax);
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(view.getFrame(), "Formato de Precio Máximo incorrecto.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
         listaActual = model.getOfrecimientos(
-            (int) emp[0], 
-            view.getChkFiltroEmpresa().isSelected(), 
-            (int) tem[0], 
-            view.getRdPendientes().isSelected()
+            (int) emp[0], view.getChkFiltroEmpresa().isSelected(), 
+            (int) tem[0], view.getRdPendientes().isSelected(),
+            minPrecio, maxPrecio
         );
 
-        String[] columnasDTO = {"id", "nombreEvento", "nombreAgencia", "fechaEvento", "nombreTematica", "decision"};
+        String[] columnasDTO = {"id", "nombreEvento", "nombreAgencia", "fechaEvento", "nombreTematica", "precio"};
         view.getTablaOfrecimientos().setModel(SwingUtil.getTableModelFromPojos(listaActual, columnasDTO));
         
         comprobarEstadoFila();
@@ -120,10 +129,17 @@ public class OfrecimientosController {
             view.getBtnRechazar().setEnabled(false);
             view.getBtnEliminar().setEnabled(false);
             view.setMensajeDecision("Seleccione un ofrecimiento para ver su estado.", false);
+            view.getDetalleEvento().setModel(new javax.swing.table.DefaultTableModel());
             return;
         }
 
         OfrecimientosDTO seleccionado = listaActual.get(fila);
+        
+        // Carga los detalles en la tabla inferior (incluido el precio)
+        String[] columnasDetalle = {"id", "nombreEvento", "nombreAgencia", "fechaEvento", "nombreTematica", "precio", "decision"};
+        view.getDetalleEvento().setModel(SwingUtil.getRecordModelFromPojo(seleccionado, columnasDetalle));
+        SwingUtil.autoAdjustColumns(view.getDetalleEvento());
+
         boolean estaBloqueado = seleccionado.isAcceso();
 
         view.getBtnAceptar().setEnabled(!estaBloqueado);

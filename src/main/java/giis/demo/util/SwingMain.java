@@ -74,7 +74,7 @@ public class SwingMain {
 				
 			JButton btnCargarDatosIniciales = new JButton("Cargar Datos Iniciales para Pruebas");
 			btnCargarDatosIniciales.addActionListener(e -> {
-				Database db = new Database();
+				Database db = new Database(); 
 				db.createDatabase(false);
 				db.loadDatabase();
 			});

@@ -22,10 +22,10 @@ public class OfrecimientosModel {
         return db.executeQueryArray(sql, idEmpresa);
     }
 
-    public List<OfrecimientosDTO> getOfrecimientos(int idEmpresa, boolean soloEmpresa, int idTematica, boolean soloPendientes) {
-        StringBuilder sql = new StringBuilder(	
-        	"SELECT o.id, ev.nombre AS nombreEvento, a.nombre AS nombreAgencia, " +
-  		    "ev.fecha AS fechaEvento, t.nombre AS nombreTematica, o.decision, o.acceso " + 
+    public List<OfrecimientosDTO> getOfrecimientos(int idEmpresa, boolean soloEmpresa, int idTematica, boolean soloPendientes, Double minPrecio, Double maxPrecio) {
+        StringBuilder sql = new StringBuilder(
+            "SELECT o.id, ev.nombre AS nombreEvento, a.nombre AS nombreAgencia, " +
+            "ev.fecha AS fechaEvento, t.nombre AS nombreTematica, ev.precio AS precio, o.decision, o.acceso " +
             "FROM Ofrecimiento o " +
             "JOIN Evento ev ON o.evento_id = ev.id " +
             "JOIN AgenciaPrensa a ON ev.agencia_id = a.id " +
@@ -50,6 +50,16 @@ public class OfrecimientosModel {
         } else if (idTematica > 0) {
             sql.append("AND t.id = ? ");
             params.add(idTematica);
+        }
+
+        // Filtros de Precio
+        if (minPrecio != null) {
+            sql.append("AND ev.precio >= ? ");
+            params.add(minPrecio);
+        }
+        if (maxPrecio != null) {
+            sql.append("AND ev.precio <= ? ");
+            params.add(maxPrecio);
         }
 
         sql.append("ORDER BY ev.fecha ASC");

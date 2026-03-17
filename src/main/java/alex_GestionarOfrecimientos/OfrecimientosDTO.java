@@ -7,6 +7,7 @@ public class OfrecimientosDTO {
     private int id;
     private String nombreEvento, nombreAgencia, fechaEvento, nombreTematica, decision;
     private boolean acceso;
+    private double precio;
     
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
@@ -22,4 +23,6 @@ public class OfrecimientosDTO {
     public void setDecision(String decision) { this.decision = decision; }
     public boolean isAcceso() { return acceso; }
     public void setAcceso(boolean acceso) { this.acceso = acceso; }
+    public double getPrecio() { return precio; }
+    public void setPrecio(double precio) { this.precio = precio; }
 }
