@@ -1,4 +1,6 @@
 
+DROP TABLE IF EXISTS Comentario;
+DROP TABLE IF EXISTS Revision;
 DROP TABLE IF EXISTS Imagen;
 DROP TABLE IF EXISTS Ofrecimiento;
 DROP TABLE IF EXISTS Asignacion;
@@ -6,6 +8,7 @@ DROP TABLE IF EXISTS VersionReportaje;
 DROP TABLE IF EXISTS EvaluacionReportaje; 
 DROP TABLE IF EXISTS Reportaje;
 DROP TABLE IF EXISTS Evento;
+DROP TABLE IF EXISTS EmpresaTematica; 
 DROP TABLE IF EXISTS Reportero;
 DROP TABLE IF EXISTS EmpresaComunicacion;
 DROP TABLE IF EXISTS AgenciaPrensa;
@@ -24,8 +27,14 @@ CREATE TABLE AgenciaPrensa (
 
 CREATE TABLE EmpresaComunicacion (
     id INT PRIMARY KEY NOT NULL,
-    nombre VARCHAR(64) NOT NULL,
+    nombre VARCHAR(64) NOT NULL
+);
+
+CREATE TABLE EmpresaTematica (
+    empresa_id INT NOT NULL,
     tematica_id INT NOT NULL,
+    PRIMARY KEY (empresa_id, tematica_id),
+    FOREIGN KEY (empresa_id) REFERENCES EmpresaComunicacion(id),
     FOREIGN KEY (tematica_id) REFERENCES Tematica(id)
 );
 
@@ -50,13 +59,30 @@ CREATE TABLE Evento (
     FOREIGN KEY (tematica_id) REFERENCES Tematica(id)
 );
 
-
 CREATE TABLE Reportaje (
     id INT PRIMARY KEY NOT NULL,
     titulo VARCHAR(128) UNIQUE NOT NULL, 
     reportero_entrega_id INT NOT NULL,  
     estado VARCHAR(32) NOT NULL, 
+    revision_solicitada BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (reportero_entrega_id) REFERENCES Reportero(id)
+);
+
+CREATE TABLE Revision (
+    id INT PRIMARY KEY NOT NULL,
+    reportaje_id INT NOT NULL,
+    revisor_id INT NOT NULL, 
+    estado VARCHAR(32) NOT NULL, 
+    FOREIGN KEY (reportaje_id) REFERENCES Reportaje(id),
+    FOREIGN KEY (revisor_id) REFERENCES Reportero(id)
+);
+
+CREATE TABLE Comentario (
+    id INT PRIMARY KEY NOT NULL,
+    revision_id INT NOT NULL,
+    texto VARCHAR(1000) NOT NULL,
+    fecha_hora TIMESTAMP NOT NULL,
+    FOREIGN KEY (revision_id) REFERENCES Revision(id)
 );
 
 CREATE TABLE EvaluacionReportaje (
