@@ -10,12 +10,12 @@ public class EmpresaModel {
      * Obtiene eventos que tienen un reportaje ACEPTADO y a los que la empresa tiene acceso.
      */
     public List<EventoAccesoDTO> getEventosConAcceso(int idEmpresa) {
-        // CRUZAMOS CON EvaluacionReportaje PORQUE Reportaje YA NO TIENE evento_id
+        // CAMBIO AQUÍ: er.estado = 'Interesado' en lugar de 'aceptado'
         String sql = "SELECT e.id, e.nombre, e.fecha "
                    + "FROM Evento e "
                    + "JOIN EvaluacionReportaje er ON e.id = er.evento_id "
                    + "JOIN Ofrecimiento o ON e.id = o.evento_id "
-                   + "WHERE o.empresa_id = ? AND o.acceso = 1 AND er.estado = 'aceptado' " 
+                   + "WHERE o.empresa_id = ? AND o.acceso = 1 AND er.estado = 'Interesado' " 
                    + "ORDER BY e.fecha";
         return db.executeQueryPojo(EventoAccesoDTO.class, sql, idEmpresa);
     }

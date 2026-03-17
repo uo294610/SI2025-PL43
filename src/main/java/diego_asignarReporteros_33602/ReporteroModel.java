@@ -23,15 +23,24 @@ public class ReporteroModel {
     /**
      * Obtiene reporteros de la agencia que NO están asignados a ningún evento en esa fecha concreta.
      */
-    public List<ReporteroDTO> getReporterosDisponibles(int idAgencia, String fechaEvento) {
-        String sql = "SELECT id, nombre FROM Reportero "
-                   + "WHERE agencia_id = ? "
-                   + "AND id NOT IN ("
+    public List<ReporteroDTO> getReporterosDisponibles(int idAgencia, String fechaEvento, int idEvento, boolean filtrarTematica) {
+        String sql = "SELECT r.id, r.nombre FROM Reportero r "
+                   + "WHERE r.agencia_id = ? "
+                   + "AND r.id NOT IN ("
                    + "    SELECT a.reportero_id FROM Asignacion a "
                    + "    JOIN Evento e ON a.evento_id = e.id "
                    + "    WHERE e.fecha = ?"
-                   + ") ORDER BY nombre";
-        return db.executeQueryPojo(ReporteroDTO.class, sql, idAgencia, fechaEvento);
+                   + ") ";
+
+        // Si el checkbox está marcado, añadimos esta condición extra
+        if (filtrarTematica) {
+            sql += "AND r.tematica_id = (SELECT tematica_id FROM Evento WHERE id = ?) ";
+            sql += "ORDER BY r.nombre";
+            return db.executeQueryPojo(ReporteroDTO.class, sql, idAgencia, fechaEvento, idEvento);
+        } else {
+            sql += "ORDER BY r.nombre";
+            return db.executeQueryPojo(ReporteroDTO.class, sql, idAgencia, fechaEvento);
+        }
     }
 
     /**
