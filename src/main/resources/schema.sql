@@ -1,4 +1,3 @@
-
 DROP TABLE IF EXISTS Comentario;
 DROP TABLE IF EXISTS Revision;
 DROP TABLE IF EXISTS Imagen;
@@ -13,7 +12,6 @@ DROP TABLE IF EXISTS Reportero;
 DROP TABLE IF EXISTS EmpresaComunicacion;
 DROP TABLE IF EXISTS AgenciaPrensa;
 DROP TABLE IF EXISTS Tematica;
-
 
 CREATE TABLE Tematica (
     id INT PRIMARY KEY NOT NULL,
@@ -125,8 +123,10 @@ CREATE TABLE Ofrecimiento (
 CREATE TABLE Imagen (
     id INT PRIMARY KEY NOT NULL,
     reportero_id INT NOT NULL,
+    reportaje_id INT,
     ruta_archivo VARCHAR(255) NOT NULL,
     estado VARCHAR(16) NOT NULL, 
     tipo VARCHAR(16) NOT NULL, 
-    FOREIGN KEY (reportero_id) REFERENCES Reportero(id)
+    FOREIGN KEY (reportero_id) REFERENCES Reportero(id),
+    FOREIGN KEY (reportaje_id) REFERENCES Reportaje(id)
 );
