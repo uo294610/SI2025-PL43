@@ -13,17 +13,18 @@ public class EmpresaView {
     private JTextField txtSubtitulo;
     private JTextArea txtCuerpo;
     private JTable tabMultimedia; 
+    private JButton btnDescargarJson;
 
     public EmpresaView() {
         initialize();
     }
 
     private void initialize() {
-        frame = new JFrame();
+    	frame = new JFrame();
         frame.setTitle("Lector de Reportajes (Empresas)");
-        frame.setBounds(0, 0, 700, 650); 
+        frame.setBounds(0, 0, 700, 680);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); 
-        frame.getContentPane().setLayout(new MigLayout("", "[grow]", "[][][grow][][][][grow][][grow]"));
+        frame.getContentPane().setLayout(new MigLayout("", "[grow]", "[][][grow][][][][grow][][grow][]"));
 
         frame.getContentPane().add(new JLabel("ID Empresa (Simulación):"), "flowx,cell 0 0");
         txtEmpresaId = new JTextField("200"); 
@@ -59,6 +60,8 @@ public class EmpresaView {
         tabMultimedia.setRowSelectionAllowed(false); 
         tabMultimedia.setDefaultEditor(Object.class, null);
         frame.getContentPane().add(new JScrollPane(tabMultimedia), "cell 0 8,grow");
+        btnDescargarJson = new JButton("Descargar Reportaje (.json)");
+        frame.getContentPane().add(btnDescargarJson, "cell 0 9, align right");
     }
 
     public JFrame getFrame() { return frame; }
@@ -69,4 +72,5 @@ public class EmpresaView {
     public JTextField getTxtSubtitulo() { return txtSubtitulo; }
     public JTextArea getTxtCuerpo() { return txtCuerpo; }
     public JTable getTabMultimedia() { return tabMultimedia; }
+    public JButton getBtnDescargarJson() { return btnDescargarJson; }
 }
