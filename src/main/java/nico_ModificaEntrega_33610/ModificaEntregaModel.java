@@ -9,40 +9,37 @@ import nico_EntregarReportEvento.VersionReportajeEntity;
 public class ModificaEntregaModel {
     private Database db = new Database();
 
-    // 1. Reutilizamos la lista de reporteros
     public List<ReporteroDisplayDTO> getListaReporteros() {
         return db.executeQueryPojo(ReporteroDisplayDTO.class, "SELECT id, nombre FROM Reportero");
     }
 
-    // 2. Eventos PENDIENTES (Sin reportaje)
+    // CORRECCIÓN: Busca eventos pendientes sin usar evento_id en Reportaje
     public List<EventoResumenDTO> getEventosPendientes(int idReportero) {
         String sql = "SELECT e.id, e.nombre, e.fecha FROM Evento e " +
                      "INNER JOIN Asignacion a ON e.id = a.evento_id " +
-                     "WHERE a.reportero_id = ? AND e.id NOT IN (SELECT evento_id FROM Reportaje)";
-        return db.executeQueryPojo(EventoResumenDTO.class, sql, idReportero);
+                     "WHERE a.reportero_id = ? AND NOT EXISTS (SELECT 1 FROM Reportaje r WHERE r.reportero_entrega_id = ?)";
+        return db.executeQueryPojo(EventoResumenDTO.class, sql, idReportero, idReportero);
     }
 
-    // 3. Eventos ENTREGADOS (Con reportaje)
+    // CORRECCIÓN: Busca eventos entregados sin usar evento_id en Reportaje
     public List<EventoResumenDTO> getEventosEntregados(int idReportero) {
         String sql = "SELECT e.id, e.nombre, e.fecha FROM Evento e " +
                      "INNER JOIN Asignacion a ON e.id = a.evento_id " +
-                     "INNER JOIN Reportaje r ON e.id = r.evento_id " +
-                     "WHERE a.reportero_id = ?";
-        return db.executeQueryPojo(EventoResumenDTO.class, sql, idReportero);
+                     "WHERE a.reportero_id = ? AND EXISTS (SELECT 1 FROM Reportaje r WHERE r.reportero_entrega_id = ?)";
+        return db.executeQueryPojo(EventoResumenDTO.class, sql, idReportero, idReportero);
     }
 
-    // 4. Obtener los datos de la última versión de un reportaje
-    public ReportajeEdicionDTO getUltimaVersion(int idEvento) {
+    // CORRECCIÓN: Busca el reportaje usando el id del Reportero en vez del Evento
+    public ReportajeEdicionDTO getUltimaVersion(int idReportero) {
         String sql = "SELECT r.id as reportaje_id, r.reportero_entrega_id, r.titulo, v.subtitulo, v.cuerpo " +
                      "FROM Reportaje r " +
                      "INNER JOIN VersionReportaje v ON r.id = v.reportaje_id " +
-                     "WHERE r.evento_id = ? " +
-                     "ORDER BY v.fecha_hora DESC LIMIT 1"; // Cogemos la versión más reciente
-        List<ReportajeEdicionDTO> lista = db.executeQueryPojo(ReportajeEdicionDTO.class, sql, idEvento);
+                     "WHERE r.reportero_entrega_id = ? " +
+                     "ORDER BY v.fecha_hora DESC LIMIT 1"; 
+        List<ReportajeEdicionDTO> lista = db.executeQueryPojo(ReportajeEdicionDTO.class, sql, idReportero);
         return lista.isEmpty() ? null : lista.get(0);
     }
 
-    // 5. Insertar una nueva versión (Historial)
     public void insertarNuevaVersion(VersionReportajeEntity version) {
         String sql = "INSERT INTO VersionReportaje (id, reportaje_id, subtitulo, cuerpo, fecha_hora, que_cambio) " +
                      "VALUES (?, ?, ?, ?, ?, ?)";
@@ -50,10 +47,9 @@ public class ModificaEntregaModel {
                          version.getCuerpo(), version.getFecha_hora(), version.getQue_cambio());
     }
     
-    // 6. Insertar el Reportaje inicial (para cuando estamos en Pendientes)
-    public void insertarReportaje(int idReportaje, String titulo, int idEvento, int idReportero) {
-        String sql = "INSERT INTO Reportaje (id, titulo, evento_id, reportero_entrega_id) VALUES (?, ?, ?, ?)";
-        db.executeUpdate(sql, idReportaje, titulo, idEvento, idReportero);
+    public void insertarReportaje(int idReportaje, String titulo, int idReportero) {
+        String sql = "INSERT INTO Reportaje (id, titulo, reportero_entrega_id, estado, revision_solicitada) VALUES (?, ?, ?, 'NODESCARGADO', FALSE)";
+        db.executeUpdate(sql, idReportaje, titulo, idReportero);
     }
 
     public int getUltimoId(String tabla) {
@@ -63,5 +59,30 @@ public class ModificaEntregaModel {
             return Integer.parseInt(result.get(0)[0].toString());
         }
         return 0;
+    }
+
+    public List<ArchivoMultimediaDTO> getMultimedia(int idReportero, String tipo) {
+        String sql = "SELECT i.ruta_archivo, i.estado, r.nombre as autor_nombre " +
+                     "FROM Imagen i " +
+                     "INNER JOIN Reportero r ON i.reportero_id = r.id " +
+                     "WHERE i.reportero_id = ? AND i.tipo = ?";
+        return db.executeQueryPojo(ArchivoMultimediaDTO.class, sql, idReportero, tipo);
+    }
+
+    public void insertarMultimedia(int idReportero, String ruta, String tipo) {
+        int nuevoId = getUltimoId("Imagen") + 1;
+        String sql = "INSERT INTO Imagen (id, reportero_id, ruta_archivo, estado, tipo) " +
+                     "VALUES (?, ?, ?, 'BORRADOR', ?)";
+        db.executeUpdate(sql, nuevoId, idReportero, ruta, tipo);
+    }
+
+    public void eliminarMultimedia(String ruta) {
+        String sql = "DELETE FROM Imagen WHERE ruta_archivo = ?";
+        db.executeUpdate(sql, ruta);
+    }
+
+    public void fijarMultimediaDefinitiva(String ruta) {
+        String sql = "UPDATE Imagen SET estado = 'DEFINITIVA' WHERE ruta_archivo = ?";
+        db.executeUpdate(sql, ruta);
     }
 }
