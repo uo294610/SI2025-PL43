@@ -92,9 +92,9 @@ INSERT INTO Comentario (id, revision_id, texto, fecha_hora) VALUES
     (901, 801, 'Todo correcto, buen trabajo con las fuentes.', '2026-04-11 12:30:00');
 
 INSERT INTO EvaluacionReportaje (id, reportaje_id, evento_id, estado) VALUES
-    (700, 300, 100, 'aceptado'),
-    (701, 301, 101, 'dudoso'),
-    (702, 302, 106, 'rechazado');
+    (700, 300, 100, 'ACEPTADO'),
+    (701, 301, 101, 'DUDOSO'),
+    (702, 302, 106, 'RECHAZADO');
 
 INSERT INTO VersionReportaje (id, reportaje_id, subtitulo, cuerpo, fecha_hora, que_cambio) VALUES 
     (400, 300, 'El Madrid levanta la 16ª', 'Contenido del reportaje final...', '2026-05-30 23:30:00', 'Versión inicial'),
