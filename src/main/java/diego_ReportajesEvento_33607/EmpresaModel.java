@@ -10,12 +10,12 @@ public class EmpresaModel {
      * Obtiene eventos que tienen un reportaje ACEPTADO y a los que la empresa tiene acceso.
      */
     public List<EventoAccesoDTO> getEventosConAcceso(int idEmpresa) {
-        // CAMBIO AQUÍ: er.estado = 'Interesado' en lugar de 'aceptado'
+        // CORREGIDO: Volvemos a 'aceptado' según los nuevos inserts en EvaluacionReportaje
         String sql = "SELECT e.id, e.nombre, e.fecha "
                    + "FROM Evento e "
                    + "JOIN EvaluacionReportaje er ON e.id = er.evento_id "
                    + "JOIN Ofrecimiento o ON e.id = o.evento_id "
-                   + "WHERE o.empresa_id = ? AND o.acceso = 1 AND er.estado = 'Interesado' " 
+                   + "WHERE o.empresa_id = ? AND o.acceso = 1 AND er.estado = 'aceptado' " 
                    + "ORDER BY e.fecha";
         return db.executeQueryPojo(EventoAccesoDTO.class, sql, idEmpresa);
     }
@@ -24,7 +24,6 @@ public class EmpresaModel {
      * Obtiene SOLO la última versión del reportaje de un evento concreto.
      */
     public ReportajeDetalleDTO getUltimaVersionReportaje(int idEvento) {
-        // CRUZAMOS CON EvaluacionReportaje PARA LLEGAR AL EVENTO
         String sql = "SELECT r.titulo, v.subtitulo, v.cuerpo "
                    + "FROM Reportaje r "
                    + "JOIN VersionReportaje v ON r.id = v.reportaje_id "
@@ -41,18 +40,20 @@ public class EmpresaModel {
     }
 
     /**
-     * Obtiene los archivos multimedia en estado DEFINITIVA de los reporteros asignados al evento.
+     * Obtiene los archivos multimedia en estado DEFINITIVA asociados al reportaje del evento.
      */
     public List<MultimediaDTO> getMultimediaDefinitiva(int idEvento) {
+        // CORREGIDO: Ahora cruzamos Imagen directamente con el Reportaje usando EvaluacionReportaje,
+        // aprovechando la nueva columna reportaje_id en la tabla Imagen.
         String sql = "SELECT i.ruta_archivo AS ruta, i.tipo "
                    + "FROM Imagen i "
-                   + "JOIN Asignacion a ON i.reportero_id = a.reportero_id "
-                   + "WHERE a.evento_id = ? AND i.estado = 'DEFINITIVA'";
+                   + "JOIN EvaluacionReportaje er ON i.reportaje_id = er.reportaje_id "
+                   + "WHERE er.evento_id = ? AND i.estado = 'DEFINITIVA'";
         return db.executeQueryPojo(MultimediaDTO.class, sql, idEvento);
     }
     
     /**
-     * Marca el reportaje como DESCARGADO (Por si quieres usar la nueva columna de tu BD)
+     * Marca el reportaje como DESCARGADO
      */
     public void marcarComoDescargado(int idEvento) {
         String sql = "UPDATE Reportaje SET estado = 'DESCARGADO' "
