@@ -9,40 +9,38 @@ public class EmpresaView {
     private JButton btnCargarEventos;
     private JTable tabEventos;
     
-    // Componentes para ver el reportaje
     private JTextField txtTitulo;
     private JTextField txtSubtitulo;
     private JTextArea txtCuerpo;
+    private JTable tabMultimedia; 
+    private JButton btnDescargarJson;
 
     public EmpresaView() {
         initialize();
     }
 
     private void initialize() {
-        frame = new JFrame();
+    	frame = new JFrame();
         frame.setTitle("Lector de Reportajes (Empresas)");
-        frame.setBounds(0, 0, 700, 500);
+        frame.setBounds(0, 0, 700, 680);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); 
-        frame.getContentPane().setLayout(new MigLayout("", "[grow]", "[][][grow][][][][grow]"));
+        frame.getContentPane().setLayout(new MigLayout("", "[grow]", "[][][grow][][][][grow][][grow][]"));
 
-        // Simulación de sesión de Empresa
         frame.getContentPane().add(new JLabel("ID Empresa (Simulación):"), "flowx,cell 0 0");
-        txtEmpresaId = new JTextField("200"); // Atresmedia por defecto (id 200)
+        txtEmpresaId = new JTextField("200"); 
         frame.getContentPane().add(txtEmpresaId, "cell 0 0, width 50!");
         btnCargarEventos = new JButton("Ver Eventos Autorizados");
         frame.getContentPane().add(btnCargarEventos, "cell 0 0");
 
-        // Tabla de Eventos
         frame.getContentPane().add(new JLabel("1. Eventos disponibles:"), "cell 0 1");
         tabEventos = new JTable();
         tabEventos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tabEventos.setDefaultEditor(Object.class, null); 
         frame.getContentPane().add(new JScrollPane(tabEventos), "cell 0 2,grow");
 
-        // Visor del Reportaje
         frame.getContentPane().add(new JLabel("Título:"), "flowx, cell 0 3");
         txtTitulo = new JTextField();
-        txtTitulo.setEditable(false); // Solo lectura
+        txtTitulo.setEditable(false); 
         frame.getContentPane().add(txtTitulo, "cell 0 3, growx");
 
         frame.getContentPane().add(new JLabel("Subtítulo:"), "flowx, cell 0 4");
@@ -56,6 +54,14 @@ public class EmpresaView {
         txtCuerpo.setLineWrap(true);
         txtCuerpo.setWrapStyleWord(true);
         frame.getContentPane().add(new JScrollPane(txtCuerpo), "cell 0 6,grow");
+
+        frame.getContentPane().add(new JLabel("Multimedia (Ruta y Tipo):"), "cell 0 7");
+        tabMultimedia = new JTable();
+        tabMultimedia.setRowSelectionAllowed(false); 
+        tabMultimedia.setDefaultEditor(Object.class, null);
+        frame.getContentPane().add(new JScrollPane(tabMultimedia), "cell 0 8,grow");
+        btnDescargarJson = new JButton("Descargar Reportaje (.json)");
+        frame.getContentPane().add(btnDescargarJson, "cell 0 9, align right");
     }
 
     public JFrame getFrame() { return frame; }
@@ -65,4 +71,6 @@ public class EmpresaView {
     public JTextField getTxtTitulo() { return txtTitulo; }
     public JTextField getTxtSubtitulo() { return txtSubtitulo; }
     public JTextArea getTxtCuerpo() { return txtCuerpo; }
-}  
+    public JTable getTabMultimedia() { return tabMultimedia; }
+    public JButton getBtnDescargarJson() { return btnDescargarJson; }
+}
