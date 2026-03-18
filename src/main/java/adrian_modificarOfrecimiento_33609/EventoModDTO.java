@@ -5,8 +5,7 @@ public class EventoModDTO {
 	private String nombre;
 	private String fecha;
 	private String reportero;
-	private String tematica;   // Nuevo: Para la tabla de arriba
-	private int tematicaId;    // Nuevo: Para poder filtrar abajo (oculto)
+	private String tematica;   // Guardará las temáticas separadas por coma
 
 	public EventoModDTO() {}
 	public String getId() { return id; }
@@ -19,6 +18,4 @@ public class EventoModDTO {
 	public void setReportero(String reportero) { this.reportero = reportero; }
 	public String getTematica() { return tematica; }
 	public void setTematica(String tematica) { this.tematica = tematica; }
-	public int getTematicaId() { return tematicaId; }
-	public void setTematicaId(int tematicaId) { this.tematicaId = tematicaId; }
 }
