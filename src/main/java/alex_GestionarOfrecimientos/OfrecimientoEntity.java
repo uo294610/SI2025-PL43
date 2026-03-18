@@ -5,13 +5,15 @@ package alex_GestionarOfrecimientos;
  * Es vital que los nombres de los atributos coincidan con los que pide 
  * SwingUtil en el controlador.
  */
+
 public class OfrecimientoEntity {
     private int id;
     private int evento_id;
     private int empresa_id;
     private String decision;
     private boolean acceso;
-
+    
+    // GETTERS O SETTERS
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
     public int getEvento_id() { return evento_id; }
