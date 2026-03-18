@@ -1,12 +1,14 @@
 package adrian_distribuirReportajes_33606;
 
 import java.awt.event.*;
+import java.util.List;
 import javax.swing.JOptionPane;
 import giis.demo.util.SwingUtil;
 
 public class DistribucionController {
 	private DistribucionModel model;
 	private DistribucionView view;
+	private List<EmpresaAceptadaDTO> empresasEnTabla;
 
 	public DistribucionController(DistribucionModel m, DistribucionView v) {
 		this.model = m; this.view = v;
@@ -14,54 +16,72 @@ public class DistribucionController {
 
 	public void initController() {
 		view.getTabEv().addMouseListener(new MouseAdapter() {
-			public void mouseReleased(MouseEvent e) {
-				int f = view.getTabEv().getSelectedRow();
-				if (f >= 0) {
-					String idEv = view.getTabEv().getValueAt(f, 0).toString();
-					cargarEmpresas(idEv);
-				}
-			}
+			public void mouseReleased(MouseEvent e) { cargarEmpresas(); }
 		});
-		view.getBtn().addActionListener(e -> ejecutarDistribucion());
+
+		view.getCbFiltro().addActionListener(e -> {
+			boolean sinAcceso = view.getCbFiltro().getSelectedIndex() == 0;
+			view.getBtnDar().setEnabled(sinAcceso);
+			view.getBtnQuitar().setEnabled(!sinAcceso);
+			cargarEmpresas();
+		});
+
+		view.getBtnDar().addActionListener(e -> ejecutarDarAcceso());
+		view.getBtnQuitar().addActionListener(e -> ejecutarQuitarAcceso());
 	}
 
 	public void initView() {
 		var datos = model.getEventosConReportaje();
-		// Mostramos el ID, el nombre del evento y su estado de evaluación
 		view.getTabEv().setModel(SwingUtil.getTableModelFromPojos(datos, new String[]{"id", "nombreEvento", "estado"}));
+		view.getCbFiltro().setSelectedIndex(0);
+		view.getBtnQuitar().setEnabled(false);
 		view.getFrame().setVisible(true);
 	}
 
-	private void cargarEmpresas(String idEv) {
-		var emps = model.getEmpresasAceptadasSinAcceso(idEv);
-		view.getTabEmp().setModel(SwingUtil.getTableModelFromPojos(emps, new String[]{"id", "nombreEmpresa"}));
+	private void cargarEmpresas() {
+		int f = view.getTabEv().getSelectedRow();
+		if (f < 0) return;
+		
+		String idEv = view.getTabEv().getValueAt(f, 0).toString();
+		boolean conAcceso = view.getCbFiltro().getSelectedIndex() == 1;
+		
+		empresasEnTabla = model.getEmpresasPorAcceso(idEv, conAcceso);
+		view.getTabEmp().setModel(SwingUtil.getTableModelFromPojos(empresasEnTabla, new String[]{"id", "nombreEmpresa", "descargado"}));
 	}
 
-	private void ejecutarDistribucion() {
+	private void ejecutarDarAcceso() {
 		int fEv = view.getTabEv().getSelectedRow();
 		int[] fEmps = view.getTabEmp().getSelectedRows();
 		
-		if (fEv < 0) {
-			JOptionPane.showMessageDialog(null, "Por favor, selecciona un evento.");
-			return;
-		}
-		if (fEmps.length == 0) {
-			JOptionPane.showMessageDialog(null, "Selecciona al menos una empresa para dar acceso.");
-			return;
-		}
+		if (fEv < 0 || fEmps.length == 0) return;
 
 		String idEv = view.getTabEv().getValueAt(fEv, 0).toString();
-		StringBuilder nombres = new StringBuilder();
-
 		for (int i : fEmps) {
-			String idEmp = view.getTabEmp().getValueAt(i, 0).toString();
-			String nom = view.getTabEmp().getValueAt(i, 1).toString();
-			model.darAcceso(idEv, idEmp);
-			nombres.append(nom).append(", ");
+			model.darAcceso(idEv, empresasEnTabla.get(i).getId());
 		}
+		JOptionPane.showMessageDialog(null, "Acceso concedido.");
+		cargarEmpresas();
+	}
 
-		view.setTextoAcceso(nombres.toString()); 
-		JOptionPane.showMessageDialog(null, "Acceso concedido correctamente.");
-		cargarEmpresas(idEv);
+	private void ejecutarQuitarAcceso() {
+		int fEv = view.getTabEv().getSelectedRow();
+		int[] fEmps = view.getTabEmp().getSelectedRows();
+		
+		if (fEv < 0 || fEmps.length == 0) return;
+
+		String idEv = view.getTabEv().getValueAt(fEv, 0).toString();
+		
+		for (int i : fEmps) {
+			EmpresaAceptadaDTO emp = empresasEnTabla.get(i);
+			
+			// Si la BD dice que está descargado, bloqueamos
+			if (emp.getDescargadoInt() == 1) {
+				JOptionPane.showMessageDialog(null, "No se puede revocar el acceso a " + emp.getNombreEmpresa() + " porque ya ha descargado el reportaje.", "Error", JOptionPane.ERROR_MESSAGE);
+				continue;
+			}
+			
+			model.revocarAcceso(idEv, emp.getId());
+		}
+		cargarEmpresas();
 	}
 }
