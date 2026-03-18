@@ -5,10 +5,13 @@ DROP TABLE IF EXISTS Ofrecimiento;
 DROP TABLE IF EXISTS Asignacion;
 DROP TABLE IF EXISTS VersionReportaje;
 DROP TABLE IF EXISTS EvaluacionReportaje; 
+DROP TABLE IF EXISTS ReportajeTematica;
 DROP TABLE IF EXISTS Reportaje;
+DROP TABLE IF EXISTS EventoTematica;
 DROP TABLE IF EXISTS Evento;
-DROP TABLE IF EXISTS EmpresaTematica; 
+DROP TABLE IF EXISTS ReporteroTematica;
 DROP TABLE IF EXISTS Reportero;
+DROP TABLE IF EXISTS EmpresaTematica; 
 DROP TABLE IF EXISTS EmpresaComunicacion;
 DROP TABLE IF EXISTS AgenciaPrensa;
 DROP TABLE IF EXISTS Tematica;
@@ -41,8 +44,14 @@ CREATE TABLE Reportero (
     nombre VARCHAR(64) NOT NULL,
     agencia_id INT, 
     tipo VARCHAR(32) NOT NULL, 
+    FOREIGN KEY (agencia_id) REFERENCES AgenciaPrensa(id)
+);
+
+CREATE TABLE ReporteroTematica (
+    reportero_id INT NOT NULL,
     tematica_id INT NOT NULL,
-    FOREIGN KEY (agencia_id) REFERENCES AgenciaPrensa(id),
+    PRIMARY KEY (reportero_id, tematica_id),
+    FOREIGN KEY (reportero_id) REFERENCES Reportero(id),
     FOREIGN KEY (tematica_id) REFERENCES Tematica(id)
 );
 
@@ -52,8 +61,14 @@ CREATE TABLE Evento (
     fecha DATE NOT NULL,
     precio DECIMAL(10, 2) NOT NULL,
     agencia_id INT NOT NULL,
+    FOREIGN KEY (agencia_id) REFERENCES AgenciaPrensa(id)
+);
+
+CREATE TABLE EventoTematica (
+    evento_id INT NOT NULL,
     tematica_id INT NOT NULL,
-    FOREIGN KEY (agencia_id) REFERENCES AgenciaPrensa(id),
+    PRIMARY KEY (evento_id, tematica_id),
+    FOREIGN KEY (evento_id) REFERENCES Evento(id),
     FOREIGN KEY (tematica_id) REFERENCES Tematica(id)
 );
 
@@ -64,6 +79,14 @@ CREATE TABLE Reportaje (
     estado VARCHAR(32) NOT NULL, 
     revision_solicitada BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (reportero_entrega_id) REFERENCES Reportero(id)
+);
+
+CREATE TABLE ReportajeTematica (
+    reportaje_id INT NOT NULL,
+    tematica_id INT NOT NULL,
+    PRIMARY KEY (reportaje_id, tematica_id),
+    FOREIGN KEY (reportaje_id) REFERENCES Reportaje(id),
+    FOREIGN KEY (tematica_id) REFERENCES Tematica(id)
 );
 
 CREATE TABLE Revision (
