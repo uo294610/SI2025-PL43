@@ -13,7 +13,6 @@ public class ModificaEntregaModel {
         return db.executeQueryPojo(ReporteroDisplayDTO.class, "SELECT id, nombre FROM Reportero");
     }
 
-    // CORRECCIÓN: Busca eventos pendientes sin usar evento_id en Reportaje
     public List<EventoResumenDTO> getEventosPendientes(int idReportero) {
         String sql = "SELECT e.id, e.nombre, e.fecha FROM Evento e " +
                      "INNER JOIN Asignacion a ON e.id = a.evento_id " +
@@ -21,7 +20,6 @@ public class ModificaEntregaModel {
         return db.executeQueryPojo(EventoResumenDTO.class, sql, idReportero, idReportero);
     }
 
-    // CORRECCIÓN: Busca eventos entregados sin usar evento_id en Reportaje
     public List<EventoResumenDTO> getEventosEntregados(int idReportero) {
         String sql = "SELECT e.id, e.nombre, e.fecha FROM Evento e " +
                      "INNER JOIN Asignacion a ON e.id = a.evento_id " +
@@ -29,9 +27,9 @@ public class ModificaEntregaModel {
         return db.executeQueryPojo(EventoResumenDTO.class, sql, idReportero, idReportero);
     }
 
-    // CORRECCIÓN: Busca el reportaje usando el id del Reportero en vez del Evento
     public ReportajeEdicionDTO getUltimaVersion(int idReportero) {
-        String sql = "SELECT r.id as reportaje_id, r.reportero_entrega_id, r.titulo, v.subtitulo, v.cuerpo " +
+        // AÑADIDO: Ahora recupera r.revision_solicitada
+        String sql = "SELECT r.id as reportaje_id, r.reportero_entrega_id, r.revision_solicitada, r.titulo, v.subtitulo, v.cuerpo " +
                      "FROM Reportaje r " +
                      "INNER JOIN VersionReportaje v ON r.id = v.reportaje_id " +
                      "WHERE r.reportero_entrega_id = ? " +
@@ -84,5 +82,25 @@ public class ModificaEntregaModel {
     public void fijarMultimediaDefinitiva(String ruta) {
         String sql = "UPDATE Imagen SET estado = 'DEFINITIVA' WHERE ruta_archivo = ?";
         db.executeUpdate(sql, ruta);
+    }
+
+    // --- NUEVOS MÉTODOS REVISIÓN (HU #34112) ---
+    
+    // Carga todos los reporteros MENOS el autor, para que no se revise a sí mismo
+    public List<ReporteroDisplayDTO> getListaRevisoresDisponibles(int idAutorOriginal) {
+        String sql = "SELECT id, nombre FROM Reportero WHERE id != ?";
+        return db.executeQueryPojo(ReporteroDisplayDTO.class, sql, idAutorOriginal);
+    }
+
+    // Actualiza el reportaje y crea la entrada en la tabla Revision
+    public void solicitarRevision(int idReportaje, int idRevisor) {
+        // 1. Bloquear el reportaje
+        String sqlUpdate = "UPDATE Reportaje SET revision_solicitada = TRUE WHERE id = ?";
+        db.executeUpdate(sqlUpdate, idReportaje);
+
+        // 2. Crear la revisión pendiente
+        int nuevoIdRevision = getUltimoId("Revision") + 1;
+        String sqlInsert = "INSERT INTO Revision (id, reportaje_id, revisor_id, estado) VALUES (?, ?, ?, 'PENDIENTE')";
+        db.executeUpdate(sqlInsert, nuevoIdRevision, idReportaje, idRevisor);
     }
 }

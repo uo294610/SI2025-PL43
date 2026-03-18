@@ -3,6 +3,7 @@ package nico_ModificaEntrega_33610;
 import javax.swing.*;
 import net.miginfocom.swing.MigLayout;
 import java.awt.FlowLayout;
+import java.awt.Font;
 import nico_EntregarReportEvento.ReporteroDisplayDTO;
 
 public class ModificaEntregaView {
@@ -29,17 +30,22 @@ public class ModificaEntregaView {
     private JButton btnEliminarVideo;
     private JButton btnFijarVidDefinitivo;
 
+    // --- NUEVOS COMPONENTES REVISIÓN (HU #34112) ---
+    private JPanel panelRevision;
+    private JComboBox<ReporteroDisplayDTO> cbRevisores;
+    private JButton btnSolicitarRevision;
+
     public ModificaEntregaView() {
         initialize();
     }
 
     private void initialize() {
-        frame = new JFrame("Modificar Entrega de Reportaje (#33610 - Multimedia)");
-        frame.setBounds(100, 100, 1050, 800); 
+        frame = new JFrame("Modificar Reportaje y Gestionar Revisión (#33610 + #34112)");
+        frame.setBounds(100, 100, 1100, 850); 
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.getContentPane().setLayout(new MigLayout("", "[350px,grow][650px,grow]", "[][][grow][][]"));
+        frame.getContentPane().setLayout(new MigLayout("", "[380px,grow][650px,grow]", "[][][grow][][][]"));
 
-        frame.getContentPane().add(new JLabel("Reportero:"), "cell 0 0, split 2, alignx left");
+        frame.getContentPane().add(new JLabel("Reportero Activo:"), "cell 0 0, split 2, alignx left");
         cbReporteros = new JComboBox<ReporteroDisplayDTO>();
         frame.getContentPane().add(cbReporteros, "cell 0 0, growx");
 
@@ -58,7 +64,7 @@ public class ModificaEntregaView {
 
         tabEventos = new JTable();
         tabEventos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        frame.getContentPane().add(new JScrollPane(tabEventos), "cell 0 2 1 2, grow"); 
+        frame.getContentPane().add(new JScrollPane(tabEventos), "cell 0 2, grow"); 
 
         JPanel panelDerecho = new JPanel(new MigLayout("insets 0", "[grow]", "[][grow]"));
         
@@ -105,14 +111,27 @@ public class ModificaEntregaView {
         panelMultimedia.add(panelBotonesVid, "cell 1 3, aligny top");
 
         panelDerecho.add(panelMultimedia, "cell 0 1, grow");
-        frame.getContentPane().add(panelDerecho, "cell 1 2, grow");
+        frame.getContentPane().add(panelDerecho, "cell 1 2 1 3, grow");
 
+        // --- PANEL DE EDICIÓN Y REVISIÓN (IZQUIERDA ABAJO) ---
         lblPermisoModificar = new JLabel("¿Puede modificar?: -");
-        frame.getContentPane().add(lblPermisoModificar, "cell 0 4");
+        lblPermisoModificar.setFont(new Font("Tahoma", Font.BOLD, 12));
+        frame.getContentPane().add(lblPermisoModificar, "cell 0 3");
         
         btnGuardarCambio = new JButton("Guardar Cambio");
         btnGuardarCambio.setVisible(false);
-        frame.getContentPane().add(btnGuardarCambio, "cell 0 5, alignx left");
+        frame.getContentPane().add(btnGuardarCambio, "cell 0 4, alignx left");
+
+        // Nuevo Panel de Revisión
+        panelRevision = new JPanel(new MigLayout("", "[grow]", "[][][]"));
+        panelRevision.setBorder(BorderFactory.createTitledBorder("Gestión de Revisión"));
+        panelRevision.add(new JLabel("Asignar Revisor:"), "cell 0 0");
+        cbRevisores = new JComboBox<ReporteroDisplayDTO>();
+        panelRevision.add(cbRevisores, "cell 0 1, growx");
+        btnSolicitarRevision = new JButton("Solicitar Revisión");
+        panelRevision.add(btnSolicitarRevision, "cell 0 2, alignx right");
+        panelRevision.setVisible(false); // Oculto por defecto
+        frame.getContentPane().add(panelRevision, "cell 0 5, growx");
 
         JPanel panelAccionesFinales = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         btnEntregar = new JButton("Entregar");
@@ -142,4 +161,9 @@ public class ModificaEntregaView {
     public JButton getBtnAnadirVideo() { return btnAnadirVideo; }
     public JButton getBtnEliminarVideo() { return btnEliminarVideo; }
     public JButton getBtnFijarVidDefinitivo() { return btnFijarVidDefinitivo; }
+    
+    // Getters de la nueva historia
+    public JPanel getPanelRevision() { return panelRevision; }
+    public JComboBox<ReporteroDisplayDTO> getCbRevisores() { return cbRevisores; }
+    public JButton getBtnSolicitarRevision() { return btnSolicitarRevision; }
 }
