@@ -30,7 +30,6 @@ public class ModificaEntregaController {
     }
 
     private void configurarListeners() {
-        // Corrección del Listener del JComboBox para evitar llamadas dobles o vacías
         view.getCbReporteros().addItemListener(e -> {
             if (e.getStateChange() == java.awt.event.ItemEvent.SELECTED) {
                 recargarTabla();
@@ -55,6 +54,9 @@ public class ModificaEntregaController {
         view.getBtnAnadirVideo().addActionListener(e -> anadirMultimedia("video"));
         view.getBtnEliminarVideo().addActionListener(e -> eliminarMultimedia(view.getTabVideos()));
         view.getBtnFijarVidDefinitivo().addActionListener(e -> fijarDefinitivo(view.getTabVideos()));
+
+        // Evento nuevo de Revisión
+        view.getBtnSolicitarRevision().addActionListener(e -> procesarSolicitudRevision());
     }
 
     private void cargarReporteros() {
@@ -70,6 +72,7 @@ public class ModificaEntregaController {
         if (isPendiente) {
             view.getBtnEntregar().setVisible(true);
             view.getBtnGuardarCambio().setVisible(false);
+            view.getPanelRevision().setVisible(false);
             view.getLblPermisoModificar().setText("Modo: Nueva Entrega");
             view.getTxtTitulo().setEditable(true);
         } else {
@@ -97,14 +100,13 @@ public class ModificaEntregaController {
         int fila = view.getTabEventos().getSelectedRow();
         if (fila < 0 || view.getRdbtnPendientes().isSelected()) {
             limpiarTablasMultimedia();
+            view.getPanelRevision().setVisible(false);
             return;
         }
 
-        // --- LAS 3 LÍNEAS QUE CAMBIAN ---
         ReporteroDisplayDTO repCombo = (ReporteroDisplayDTO) view.getCbReporteros().getSelectedItem();
         int idRepActual = Integer.parseInt(repCombo.getId());
         reportajeActual = model.getUltimaVersion(idRepActual); 
-        // --------------------------------
 
         if (reportajeActual != null) {
             view.getTxtTitulo().setText(reportajeActual.getTitulo());
@@ -112,36 +114,49 @@ public class ModificaEntregaController {
             view.getAreaCuerpo().setText(reportajeActual.getCuerpo());
 
             recargarTablasMultimedia();
+            cargarRevisores(idRepActual); // Rellenamos el desplegable de compañeros
 
-            if (idRepActual == reportajeActual.getReportero_entrega_id()) {
-                view.getLblPermisoModificar().setText("✓ Eres el autor. Puedes modificar.");
-                view.getLblPermisoModificar().setForeground(Color.GREEN.darker());
-                view.getBtnGuardarCambio().setVisible(true);
-                activarBotonesMultimedia(true);
-            } else {
-                view.getLblPermisoModificar().setText("✗ Sólo el autor original puede modificar.");
+            // --- LÓGICA DE BLOQUEO DE LA HU #34112 ---
+            if (reportajeActual.isRevision_solicitada()) {
+                // REGLA: Si ya solicitó revisión, todo se congela
+                view.getLblPermisoModificar().setText("🔒 Solicitaste Revisión: No puedes modificar.");
                 view.getLblPermisoModificar().setForeground(Color.RED);
-                view.getBtnGuardarCambio().setVisible(false);
-                activarBotonesMultimedia(false);
+                congelarEdicion(true);
+            } else {
+                // REGLA: No hay revisión solicitada, comprobamos permisos normales
+                if (idRepActual == reportajeActual.getReportero_entrega_id()) {
+                    view.getLblPermisoModificar().setText("✓ Eres el autor. Puedes modificar y pedir revisión.");
+                    view.getLblPermisoModificar().setForeground(Color.GREEN.darker());
+                    congelarEdicion(false);
+                } else {
+                    view.getLblPermisoModificar().setText("✗ Sólo el autor original puede modificar.");
+                    view.getLblPermisoModificar().setForeground(Color.RED);
+                    congelarEdicion(true);
+                }
             }
         }
     }
 
-    private void activarBotonesMultimedia(boolean activar) {
-        view.getBtnAnadirImagen().setEnabled(activar);
-        view.getBtnEliminarImagen().setEnabled(activar);
-        view.getBtnFijarImgDefinitiva().setEnabled(activar);
-        view.getBtnAnadirVideo().setEnabled(activar);
-        view.getBtnEliminarVideo().setEnabled(activar);
-        view.getBtnFijarVidDefinitivo().setEnabled(activar);
+    private void congelarEdicion(boolean congelar) {
+        view.getTxtSubtitulo().setEditable(!congelar);
+        view.getAreaCuerpo().setEditable(!congelar);
+        view.getBtnGuardarCambio().setVisible(!congelar);
+        
+        view.getBtnAnadirImagen().setEnabled(!congelar);
+        view.getBtnEliminarImagen().setEnabled(!congelar);
+        view.getBtnFijarImgDefinitiva().setEnabled(!congelar);
+        view.getBtnAnadirVideo().setEnabled(!congelar);
+        view.getBtnEliminarVideo().setEnabled(!congelar);
+        view.getBtnFijarVidDefinitivo().setEnabled(!congelar);
+        
+        // El panel de solicitar revisión solo se ve si ERES el autor y NO está congelado
+        view.getPanelRevision().setVisible(!congelar);
     }
 
     private void limpiarTablasMultimedia() {
         view.getTabImagenes().setModel(new javax.swing.table.DefaultTableModel());
         view.getTabVideos().setModel(new javax.swing.table.DefaultTableModel());
     }
-
-    // --- LÓGICA MULTIMEDIA ---
 
     private void recargarTablasMultimedia() {
         ReporteroDisplayDTO repCombo = (ReporteroDisplayDTO) view.getCbReporteros().getSelectedItem();
@@ -161,44 +176,28 @@ public class ModificaEntregaController {
     }
 
     private void anadirMultimedia(String tipo) {
-        if (reportajeActual == null) {
-            JOptionPane.showMessageDialog(view.getFrame(), "Debes entregar primero el reportaje (textos) antes de añadir multimedia.");
-            return;
-        }
+        if (reportajeActual == null) return;
 
         JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle("Seleccionar " + tipo);
-        if (tipo.equals("imagen")) {
-            chooser.setFileFilter(new FileNameExtensionFilter("Imágenes (JPG, PNG)", "jpg", "png", "jpeg"));
-        } else {
-            chooser.setFileFilter(new FileNameExtensionFilter("Vídeos (MP4, AVI)", "mp4", "avi"));
-        }
+        if (tipo.equals("imagen")) chooser.setFileFilter(new FileNameExtensionFilter("Imágenes (JPG, PNG)", "jpg", "png", "jpeg"));
+        else chooser.setFileFilter(new FileNameExtensionFilter("Vídeos (MP4, AVI)", "mp4", "avi"));
 
         if (chooser.showOpenDialog(view.getFrame()) == JFileChooser.APPROVE_OPTION) {
             File archivo = chooser.getSelectedFile();
             String ruta = archivo.getAbsolutePath();
-            String nombreNuevoArchivo = archivo.getName(); // Extraemos solo el nombre (ej: "foto.jpg")
+            String nombreNuevoArchivo = archivo.getName();
 
-            // --- NUEVO: CONTROL DE DUPLICADOS ---
-            // 1. Elegimos en qué tabla vamos a buscar dependiendo del tipo
             JTable tablaDestino = tipo.equals("imagen") ? view.getTabImagenes() : view.getTabVideos();
-            
-            // 2. Recorremos todas las filas de esa tabla
             for (int i = 0; i < tablaDestino.getRowCount(); i++) {
-                String rutaExistente = (String) tablaDestino.getValueAt(i, 0); // Columna 0 es la ruta
+                String rutaExistente = (String) tablaDestino.getValueAt(i, 0); 
                 File archivoExistente = new File(rutaExistente);
-                
-                // 3. Comprobamos si la ruta es idéntica o si el nombre del archivo es el mismo
                 if (rutaExistente.equals(ruta) || archivoExistente.getName().equals(nombreNuevoArchivo)) {
-                    JOptionPane.showMessageDialog(view.getFrame(), 
-                        "Error: Ya existe un(a) " + tipo + " con el nombre '" + nombreNuevoArchivo + "' en la lista.",
-                        "Archivo Duplicado", JOptionPane.ERROR_MESSAGE);
-                    return; // CORTAMOS LA EJECUCIÓN: No se guarda nada en base de datos
+                    JOptionPane.showMessageDialog(view.getFrame(), "Error: Ya existe un(a) " + tipo + " con el nombre '" + nombreNuevoArchivo + "' en la lista.", "Archivo Duplicado", JOptionPane.ERROR_MESSAGE);
+                    return; 
                 }
             }
-            // ------------------------------------
 
-            // Si pasa el control, guardamos normalmente
             ReporteroDisplayDTO repCombo = (ReporteroDisplayDTO) view.getCbReporteros().getSelectedItem();
             int idReportero = Integer.parseInt(repCombo.getId());
 
@@ -214,7 +213,6 @@ public class ModificaEntregaController {
             JOptionPane.showMessageDialog(view.getFrame(), "Selecciona un archivo de la tabla primero.");
             return;
         }
-        
         String ruta = (String) tabla.getValueAt(fila, 0);
         String estado = (String) tabla.getValueAt(fila, 1);
         
@@ -232,16 +230,11 @@ public class ModificaEntregaController {
 
     private void fijarDefinitivo(javax.swing.JTable tabla) {
         int fila = tabla.getSelectedRow();
-        if (fila < 0) {
-            JOptionPane.showMessageDialog(view.getFrame(), "Selecciona un archivo de la tabla primero.");
-            return;
-        }
+        if (fila < 0) return;
         String ruta = (String) tabla.getValueAt(fila, 0);
         model.fijarMultimediaDefinitiva(ruta);
         recargarTablasMultimedia();
     }
-
-    // --- LÓGICA DE TEXTOS ---
 
     private void guardarModificacion() {
         if (reportajeActual == null) return;
@@ -264,8 +257,7 @@ public class ModificaEntregaController {
         nuevaVersion.setReportaje_id(reportajeActual.getReportaje_id());
         nuevaVersion.setSubtitulo(nuevoSub);
         nuevaVersion.setCuerpo(nuevoCuerpo);
-        java.sql.Timestamp fechaHoraCambio = new java.sql.Timestamp(System.currentTimeMillis());
-        nuevaVersion.setFecha_hora(fechaHoraCambio);
+        nuevaVersion.setFecha_hora(new java.sql.Timestamp(System.currentTimeMillis()));
         nuevaVersion.setQue_cambio("Se modificó: " + cambios);
 
         try {
@@ -280,10 +272,7 @@ public class ModificaEntregaController {
 
     private void realizarNuevaEntrega() {
         int fila = view.getTabEventos().getSelectedRow();
-        if (fila < 0) {
-            JOptionPane.showMessageDialog(view.getFrame(), "Debe seleccionar un evento.");
-            return;
-        }
+        if (fila < 0) return;
         String titulo = view.getTxtTitulo().getText().trim();
         if (titulo.isEmpty()) {
             JOptionPane.showMessageDialog(view.getFrame(), "El Título es obligatorio.");
@@ -308,18 +297,52 @@ public class ModificaEntregaController {
             nuevaVersion.setQue_cambio("Versión inicial");
 
             model.insertarNuevaVersion(nuevaVersion);
-            JOptionPane.showMessageDialog(view.getFrame(), "¡Reportaje entregado! Ahora ve a 'Entregados' para añadirle fotos o vídeos.");
+            JOptionPane.showMessageDialog(view.getFrame(), "¡Reportaje entregado!");
             recargarTabla(); 
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(view.getFrame(), "Error al entregar: " + ex.getMessage());
         }
     }
     
+    // --- MÉTODOS DE LA NUEVA HU (#34112) ---
+
+    private void cargarRevisores(int idAutorOriginal) {
+        List<ReporteroDisplayDTO> revisores = model.getListaRevisoresDisponibles(idAutorOriginal);
+        view.getCbRevisores().removeAllItems();
+        for (ReporteroDisplayDTO rev : revisores) {
+            view.getCbRevisores().addItem(rev);
+        }
+    }
+
+    private void procesarSolicitudRevision() {
+        ReporteroDisplayDTO revisor = (ReporteroDisplayDTO) view.getCbRevisores().getSelectedItem();
+        if (revisor == null) {
+            JOptionPane.showMessageDialog(view.getFrame(), "Debes seleccionar a un compañero de la lista.");
+            return;
+        }
+
+        int idRevisor = Integer.parseInt(revisor.getId());
+        int idReportaje = reportajeActual.getReportaje_id();
+
+        int confirm = JOptionPane.showConfirmDialog(view.getFrame(), 
+            "Al solicitar revisión, el reportaje quedará BLOQUEADO y no podrás hacer más modificaciones.\n¿Deseas continuar?", 
+            "Aviso Importante", JOptionPane.YES_NO_OPTION);
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            model.solicitarRevision(idReportaje, idRevisor);
+            JOptionPane.showMessageDialog(view.getFrame(), "Revisión solicitada a " + revisor.toString() + " con éxito.");
+            
+            // Recargamos el evento para que aplique la congelación de botones
+            seleccionarEvento(); 
+        }
+    }
+
     private void limpiarFormulario() {
         view.getTxtTitulo().setText("");
         view.getTxtSubtitulo().setText("");
         view.getAreaCuerpo().setText("");
         reportajeActual = null;
         limpiarTablasMultimedia();
+        view.getPanelRevision().setVisible(false);
     }
 }
