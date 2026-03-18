@@ -6,25 +6,30 @@ import giis.demo.util.Database;
 public class ReporteroModel {
     private Database db = new Database();
 
-    /**
-     * Obtiene eventos de una agencia que NO tienen asignaciones.
-     */
     public List<EventoDTO> getEventosSinAsignar(int idAgencia) {
- 
-        String sql = "SELECT e.id, e.nombre, e.fecha "
+        String sql = "SELECT e.id, e.nombre, e.fecha, t.nombre AS tematica "
                    + "FROM Evento e "
                    + "LEFT JOIN Asignacion a ON e.id = a.evento_id "
+                   + "JOIN Tematica t ON e.tematica_id = t.id "
                    + "WHERE e.agencia_id = ? "
                    + "AND a.evento_id IS NULL "
                    + "ORDER BY e.fecha";
         return db.executeQueryPojo(EventoDTO.class, sql, idAgencia);
     }
 
-    /**
-     * Obtiene reporteros de la agencia que NO están asignados a ningún evento en esa fecha concreta.
-     */
+    public List<EventoDTO> getEventosConAsignacion(int idAgencia) {
+        String sql = "SELECT DISTINCT e.id, e.nombre, e.fecha, t.nombre AS tematica "
+                   + "FROM Evento e "
+                   + "JOIN Asignacion a ON e.id = a.evento_id "
+                   + "JOIN Tematica t ON e.tematica_id = t.id "
+                   + "WHERE e.agencia_id = ? "
+                   + "ORDER BY e.fecha";
+        return db.executeQueryPojo(EventoDTO.class, sql, idAgencia);
+    }
+
     public List<ReporteroDTO> getReporterosDisponibles(int idAgencia, String fechaEvento, int idEvento, boolean filtrarTematica) {
-        String sql = "SELECT r.id, r.nombre FROM Reportero r "
+        String sql = "SELECT r.id, r.nombre, t.nombre AS tematica FROM Reportero r "
+                   + "JOIN Tematica t ON r.tematica_id = t.id "
                    + "WHERE r.agencia_id = ? "
                    + "AND r.id NOT IN ("
                    + "    SELECT a.reportero_id FROM Asignacion a "
@@ -32,7 +37,6 @@ public class ReporteroModel {
                    + "    WHERE e.fecha = ?"
                    + ") ";
 
-        // Si el checkbox está marcado, añadimos esta condición extra
         if (filtrarTematica) {
             sql += "AND r.tematica_id = (SELECT tematica_id FROM Evento WHERE id = ?) ";
             sql += "ORDER BY r.nombre";
@@ -43,41 +47,20 @@ public class ReporteroModel {
         }
     }
 
-    /**
-     * Crea la asignación en la base de datos.
-     */
-    public void asignarReportero(int idEvento, int idReportero) {
-        String sql = "INSERT INTO Asignacion (evento_id, reportero_id) VALUES (?, ?)";
-        db.executeUpdate(sql, idEvento, idReportero);
-    }
-    
-    /**
-     * Obtiene la lista de reporteros que ya están asignados a un evento específico.
-     */
     public List<ReporteroDTO> getReporterosAsignados(int idEvento) {
-        String sql = "SELECT r.id, r.nombre FROM Reportero r "
+        String sql = "SELECT r.id, r.nombre, t.nombre AS tematica FROM Reportero r "
                    + "JOIN Asignacion a ON r.id = a.reportero_id "
+                   + "JOIN Tematica t ON r.tematica_id = t.id "
                    + "WHERE a.evento_id = ? "
                    + "ORDER BY r.nombre";
         return db.executeQueryPojo(ReporteroDTO.class, sql, idEvento);
     }
-    
-    /**
-     * Obtiene eventos de una agencia que SÍ tienen alguna asignación.
-     */
-    public List<EventoDTO> getEventosConAsignacion(int idAgencia) {
-        // Usamos DISTINCT para que no salga el evento repetido si tiene varios reporteros
-        String sql = "SELECT DISTINCT e.id, e.nombre, e.fecha "
-                   + "FROM Evento e "
-                   + "JOIN Asignacion a ON e.id = a.evento_id "
-                   + "WHERE e.agencia_id = ? "
-                   + "ORDER BY e.fecha";
-        return db.executeQueryPojo(EventoDTO.class, sql, idAgencia);
+
+    public void asignarReportero(int idEvento, int idReportero) {
+        String sql = "INSERT INTO Asignacion (evento_id, reportero_id) VALUES (?, ?)";
+        db.executeUpdate(sql, idEvento, idReportero);
     }
 
-    /**
-     * Elimina la asignación de un reportero a un evento.
-     */
     public void eliminarAsignacion(int idEvento, int idReportero) {
         String sql = "DELETE FROM Asignacion WHERE evento_id = ? AND reportero_id = ?";
         db.executeUpdate(sql, idEvento, idReportero);

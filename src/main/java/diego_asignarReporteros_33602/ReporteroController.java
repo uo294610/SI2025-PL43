@@ -52,7 +52,7 @@ public class ReporteroController {
             eventos = model.getEventosConAsignacion(idAgencia);
         }
         
-        TableModel tmodel = SwingUtil.getTableModelFromPojos(eventos, new String[] { "id", "nombre", "fecha" });
+        TableModel tmodel = SwingUtil.getTableModelFromPojos(eventos, new String[] { "id", "nombre", "fecha", "tematica" });
         view.getTabEventos().setModel(tmodel);
         SwingUtil.autoAdjustColumns(view.getTabEventos());
         
@@ -73,13 +73,13 @@ public class ReporteroController {
 
         // 1. Cargar disponibles (pasando los nuevos parámetros)
         List<ReporteroDTO> reporteros = model.getReporterosDisponibles(idAgencia, fechaEvento, idEvento, filtrarTematica);
-        TableModel tmodelDisp = SwingUtil.getTableModelFromPojos(reporteros, new String[] { "id", "nombre" });
+        TableModel tmodelDisp = SwingUtil.getTableModelFromPojos(reporteros, new String[] { "id", "nombre", "tematica" });
         view.getTabReporteros().setModel(tmodelDisp);
         SwingUtil.autoAdjustColumns(view.getTabReporteros());
 
         // 2. Cargar asignados
         List<ReporteroDTO> asignados = model.getReporterosAsignados(idEvento);
-        TableModel tmodelAsig = SwingUtil.getTableModelFromPojos(asignados, new String[] { "id", "nombre" });
+        TableModel tmodelAsig = SwingUtil.getTableModelFromPojos(asignados, new String[] { "id", "nombre", "tematica" });
         view.getTabReporterosAsignados().setModel(tmodelAsig);
         SwingUtil.autoAdjustColumns(view.getTabReporterosAsignados());
     }
