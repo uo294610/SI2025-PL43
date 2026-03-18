@@ -1,4 +1,4 @@
-package alex_ModificarDecision_33611;
+package alex_GestionarOfrecimientos;
 
 /**
  * Objeto con el detalle completo del ofrecimiento.
@@ -7,31 +7,19 @@ package alex_ModificarDecision_33611;
  */
 public class OfrecimientoEntity {
     private int id;
-    private String evento;
-    private String agencia;
-    private String fecha;
-    private String decision; 
+    private int evento_id;
+    private int empresa_id;
+    private String decision;
     private boolean acceso;
 
-    public OfrecimientoEntity() {}
-
-    // GETTERS Y SETTERS 
-    	
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
-
-    public String getEvento() { return evento; }
-    public void setEvento(String evento) { this.evento = evento; }
-
-    public String getAgencia() { return agencia; }
-    public void setAgencia(String agencia) { this.agencia = agencia; }
-
-    public String getFecha() { return fecha; }
-    public void setFecha(String fecha) { this.fecha = fecha; }
-
+    public int getEvento_id() { return evento_id; }
+    public void setEvento_id(int evento_id) { this.evento_id = evento_id; }
+    public int getEmpresa_id() { return empresa_id; }
+    public void setEmpresa_id(int empresa_id) { this.empresa_id = empresa_id; }
     public String getDecision() { return decision; }
     public void setDecision(String decision) { this.decision = decision; }
-
     public boolean isAcceso() { return acceso; }
     public void setAcceso(boolean acceso) { this.acceso = acceso; }
 }

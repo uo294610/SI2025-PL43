@@ -11,8 +11,8 @@ import nico_RestaurarVersionReport_33612.*;
 import diego_asignarReporteros_33602.*;
 import diego_ReportajesEvento_33607.*;
 import adrian_modificarOfrecimiento_33609.*;
+import alex_GestionarOfrecimientos.*;
 import alex_InformeEvento_33613.*;
-import alex_ModificarDecision_33611.*;
 import adrian_distribuirReportajes_33606.*;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -122,10 +122,10 @@ public class SwingMain {
 			// Gestionar Ofrecimientos Actualizado
 			JButton btnGestionarOfrecimientosMod = new JButton("Gestionar Ofrecimientos");
 			btnGestionarOfrecimientosMod.addActionListener(e -> {
-				OfrecimientosController controller = new OfrecimientosController(new OfrecimientosModel(), new OfrecimientosView());
-				
-				controller.initController();
-				controller.initView();
+			    OfrecimientosController controller = new OfrecimientosController(new OfrecimientosModel(),new OfrecimientosView());
+			    
+			    controller.initController();
+			    controller.initView();
 			});
 			frame.getContentPane().add(btnGestionarOfrecimientosMod);
 
