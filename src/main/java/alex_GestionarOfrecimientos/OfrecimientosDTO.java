@@ -1,8 +1,5 @@
 package alex_GestionarOfrecimientos;
 
-/**
- * Objeto para mostrar en la tabla de ofrecimientos (pendientes o decididos).
- */
 public class OfrecimientosDTO {
     private int id;
     private String nombreEvento, nombreAgencia, fechaEvento, nombreTematica, decision;

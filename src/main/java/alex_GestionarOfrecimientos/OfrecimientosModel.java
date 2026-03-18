@@ -52,7 +52,6 @@ public class OfrecimientosModel {
             params.add(idTematica);
         }
 
-        // Filtros de Precio
         if (minPrecio != null) {
             sql.append("AND ev.precio >= ? ");
             params.add(minPrecio);

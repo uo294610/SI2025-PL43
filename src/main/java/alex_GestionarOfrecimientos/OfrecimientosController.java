@@ -23,6 +23,8 @@ public class OfrecimientosController {
         view.getCbTematicas().addActionListener(e -> cargarTabla());
         view.getRdPendientes().addActionListener(e -> cargarTabla());
         view.getRdDecididos().addActionListener(e -> cargarTabla());
+        
+        // Se actualiza el filtro de precios pulsando INTRO 
         view.getTxtPrecioMin().addActionListener(e -> cargarTabla());
         view.getTxtPrecioMax().addActionListener(e -> cargarTabla());
 
@@ -136,7 +138,6 @@ public class OfrecimientosController {
 
         OfrecimientosDTO seleccionado = listaActual.get(fila);
         
-        // Carga los detalles en la tabla inferior 
         String[] columnasDetalle = {"id", "nombreEvento", "nombreAgencia", "fechaEvento", "nombreTematica", "precio", "decision"};
         view.getDetalleEvento().setModel(SwingUtil.getRecordModelFromPojo(seleccionado, columnasDetalle));
         SwingUtil.autoAdjustColumns(view.getDetalleEvento());

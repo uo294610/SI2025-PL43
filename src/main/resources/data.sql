@@ -33,14 +33,14 @@ INSERT INTO EmpresaComunicacion (id, nombre) VALUES
     (204, 'Unidad Editorial');
 
 INSERT INTO EmpresaTematica (empresa_id, tematica_id) VALUES
-    (200, 2),
-    (200, 3),
+    (200, 2), 
+    (200, 3), 
     (201, 2), 
     (202, 1), 
-    (202, 3),
+    (202, 3), 
     (202, 4), 
-    (203, 3),
-    (204, 1);
+    (203, 3), 
+    (204, 1); 
 
 INSERT INTO Reportero (id, nombre, agencia_id, tipo, tematica_id) VALUES 
     (10, 'Diego Abella', 1, 'Básico', 1), 
@@ -83,7 +83,6 @@ INSERT INTO Reportaje (id, titulo, reportero_entrega_id, estado, revision_solici
     (301, 'Glamour en la alfombra roja', 12, 'NODESCARGADO', FALSE),
     (302, 'Decisiones clave en la cumbre', 16, 'DESCARGADO', TRUE);
 
-
 INSERT INTO Revision (id, reportaje_id, revisor_id, estado) VALUES
     (800, 300, 11, 'PENDIENTE'),  
     (801, 302, 17, 'FINALIZADA'); 
@@ -93,9 +92,9 @@ INSERT INTO Comentario (id, revision_id, texto, fecha_hora) VALUES
     (901, 801, 'Todo correcto, buen trabajo con las fuentes.', '2026-04-11 12:30:00');
 
 INSERT INTO EvaluacionReportaje (id, reportaje_id, evento_id, estado) VALUES
-    (700, 300, 100, 'Interesado'),
-    (701, 301, 101, 'Dudoso'),
-    (702, 302, 106, 'No interesado');
+    (700, 300, 100, 'aceptado'),
+    (701, 301, 101, 'dudoso'),
+    (702, 302, 106, 'rechazado');
 
 INSERT INTO VersionReportaje (id, reportaje_id, subtitulo, cuerpo, fecha_hora, que_cambio) VALUES 
     (400, 300, 'El Madrid levanta la 16ª', 'Contenido del reportaje final...', '2026-05-30 23:30:00', 'Versión inicial'),
@@ -110,10 +109,10 @@ INSERT INTO Ofrecimiento (id, evento_id, empresa_id, decision, acceso) VALUES
     (503, 101, 203, 'RECHAZADO', FALSE),
     (504, 106, 204, 'ACEPTADO', TRUE);
 
-INSERT INTO Imagen (id, reportero_id, ruta_archivo, estado, tipo) VALUES
-    (600, 11, '/img/champions_final_01.jpg', 'DEFINITIVA', 'imagen'),
-    (601, 11, '/img/champions_final_02_raw.jpg', 'BORRADOR', 'imagen'),
-    (602, 14, '/img/sainz_freelance_foto.jpg', 'DEFINITIVA', 'imagen'),
-    (603, 20, '/img/oscars_redcarpet.png', 'BORRADOR', 'imagen'),
-    (604, 12, '/video/goya_entrevistas.mp4', 'DEFINITIVA', 'video'), 
-    (605, 17, '/video/onu_declaraciones_raw.avi', 'BORRADOR', 'video');
+INSERT INTO Imagen (id, reportero_id, reportaje_id, ruta_archivo, estado, tipo) VALUES
+    (600, 11, 300, '/img/champions_final_01.jpg', 'DEFINITIVA', 'imagen'),
+    (601, 11, 300, '/img/champions_final_02_raw.jpg', 'BORRADOR', 'imagen'),
+    (602, 14, 300, '/img/sainz_freelance_foto.jpg', 'DEFINITIVA', 'imagen'),
+    (603, 20, 301, '/img/oscars_redcarpet.png', 'BORRADOR', 'imagen'),
+    (604, 12, 301, '/video/goya_entrevistas.mp4', 'DEFINITIVA', 'video'), 
+    (605, 17, 302, '/video/onu_declaraciones_raw.avi', 'BORRADOR', 'video');
