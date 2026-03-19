@@ -198,7 +198,26 @@ public class SwingMain {
 				});
 				frame.getContentPane().add(btnRestaurarVersion);
 	
+				// Revisar otros reportajes como reportero revisor
+		        
+		        javax.swing.JButton btnRevisiones = new javax.swing.JButton("Revisar Reportajes");
+		        frame.getContentPane().add(btnRevisiones, "cell 0 2, growx"); 
+		        btnRevisiones.addActionListener(new java.awt.event.ActionListener() {
+		            public void actionPerformed(java.awt.event.ActionEvent e) {
+		                try {
+		                    revisionOtrosReportajes.RevisionOtrosReportajesModel model = new revisionOtrosReportajes.RevisionOtrosReportajesModel();
+		                    revisionOtrosReportajes.RevisionOtrosReportajesView view = new revisionOtrosReportajes.RevisionOtrosReportajesView();
+		                    revisionOtrosReportajes.RevisionOtrosReportajesController controller = new revisionOtrosReportajes.RevisionOtrosReportajesController(model, view);
 
+		                    controller.initController();
+		                    
+		                } catch (Exception ex) {
+		                    ex.printStackTrace();
+		                    javax.swing.JOptionPane.showMessageDialog(null, "Error al abrir el Centro de Revisiones: " + ex.getMessage());
+		                }
+		            }
+		        });
+		        
 	
 	// Generar informe .csv
 	JButton btnInformeEvento = new JButton("Generar Informe Eventos");
@@ -208,6 +227,9 @@ public class SwingMain {
 			    controller.initView();
 			});
 			frame.getContentPane().add(btnInformeEvento);
+			
+			
+			
 }
 
 		

@@ -9,8 +9,6 @@ import nico_EntregarReportEvento.ReporteroDisplayDTO;
 public class RevisionOtrosReportajesView {
     private JFrame frame;
     private JComboBox<ReporteroDisplayDTO> cbRevisores;
-    private JRadioButton rbNuevas;
-    private JRadioButton rbEnCurso;
     private JTable tabRevisiones;
     
     // Lectura del reportaje
@@ -37,25 +35,18 @@ public class RevisionOtrosReportajesView {
 
         // --- FILA 0: Selector Superior ---
         JPanel panelTop = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        panelTop.add(new JLabel("Reportero Revisor:"));
+        panelTop.add(new JLabel("Reportero (Revisor):")); 
         cbRevisores = new JComboBox<ReporteroDisplayDTO>();
         panelTop.add(cbRevisores);
         frame.getContentPane().add(panelTop, "cell 0 0 2 1, growx");
 
         // --- COLUMNA IZQUIERDA: Lista de Revisiones ---
-        JPanel panelIzquierdo = new JPanel(new MigLayout("", "[grow]", "[][][grow][]"));
+        JPanel panelIzquierdo = new JPanel(new MigLayout("", "[grow]", "[grow][]")); 
         panelIzquierdo.setBorder(BorderFactory.createTitledBorder("1. Reportajes para revisar"));
         
-        JPanel panelFiltro = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        rbNuevas = new JRadioButton("Nuevas", true);
-        rbEnCurso = new JRadioButton("Sin Finalizar");
-        ButtonGroup bg = new ButtonGroup();
-        bg.add(rbNuevas); bg.add(rbEnCurso);
-        panelFiltro.add(rbNuevas); panelFiltro.add(rbEnCurso);
-        panelIzquierdo.add(panelFiltro, "cell 0 0, growx");
-
         tabRevisiones = new JTable();
         tabRevisiones.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        // (La configuración visual de las columnas la hemos movido al Controlador para evitar el error 3 >= 0)
         panelIzquierdo.add(new JScrollPane(tabRevisiones), "cell 0 1, grow");
         
         btnFinalizarRevision = new JButton("Marcar como Finalizada");
@@ -99,7 +90,7 @@ public class RevisionOtrosReportajesView {
         areaNuevoComentario = new JTextArea(3, 20);
         panelComentarios.add(new JScrollPane(areaNuevoComentario), "cell 0 2, grow");
         
-        btnAñadirComentario = new JButton("Guardar Comentario");
+        btnAñadirComentario = new JButton("Guardar Comentario"); 
         panelComentarios.add(btnAñadirComentario, "cell 1 2, aligny bottom");
         panelDerecho.add(panelComentarios, "cell 0 2, grow");
 
@@ -109,8 +100,6 @@ public class RevisionOtrosReportajesView {
     // Getters
     public JFrame getFrame() { return frame; }
     public JComboBox<ReporteroDisplayDTO> getCbRevisores() { return cbRevisores; }
-    public JRadioButton getRbNuevas() { return rbNuevas; }
-    public JRadioButton getRbEnCurso() { return rbEnCurso; }
     public JTable getTabRevisiones() { return tabRevisiones; }
     public JTextField getTxtTitulo() { return txtTitulo; }
     public JTextField getTxtSubtitulo() { return txtSubtitulo; }

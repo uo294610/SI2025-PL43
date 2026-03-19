@@ -1,7 +1,10 @@
 package revisionOtrosReportajes;
 
+import java.awt.Component;
 import java.util.List;
 import javax.swing.JOptionPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
 import giis.demo.util.SwingUtil;
 import nico_EntregarReportEvento.ReporteroDisplayDTO;
 import nico_ModificaEntrega_33610.ArchivoMultimediaDTO;
@@ -22,15 +25,13 @@ public class RevisionOtrosReportajesController {
         cargarReporteros();
         configurarListeners();
         view.getFrame().setVisible(true);
+        recargarTablaRevisiones();
     }
 
     private void configurarListeners() {
         view.getCbRevisores().addItemListener(e -> {
             if (e.getStateChange() == java.awt.event.ItemEvent.SELECTED) recargarTablaRevisiones();
         });
-        
-        view.getRbNuevas().addActionListener(e -> recargarTablaRevisiones());
-        view.getRbEnCurso().addActionListener(e -> recargarTablaRevisiones());
 
         view.getTabRevisiones().getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) cargarDetalleRevision();
@@ -52,13 +53,27 @@ public class RevisionOtrosReportajesController {
         if (revisor == null) return;
         
         int idRevisor = Integer.parseInt(revisor.getId());
-        String estado = view.getRbNuevas().isSelected() ? "PENDIENTE" : "EN_CURSO";
         
-        List<ReportajeRevisionDTO> revisiones = model.getRevisiones(idRevisor, estado);
+        List<ReportajeRevisionDTO> revisiones = model.getAllPendingRevisiones(idRevisor);
         view.getTabRevisiones().setModel(SwingUtil.getTableModelFromPojos(revisiones, 
-            new String[] {"id_revision", "titulo_reportaje", "autor_nombre"}));
+            new String[] {"id_revision", "titulo_reportaje", "autor_nombre", "estado_revision"})); 
+            
+        // AHORA SÍ: Como la tabla ya tiene datos, podemos cambiarle el texto a la columna 3 sin que explote
+        view.getTabRevisiones().getColumnModel().getColumn(3).setCellRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                String originalValue = (String) value;
+                String mappedValue = originalValue;
+                if ("PENDIENTE".equals(originalValue)) {
+                    mappedValue = "Nueva";
+                } else if ("EN_CURSO".equals(originalValue)) {
+                    mappedValue = "Sin Finalizar";
+                }
+                return super.getTableCellRendererComponent(table, mappedValue, isSelected, hasFocus, row, column);
+            }
+        });
+
         SwingUtil.autoAdjustColumns(view.getTabRevisiones());
-        
         limpiarVisor();
     }
 
@@ -67,10 +82,9 @@ public class RevisionOtrosReportajesController {
         if (fila < 0) return;
 
         int idRevision = (int) view.getTabRevisiones().getValueAt(fila, 0);
-        // Rescatamos el DTO de la lista (truco rápido sacando ID y buscando)
+        
         ReporteroDisplayDTO revisor = (ReporteroDisplayDTO) view.getCbRevisores().getSelectedItem();
-        String estado = view.getRbNuevas().isSelected() ? "PENDIENTE" : "EN_CURSO";
-        List<ReportajeRevisionDTO> revs = model.getRevisiones(Integer.parseInt(revisor.getId()), estado);
+        List<ReportajeRevisionDTO> revs = model.getAllPendingRevisiones(Integer.parseInt(revisor.getId()));
         for(ReportajeRevisionDTO r : revs) {
             if(r.getId_revision() == idRevision) {
                 revisionActual = r;
@@ -89,7 +103,9 @@ public class RevisionOtrosReportajesController {
 
             // Cargar multimedia
             List<ArchivoMultimediaDTO> multimedia = model.getMultimedia(revisionActual.getId_reportaje());
-            view.getTabMultimedia().setModel(SwingUtil.getTableModelFromPojos(multimedia, new String[] {"ruta_archivo", "autor_nombre", "estado"}));
+            view.getTabMultimedia().setModel(SwingUtil.getTableModelFromPojos(multimedia, 
+                new String[] {"autor_nombre", "ruta_archivo", "estado"})); // autor_nombre = Tipo en el SQL
+            SwingUtil.autoAdjustColumns(view.getTabMultimedia());
             
             // Cargar comentarios
             recargarComentarios();
@@ -99,7 +115,8 @@ public class RevisionOtrosReportajesController {
     private void recargarComentarios() {
         if (revisionActual == null) return;
         List<ComentarioDTO> comentarios = model.getComentarios(revisionActual.getId_revision());
-        view.getTabComentarios().setModel(SwingUtil.getTableModelFromPojos(comentarios, new String[] {"fecha_hora", "texto"}));
+        view.getTabComentarios().setModel(SwingUtil.getTableModelFromPojos(comentarios, 
+            new String[] {"fecha_hora", "texto"}));
         SwingUtil.autoAdjustColumns(view.getTabComentarios());
     }
 
@@ -121,9 +138,8 @@ public class RevisionOtrosReportajesController {
         
         recargarComentarios();
         
-        // Si estaba en "Nuevas", al comentar pasa a "En curso", recargamos las listas
-        if (view.getRbNuevas().isSelected()) {
-            recargarTablaRevisiones();
+        if ("PENDIENTE".equals(revisionActual.getEstado_revision())) {
+             recargarTablaRevisiones();
         }
     }
 

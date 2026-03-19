@@ -13,14 +13,15 @@ public class RevisionOtrosReportajesModel {
         return db.executeQueryPojo(ReporteroDisplayDTO.class, "SELECT id, nombre FROM Reportero");
     }
 
-    public List<ReportajeRevisionDTO> getRevisiones(int idRevisor, String estado) {
+    // CORRECCIÓN: Busca todas las revisiones pendientes y en curso del revisor
+    public List<ReportajeRevisionDTO> getAllPendingRevisiones(int idRevisor) {
         String sql = "SELECT r.id as id_revision, rep.id as id_reportaje, rep.titulo as titulo_reportaje, " +
                      "autor.nombre as autor_nombre, r.estado as estado_revision " +
                      "FROM Revision r " +
                      "INNER JOIN Reportaje rep ON r.reportaje_id = rep.id " +
                      "INNER JOIN Reportero autor ON rep.reportero_entrega_id = autor.id " +
-                     "WHERE r.revisor_id = ? AND r.estado = ?";
-        return db.executeQueryPojo(ReportajeRevisionDTO.class, sql, idRevisor, estado);
+                     "WHERE r.revisor_id = ? AND r.estado IN ('PENDIENTE', 'EN_CURSO')";
+        return db.executeQueryPojo(ReportajeRevisionDTO.class, sql, idRevisor);
     }
 
     public ReportajeEdicionDTO getTextosReportaje(int idReportaje) {
@@ -34,12 +35,14 @@ public class RevisionOtrosReportajesModel {
     }
 
     public List<ArchivoMultimediaDTO> getMultimedia(int idReportaje) {
+        // CORRECCIÓN SQL: Mapea i.tipo a 'autor_nombre' para la columna "Tipo" de la tabla
         String sql = "SELECT i.ruta_archivo, i.estado, i.tipo as autor_nombre " + 
                      "FROM Imagen i WHERE i.reportaje_id = ?";
         return db.executeQueryPojo(ArchivoMultimediaDTO.class, sql, idReportaje);
     }
 
     public List<ComentarioDTO> getComentarios(int idRevision) {
+        // CORRECCIÓN SQL: Mapea la fecha_hora para la columna "Fecha" de la tabla
         String sql = "SELECT fecha_hora, texto FROM Comentario WHERE revision_id = ? ORDER BY fecha_hora ASC";
         return db.executeQueryPojo(ComentarioDTO.class, sql, idRevision);
     }
