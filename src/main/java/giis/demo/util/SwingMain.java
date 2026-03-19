@@ -13,6 +13,7 @@ import diego_ReportajesEvento_33607.*;
 import adrian_modificarOfrecimiento_33609.*;
 import alex_GestionarOfrecimientos.*;
 import alex_InformeEvento_33613.*;
+import alex_InformeReportajes.*;
 import adrian_distribuirReportajes_33606.*;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -208,10 +209,19 @@ public class SwingMain {
 			    controller.initView();
 			});
 			frame.getContentPane().add(btnInformeEvento);
-}
 
+
+		// Botón para generar informes de reportajes accesibles
+		JButton btnInformeReportajes = new JButton("Generar Informes (Empresa)");
+		btnInformeReportajes.addActionListener(e -> {
+		    InformeReportajesController controller = new InformeReportajesController(new InformeReportajesModel(), new InformeReportajesView());
+		    
+		    controller.initController();
+		    controller.initView();
+		});
+		frame.getContentPane().add(btnInformeReportajes);
 		
-
+		}
 
 	public JFrame getFrame() { return this.frame; }
 	}
