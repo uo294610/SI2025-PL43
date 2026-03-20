@@ -6,6 +6,7 @@ import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
+import revisionOtrosReportajes.*;
 import nico_EntregarReportEvento.*;
 import nico_RestaurarVersionReport_33612.*;
 import diego_asignarReporteros_33602.*;
