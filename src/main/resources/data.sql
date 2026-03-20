@@ -156,3 +156,8 @@ INSERT INTO Imagen (id, reportero_id, reportaje_id, ruta_archivo, estado, tipo) 
     (603, 20, 301, '/img/oscars_redcarpet.png', 'BORRADOR', 'imagen'),
     (604, 12, 301, '/video/goya_entrevistas.mp4', 'DEFINITIVA', 'video'), 
     (605, 17, 302, '/video/onu_declaraciones_raw.avi', 'BORRADOR', 'video');
+    
+
+INSERT INTO InteresFreelance (reportero_id, evento_id, estado) VALUES 
+    (14, 100, 'Interesado'),
+    (14, 108, 'En duda');    

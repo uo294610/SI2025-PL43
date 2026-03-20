@@ -15,6 +15,7 @@ DROP TABLE IF EXISTS EmpresaTematica;
 DROP TABLE IF EXISTS EmpresaComunicacion;
 DROP TABLE IF EXISTS AgenciaPrensa;
 DROP TABLE IF EXISTS Tematica;
+DROP TABLE IF EXISTS InteresFreelance;
 
 CREATE TABLE Tematica (
     id INT PRIMARY KEY NOT NULL,
@@ -152,4 +153,13 @@ CREATE TABLE Imagen (
     tipo VARCHAR(16) NOT NULL, 
     FOREIGN KEY (reportero_id) REFERENCES Reportero(id),
     FOREIGN KEY (reportaje_id) REFERENCES Reportaje(id)
+);
+
+CREATE TABLE InteresFreelance (
+    reportero_id INT NOT NULL,
+    evento_id INT NOT NULL,
+    estado VARCHAR(32) NOT NULL, 
+    PRIMARY KEY (reportero_id, evento_id),
+    FOREIGN KEY (reportero_id) REFERENCES Reportero(id),
+    FOREIGN KEY (evento_id) REFERENCES Evento(id)
 );
