@@ -29,7 +29,8 @@ public class OfrecimientosModel {
             "FROM Ofrecimiento o " +
             "JOIN Evento ev ON o.evento_id = ev.id " +
             "JOIN AgenciaPrensa a ON ev.agencia_id = a.id " +
-            "JOIN Tematica t ON ev.tematica_id = t.id " +
+            "JOIN EventoTematica etm ON ev.id = etm.evento_id " +
+            "JOIN Tematica t ON etm.tematica_id = t.id " +
             "WHERE o.empresa_id = ? "
         );
 
@@ -52,7 +53,6 @@ public class OfrecimientosModel {
             params.add(idTematica);
         }
 
-        // Filtros de Precio
         if (minPrecio != null) {
             sql.append("AND ev.precio >= ? ");
             params.add(minPrecio);

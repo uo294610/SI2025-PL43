@@ -11,7 +11,6 @@ public class OfrecimientosView {
     private JRadioButton rdPendientes, rdDecididos;
     private JCheckBox chkFiltroEmpresa;
     private JTextField txtPrecioMin, txtPrecioMax;
-    private JButton btnFiltrarPrecio;
     private JTable tablaOfrecimientos, detalleEvento;
     private JButton btnAceptar, btnRechazar, btnEliminar;
     private JLabel lblMensajeDecision;
@@ -40,26 +39,25 @@ public class OfrecimientosView {
         frame.getContentPane().add(pnl1, "growx, wrap");
 
         // Temáticas
-        JPanel pnl2 = new JPanel(new MigLayout("ins 0", "[][grow][]", "[]"));
+        JPanel pnl2 = new JPanel(new MigLayout("ins 0", "[][][]", "[]"));
         chkFiltroEmpresa = new JCheckBox("Solo temáticas de la empresa", true);
         pnl2.add(chkFiltroEmpresa);
-        pnl2.add(new JLabel("Temática:"), "gapleft 20");
+        pnl2.add(new JLabel("Temática:"), "gapleft 40");
         cbTematicas = new JComboBox<>();
         pnl2.add(cbTematicas, "wmin 250");
         frame.getContentPane().add(pnl2, "growx, gaptop 10, wrap");
 
-        // Precios
-        JPanel pnl3 = new JPanel(new MigLayout("ins 0", "[][][][][][]", "[]"));
+        // Filtro precios
+        JPanel pnl3 = new JPanel(new MigLayout("ins 0", "[][][][][]", "[]"));
         pnl3.add(new JLabel("Precio Mínimo:"));
         txtPrecioMin = new JTextField(6);
         pnl3.add(txtPrecioMin);
         pnl3.add(new JLabel("€"), "gapright 20");
+        
         pnl3.add(new JLabel("Precio Máximo:"));
         txtPrecioMax = new JTextField(6);
         pnl3.add(txtPrecioMax);
         pnl3.add(new JLabel("€"));
-        btnFiltrarPrecio = new JButton("Aplicar Filtros");
-        pnl3.add(btnFiltrarPrecio, "gapleft 15");
         frame.getContentPane().add(pnl3, "growx, gaptop 5, wrap");
 
         // Tabla Principal
@@ -67,7 +65,7 @@ public class OfrecimientosView {
         tablaOfrecimientos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         frame.getContentPane().add(new JScrollPane(tablaOfrecimientos), "grow, gaptop 10, wrap");
 
-        //  Detalle Evento
+        // Detalle Evento
         detalleEvento = new JTable();
         detalleEvento.setEnabled(false);
         detalleEvento.setBackground(SystemColor.control); 
@@ -75,7 +73,7 @@ public class OfrecimientosView {
         spDetalle.setBorder(new TitledBorder("Información del Evento"));
         frame.getContentPane().add(spDetalle, "growx, height 100!, gaptop 10, wrap");
 
-        //  Botones
+        // Botones
         JPanel pnlBtns = new JPanel(new FlowLayout(FlowLayout.CENTER, 30, 10));
         btnAceptar = new JButton("ACEPTAR");
         btnRechazar = new JButton("RECHAZAR");
@@ -106,7 +104,6 @@ public class OfrecimientosView {
     public JCheckBox getChkFiltroEmpresa() { return chkFiltroEmpresa; }
     public JTextField getTxtPrecioMin() { return txtPrecioMin; }
     public JTextField getTxtPrecioMax() { return txtPrecioMax; }
-    public JButton getBtnFiltrarPrecio() { return btnFiltrarPrecio; }
     public JTable getTablaOfrecimientos() { return tablaOfrecimientos; }
     public JTable getDetalleEvento() { return detalleEvento; }
     public JButton getBtnAceptar() { return btnAceptar; }
