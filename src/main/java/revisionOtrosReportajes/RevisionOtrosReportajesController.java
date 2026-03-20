@@ -55,11 +55,13 @@ public class RevisionOtrosReportajesController {
         int idRevisor = Integer.parseInt(revisor.getId());
         
         List<ReportajeRevisionDTO> revisiones = model.getAllPendingRevisiones(idRevisor);
+        
+        // --- AQUÍ ESTÁ EL CAMBIO: Añadida la columna nombre_evento ---
         view.getTabRevisiones().setModel(SwingUtil.getTableModelFromPojos(revisiones, 
-            new String[] {"id_revision", "titulo_reportaje", "autor_nombre", "estado_revision"})); 
+            new String[] {"id_revision", "titulo_reportaje", "nombre_evento", "autor_nombre", "estado_revision"})); 
             
-        // AHORA SÍ: Como la tabla ya tiene datos, podemos cambiarle el texto a la columna 3 sin que explote
-        view.getTabRevisiones().getColumnModel().getColumn(3).setCellRenderer(new DefaultTableCellRenderer() {
+        // Como hemos metido una columna nueva, "estado_revision" ahora es la número 4 (empezando desde 0)
+        view.getTabRevisiones().getColumnModel().getColumn(4).setCellRenderer(new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
                 String originalValue = (String) value;
@@ -72,6 +74,14 @@ public class RevisionOtrosReportajesController {
                 return super.getTableCellRendererComponent(table, mappedValue, isSelected, hasFocus, row, column);
             }
         });
+
+        // Renombrar todas las cabeceras bonitas
+        view.getTabRevisiones().getColumnModel().getColumn(0).setHeaderValue("ID");
+        view.getTabRevisiones().getColumnModel().getColumn(1).setHeaderValue("Título");
+        view.getTabRevisiones().getColumnModel().getColumn(2).setHeaderValue("Evento"); // NUEVA
+        view.getTabRevisiones().getColumnModel().getColumn(3).setHeaderValue("Autor");
+        view.getTabRevisiones().getColumnModel().getColumn(4).setHeaderValue("Revisión");
+        view.getTabRevisiones().getTableHeader().repaint();
 
         SwingUtil.autoAdjustColumns(view.getTabRevisiones());
         limpiarVisor();
@@ -93,7 +103,6 @@ public class RevisionOtrosReportajesController {
         }
 
         if (revisionActual != null) {
-            // Cargar textos
             ReportajeEdicionDTO textos = model.getTextosReportaje(revisionActual.getId_reportaje());
             if (textos != null) {
                 view.getTxtTitulo().setText(textos.getTitulo());
@@ -101,13 +110,17 @@ public class RevisionOtrosReportajesController {
                 view.getAreaCuerpo().setText(textos.getCuerpo());
             }
 
-            // Cargar multimedia
             List<ArchivoMultimediaDTO> multimedia = model.getMultimedia(revisionActual.getId_reportaje());
             view.getTabMultimedia().setModel(SwingUtil.getTableModelFromPojos(multimedia, 
-                new String[] {"autor_nombre", "ruta_archivo", "estado"})); // autor_nombre = Tipo en el SQL
+                new String[] {"autor_nombre", "ruta_archivo", "estado"})); 
+            
+            view.getTabMultimedia().getColumnModel().getColumn(0).setHeaderValue("Tipo");
+            view.getTabMultimedia().getColumnModel().getColumn(1).setHeaderValue("Ruta");
+            view.getTabMultimedia().getColumnModel().getColumn(2).setHeaderValue("Estado");
+            view.getTabMultimedia().getTableHeader().repaint();
+            
             SwingUtil.autoAdjustColumns(view.getTabMultimedia());
             
-            // Cargar comentarios
             recargarComentarios();
         }
     }
@@ -117,6 +130,11 @@ public class RevisionOtrosReportajesController {
         List<ComentarioDTO> comentarios = model.getComentarios(revisionActual.getId_revision());
         view.getTabComentarios().setModel(SwingUtil.getTableModelFromPojos(comentarios, 
             new String[] {"fecha_hora", "texto"}));
+            
+        view.getTabComentarios().getColumnModel().getColumn(0).setHeaderValue("Fecha");
+        view.getTabComentarios().getColumnModel().getColumn(1).setHeaderValue("Comentario");
+        view.getTabComentarios().getTableHeader().repaint();
+            
         SwingUtil.autoAdjustColumns(view.getTabComentarios());
     }
 
@@ -133,7 +151,7 @@ public class RevisionOtrosReportajesController {
         }
 
         model.añadirComentario(revisionActual.getId_revision(), texto);
-        view.getAreaNuevoComentario().setText(""); // Limpiar
+        view.getAreaNuevoComentario().setText(""); 
         JOptionPane.showMessageDialog(view.getFrame(), "Comentario añadido.");
         
         recargarComentarios();

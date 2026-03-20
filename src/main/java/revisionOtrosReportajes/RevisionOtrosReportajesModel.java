@@ -13,13 +13,15 @@ public class RevisionOtrosReportajesModel {
         return db.executeQueryPojo(ReporteroDisplayDTO.class, "SELECT id, nombre FROM Reportero");
     }
 
-    // CORRECCIÓN: Busca todas las revisiones pendientes y en curso del revisor
+    // --- SQL ACTUALIZADA PARA TRAER EL EVENTO ---
     public List<ReportajeRevisionDTO> getAllPendingRevisiones(int idRevisor) {
         String sql = "SELECT r.id as id_revision, rep.id as id_reportaje, rep.titulo as titulo_reportaje, " +
-                     "autor.nombre as autor_nombre, r.estado as estado_revision " +
+                     "ev.nombre as nombre_evento, autor.nombre as autor_nombre, r.estado as estado_revision " +
                      "FROM Revision r " +
                      "INNER JOIN Reportaje rep ON r.reportaje_id = rep.id " +
                      "INNER JOIN Reportero autor ON rep.reportero_entrega_id = autor.id " +
+                     "INNER JOIN Asignacion asi ON autor.id = asi.reportero_id " +
+                     "INNER JOIN Evento ev ON asi.evento_id = ev.id " +
                      "WHERE r.revisor_id = ? AND r.estado IN ('PENDIENTE', 'EN_CURSO')";
         return db.executeQueryPojo(ReportajeRevisionDTO.class, sql, idRevisor);
     }
@@ -35,14 +37,12 @@ public class RevisionOtrosReportajesModel {
     }
 
     public List<ArchivoMultimediaDTO> getMultimedia(int idReportaje) {
-        // CORRECCIÓN SQL: Mapea i.tipo a 'autor_nombre' para la columna "Tipo" de la tabla
         String sql = "SELECT i.ruta_archivo, i.estado, i.tipo as autor_nombre " + 
                      "FROM Imagen i WHERE i.reportaje_id = ?";
         return db.executeQueryPojo(ArchivoMultimediaDTO.class, sql, idReportaje);
     }
 
     public List<ComentarioDTO> getComentarios(int idRevision) {
-        // CORRECCIÓN SQL: Mapea la fecha_hora para la columna "Fecha" de la tabla
         String sql = "SELECT fecha_hora, texto FROM Comentario WHERE revision_id = ? ORDER BY fecha_hora ASC";
         return db.executeQueryPojo(ComentarioDTO.class, sql, idRevision);
     }
@@ -52,7 +52,6 @@ public class RevisionOtrosReportajesModel {
         String sql = "INSERT INTO Comentario (id, revision_id, texto, fecha_hora) VALUES (?, ?, ?, ?)";
         db.executeUpdate(sql, nuevoId, idRevision, texto, new java.sql.Timestamp(System.currentTimeMillis()));
         
-        // Si estaba en PENDIENTE, al comentar pasa a estar EN_CURSO automáticamente
         db.executeUpdate("UPDATE Revision SET estado = 'EN_CURSO' WHERE id = ? AND estado = 'PENDIENTE'", idRevision);
     }
 
