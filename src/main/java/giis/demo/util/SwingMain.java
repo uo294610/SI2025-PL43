@@ -13,6 +13,7 @@ import alex_GestionarOfrecimientos.*;
 import alex_InformeEvento_33613.*;
 import alex_InformeReportajes.*;
 import adrian_distribuirReportajes_33606.*;
+import adrian_interesFreelance_34116.*;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
@@ -201,8 +202,21 @@ public class SwingMain {
             controller.initView();
         });
         frame.getContentPane().add(btnInformeReportajes);
+     // Eventos Freelance
+        JButton btnFreelance = new JButton("Eventos Freelance");
+        btnFreelance.addActionListener(new ActionListener() { 
+            public void actionPerformed(ActionEvent e) {
+                FreelanceModel m = new FreelanceModel();
+                FreelanceView v = new FreelanceView();
+                FreelanceController c = new FreelanceController(m, v);
+                c.initController();
+                c.initView();
+            }
+        });
+        frame.getContentPane().add(btnFreelance);
 
     } 
+    
 
     public JFrame getFrame() { return this.frame; }
 } 
