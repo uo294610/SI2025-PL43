@@ -118,7 +118,7 @@ public class OfrecimientosController {
             minPrecio, maxPrecio
         );
 
-        String[] columnasDTO = {"id", "nombreEvento", "nombreAgencia", "fechaEvento", "nombreTematica", "precio"};
+        String[] columnasDTO = {"id", "nombreEvento", "nombreAgencia", "fechaEvento", "nombreTematica", "precio", "decision"};
         view.getTablaOfrecimientos().setModel(SwingUtil.getTableModelFromPojos(listaActual, columnasDTO));
         
         comprobarEstadoFila();
