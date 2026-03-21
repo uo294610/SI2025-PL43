@@ -14,9 +14,8 @@ public class ReporteroView {
     private JRadioButton rbSinAsignar;
     private JRadioButton rbConAsignar;
     private JButton btnEliminar;
-    
-    // NUEVO COMPONENTE
     private JCheckBox chkFiltroTematica;
+    private JComboBox<String> cbTipoReportero;
     
     public ReporteroView() {
         initialize();
@@ -25,7 +24,7 @@ public class ReporteroView {
     private void initialize() {
         frame = new JFrame();
         frame.setTitle("Gestión de Asignaciones de Reporteros");
-        frame.setBounds(0, 0, 650, 700);
+        frame.setBounds(0, 0, 680, 700);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.getContentPane().setLayout(new MigLayout("", "[grow]", "[][][][grow][][grow][][grow][]"));
 
@@ -55,8 +54,10 @@ public class ReporteroView {
         // Tabla de Reporteros Disponibles + Checkbox
         frame.getContentPane().add(new JLabel("2. Disponibles (Ctrl+Click para varios):"), "flowx, cell 0 4");
         
-        // NUEVO CHECKBOX (Marcado por defecto para cumplir la HU al instante)
-        chkFiltroTematica = new JCheckBox("Filtrar por coincidencia de temática", true);
+        cbTipoReportero = new JComboBox<>(new String[]{"Todos", "Básico", "Reportero gráfico", "Camarógrafo"});
+        frame.getContentPane().add(cbTipoReportero, "cell 0 4");
+
+        chkFiltroTematica = new JCheckBox("Filtrar por temática", true);
         frame.getContentPane().add(chkFiltroTematica, "cell 0 4");
         
         tabReporteros = new JTable();
@@ -90,7 +91,6 @@ public class ReporteroView {
     public JButton getBtnAsignar() { return btnAsignar; }
     public JRadioButton getRbSinAsignar() { return rbSinAsignar; }
     public JButton getBtnEliminar() { return btnEliminar; }
-    
-    // Getter del nuevo checkbox
     public JCheckBox getChkFiltroTematica() { return chkFiltroTematica; }
+    public JComboBox<String> getCbTipoReportero() { return cbTipoReportero; }
 }

@@ -30,7 +30,7 @@ public class ReporteroController {
         
         // NUEVO: Que se actualice la lista de reporteros automáticamente al hacer clic en el CheckBox
         view.getChkFiltroTematica().addActionListener(e -> SwingUtil.exceptionWrapper(() -> actualizarTablasReporteros()));
-
+        view.getCbTipoReportero().addActionListener(e -> SwingUtil.exceptionWrapper(() -> actualizarTablasReporteros()));
         view.getBtnAsignar().addActionListener(e -> SwingUtil.exceptionWrapper(() -> asignarReporteros()));
         view.getBtnEliminar().addActionListener(e -> SwingUtil.exceptionWrapper(() -> eliminarReporteros()));
     }
@@ -68,18 +68,23 @@ public class ReporteroController {
         int idEvento = Integer.parseInt(view.getTabEventos().getValueAt(row, 0).toString());
         String fechaEvento = view.getTabEventos().getValueAt(row, 2).toString(); 
         
-        // NUEVO: Leemos si el checkbox está marcado o no
         boolean filtrarTematica = view.getChkFiltroTematica().isSelected();
+        // NUEVO: Obtenemos el tipo seleccionado ("Todos", "Básico", etc.)
+        String tipoFiltro = view.getCbTipoReportero().getSelectedItem().toString();
 
-        // 1. Cargar disponibles (pasando los nuevos parámetros)
-        List<ReporteroDTO> reporteros = model.getReporterosDisponibles(idAgencia, fechaEvento, idEvento, filtrarTematica);
-        TableModel tmodelDisp = SwingUtil.getTableModelFromPojos(reporteros, new String[] { "id", "nombre", "tematica" });
+        // 1. Cargar disponibles (pasando el nuevo parámetro tipoFiltro)
+        List<ReporteroDTO> reporteros = model.getReporterosDisponibles(idAgencia, fechaEvento, idEvento, filtrarTematica, tipoFiltro);
+        
+        // AÑADIDO "tipo" a la vista de la tabla
+        TableModel tmodelDisp = SwingUtil.getTableModelFromPojos(reporteros, new String[] { "id", "nombre", "tipo", "tematica" });
         view.getTabReporteros().setModel(tmodelDisp);
         SwingUtil.autoAdjustColumns(view.getTabReporteros());
 
         // 2. Cargar asignados
         List<ReporteroDTO> asignados = model.getReporterosAsignados(idEvento);
-        TableModel tmodelAsig = SwingUtil.getTableModelFromPojos(asignados, new String[] { "id", "nombre", "tematica" });
+        
+        // AÑADIDO "tipo" a la vista de la tabla
+        TableModel tmodelAsig = SwingUtil.getTableModelFromPojos(asignados, new String[] { "id", "nombre", "tipo", "tematica" });
         view.getTabReporterosAsignados().setModel(tmodelAsig);
         SwingUtil.autoAdjustColumns(view.getTabReporterosAsignados());
     }
