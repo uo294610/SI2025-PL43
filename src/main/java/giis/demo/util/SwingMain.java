@@ -57,7 +57,7 @@ public class SwingMain {
     private void initialize() {
         frame = new JFrame();
         frame.setTitle("Main Menu");
-        frame.setBounds(0, 0, 350, 600); // He ampliado un poco la altura de la ventana para que quepan todos los botones
+        frame.setBounds(0, 0, 350, 600); 
         frame.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         frame.getContentPane().setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS));
         

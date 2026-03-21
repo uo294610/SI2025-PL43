@@ -10,8 +10,7 @@ public class InformeReportajesView {
     private JComboBox<Object> cbEmpresas;
     private JComboBox<Object> cbAgencias;
     private JTextField txtFechaInicio, txtFechaFin;
-    private JTable tablaReportajes;
-    private JTextArea txtInforme;
+    private JTextArea txtInforme; 
 
     public InformeReportajesView() {
         initialize();
@@ -19,9 +18,10 @@ public class InformeReportajesView {
 
     private void initialize() {
         frame = new JFrame("Generación de Informes de Reportajes");
-        frame.setBounds(100, 100, 900, 700);
+        frame.setBounds(100, 100, 900, 600);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.getContentPane().setLayout(new MigLayout("ins 20, fillx", "[grow]", "[][][grow][grow]"));
+        
+        frame.getContentPane().setLayout(new MigLayout("ins 20, fill", "[grow]", "[][][grow]"));
 
         // Empresa y Agencia
         JPanel pnlCabecera = new JPanel(new MigLayout("ins 0", "[][grow][][grow]", "[]"));
@@ -45,19 +45,15 @@ public class InformeReportajesView {
         pnlFechas.add(txtFechaFin);
         frame.getContentPane().add(pnlFechas, "growx, gaptop 10, wrap");
 
-        // Tabla
-        tablaReportajes = new JTable();
-        frame.getContentPane().add(new JScrollPane(tablaReportajes), "grow, gaptop 10, height 150!, wrap");
-
         // El Informe por pantalla
         txtInforme = new JTextArea();
         txtInforme.setEditable(false);
-        txtInforme.setFont(new Font("Monospaced", Font.PLAIN, 13)); 
+        txtInforme.setFont(new Font("Monospaced", Font.PLAIN, 14)); // Letra un poco más grande
         txtInforme.setBackground(new Color(245, 245, 245));
         
         JScrollPane spInforme = new JScrollPane(txtInforme);
         spInforme.setBorder(new TitledBorder(null, "INFORME POR PANTALLA:", TitledBorder.LEADING, TitledBorder.TOP, new Font("Tahoma", Font.BOLD, 12)));
-        frame.getContentPane().add(spInforme, "grow, gaptop 10");
+        frame.getContentPane().add(spInforme, "grow, gaptop 15"); // "grow" para que ocupe el resto de la pantalla
     }
 
     public JFrame getFrame() { return frame; }
@@ -65,6 +61,5 @@ public class InformeReportajesView {
     public JComboBox<Object> getCbAgencias() { return cbAgencias; }
     public JTextField getTxtFechaInicio() { return txtFechaInicio; }
     public JTextField getTxtFechaFin() { return txtFechaFin; }
-    public JTable getTablaReportajes() { return tablaReportajes; }
     public JTextArea getTxtInforme() { return txtInforme; }
 }
