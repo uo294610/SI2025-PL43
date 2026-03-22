@@ -49,7 +49,7 @@ public class FreelanceController {
 	private void cargarTabla() {
 		var eventos = model.getEventosDisponibles(ID_FREELANCE_ACTUAL);
 		view.getTabEventos().setModel(SwingUtil.getTableModelFromPojos(eventos, 
-				new String[]{"id", "nombreEvento", "fecha", "tematica", "Interes"}));
+				new String[]{"id", "nombreEvento", "fecha", "tematica", "miInteres"}));
 	}
 
 	private void ejecutarGuardar() {
