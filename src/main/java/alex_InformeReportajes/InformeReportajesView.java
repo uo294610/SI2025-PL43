@@ -48,12 +48,12 @@ public class InformeReportajesView {
         // El Informe por pantalla
         txtInforme = new JTextArea();
         txtInforme.setEditable(false);
-        txtInforme.setFont(new Font("Monospaced", Font.PLAIN, 14)); // Letra un poco más grande
+        txtInforme.setFont(new Font("Monospaced", Font.PLAIN, 14)); 
         txtInforme.setBackground(new Color(245, 245, 245));
         
         JScrollPane spInforme = new JScrollPane(txtInforme);
         spInforme.setBorder(new TitledBorder(null, "INFORME POR PANTALLA:", TitledBorder.LEADING, TitledBorder.TOP, new Font("Tahoma", Font.BOLD, 12)));
-        frame.getContentPane().add(spInforme, "grow, gaptop 15"); // "grow" para que ocupe el resto de la pantalla
+        frame.getContentPane().add(spInforme, "grow, gaptop 15"); 
     }
 
     public JFrame getFrame() { return frame; }

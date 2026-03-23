@@ -3,6 +3,9 @@ package alex_InformeReportajes;
 import java.awt.Component;
 import java.util.List;
 import javax.swing.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 public class InformeReportajesController {
     private InformeReportajesModel model;
@@ -16,6 +19,8 @@ public class InformeReportajesController {
     public void initController() {
         view.getCbEmpresas().addActionListener(e -> generarInforme());
         view.getCbAgencias().addActionListener(e -> generarInforme());
+        
+        // Al pulsar Intro en las cajas de texto de fecha
         view.getTxtFechaInicio().addActionListener(e -> generarInforme());
         view.getTxtFechaFin().addActionListener(e -> generarInforme());
     }
@@ -47,7 +52,6 @@ public class InformeReportajesController {
         
         for (java.awt.event.ActionListener l : listeners) view.getCbAgencias().addActionListener(l);
         
-        
         view.getTxtInforme().setText("\n  Pulse 'Intro' en las fechas para generar el informe.");
     }
 
@@ -59,6 +63,7 @@ public class InformeReportajesController {
         String fechaInicio = view.getTxtFechaInicio().getText().trim();
         String fechaFin = view.getTxtFechaFin().getText().trim();
 
+        // Validar que no estén vacías
         if (fechaInicio.isEmpty() || fechaFin.isEmpty()) {
             JOptionPane.showMessageDialog(view.getFrame(), 
                 "El filtro por rango de fechas es obligatorio.", 
@@ -66,11 +71,32 @@ public class InformeReportajesController {
             return; 
         }
 
+        // Validar el formato exacto YYYY-MM-DD y el orden lógico
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        try {
+            LocalDate dateInicio = LocalDate.parse(fechaInicio, formatter);
+            LocalDate dateFin = LocalDate.parse(fechaFin, formatter);
+            
+            if (dateInicio.isAfter(dateFin)) {
+                JOptionPane.showMessageDialog(view.getFrame(), 
+                    "La fecha de inicio no puede ser posterior a la fecha de fin.", 
+                    "Rango de fechas incorrecto", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            
+        } catch (DateTimeParseException e) {
+            JOptionPane.showMessageDialog(view.getFrame(), 
+                "El formato de la fecha es incorrecto.\nPor favor, usa el formato: AAAA-MM-DD (ejemplo: 2026-03-01)", 
+                "Formato de fecha inválido", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Obtener los datos del modelo
         List<InformeReportajeDTO> datos = model.getReportajesAccesibles(
             (int) empresa[0], (int) agencia[0], fechaInicio, fechaFin
         );
 
-        // Construir el informe directamente en texto 
+        // Construir el informe
         StringBuilder informe = new StringBuilder();
         String nombreAgencia = agencia[1].toString().toUpperCase();
         

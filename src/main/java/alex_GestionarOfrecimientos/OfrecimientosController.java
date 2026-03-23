@@ -4,6 +4,7 @@ import java.awt.Component;
 import java.util.List;
 import javax.swing.*;
 import giis.demo.util.SwingUtil;
+import java.awt.Color;
 
 public class OfrecimientosController {
     private OfrecimientosModel model;
@@ -19,21 +20,17 @@ public class OfrecimientosController {
         view.getCbEmpresas().addActionListener(e -> recargarComboTematicas());
         view.getChkFiltroEmpresa().addActionListener(e -> recargarComboTematicas());
         
-        // Listener para los filtros
         view.getCbTematicas().addActionListener(e -> cargarTabla());
         view.getRdPendientes().addActionListener(e -> cargarTabla());
         view.getRdDecididos().addActionListener(e -> cargarTabla());
         
-        // Se actualiza el filtro de precios pulsando INTRO 
         view.getTxtPrecioMin().addActionListener(e -> cargarTabla());
         view.getTxtPrecioMax().addActionListener(e -> cargarTabla());
 
-        // Listener para acciones
         view.getBtnAceptar().addActionListener(e -> procesarDecision("ACEPTADO"));
         view.getBtnRechazar().addActionListener(e -> procesarDecision("RECHAZADO"));
         view.getBtnEliminar().addActionListener(e -> procesarDecision(null));
 
-        // Listener de la tabla
         view.getTablaOfrecimientos().getSelectionModel().addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 comprobarEstadoFila();
@@ -100,7 +97,7 @@ public class OfrecimientosController {
             String txtMin = view.getTxtPrecioMin().getText().trim();
             if (!txtMin.isEmpty()) minPrecio = Double.parseDouble(txtMin);
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(view.getFrame(), "Formato de Precio Mínimo incorrecto.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(view.getFrame(), "Formato de precio mínimo incorrecto.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
@@ -108,7 +105,14 @@ public class OfrecimientosController {
             String txtMax = view.getTxtPrecioMax().getText().trim();
             if (!txtMax.isEmpty()) maxPrecio = Double.parseDouble(txtMax);
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(view.getFrame(), "Formato de Precio Máximo incorrecto.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(view.getFrame(), "Formato de precio máximo incorrecto.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (minPrecio != null && maxPrecio != null && minPrecio > maxPrecio) {
+            JOptionPane.showMessageDialog(view.getFrame(), 
+                "El precio mínimo no puede ser mayor que el precio máximo.", 
+                "Rango de precios incorrecto", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
