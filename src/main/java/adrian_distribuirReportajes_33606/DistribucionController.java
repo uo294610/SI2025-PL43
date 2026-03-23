@@ -46,7 +46,8 @@ public class DistribucionController {
 		boolean conAcceso = view.getCbFiltro().getSelectedIndex() == 1;
 		
 		empresasEnTabla = model.getEmpresasPorAcceso(idEv, conAcceso);
-		view.getTabEmp().setModel(SwingUtil.getTableModelFromPojos(empresasEnTabla, new String[]{"id", "nombreEmpresa", "descargado"}));
+		// AQUÍ USAMOS descargadoTexto para que salga el SÍ / NO en la tabla visual
+		view.getTabEmp().setModel(SwingUtil.getTableModelFromPojos(empresasEnTabla, new String[]{"id", "nombreEmpresa", "descargadoTexto"}));
 	}
 
 	private void ejecutarDarAcceso() {
@@ -74,8 +75,8 @@ public class DistribucionController {
 		for (int i : fEmps) {
 			EmpresaAceptadaDTO emp = empresasEnTabla.get(i);
 			
-			// Si la BD dice que está descargado, bloqueamos
-			if (emp.getDescargadoInt() == 1) {
+			// AQUÍ USAMOS descargadoValor para evaluar el 1 o el 0
+			if (emp.getDescargadoValor() == 1) {
 				JOptionPane.showMessageDialog(null, "No se puede revocar el acceso a " + emp.getNombreEmpresa() + " porque ya ha descargado el reportaje.", "Error", JOptionPane.ERROR_MESSAGE);
 				continue;
 			}

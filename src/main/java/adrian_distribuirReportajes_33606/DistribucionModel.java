@@ -15,9 +15,9 @@ public class DistribucionModel {
 
 	public List<EmpresaAceptadaDTO> getEmpresasPorAcceso(String idEvento, boolean conAcceso) {
 		int accesoFiltro = conAcceso ? 1 : 0;
-		// Buscamos si el reportaje de este evento está descargado
+		// OJO A LA LÍNEA DEL CASE WHEN: ahora lo llamamos descargadoValor
 		String sql = "SELECT ec.id, ec.nombre as nombreEmpresa, " +
-		             "CASE WHEN r.estado = 'DESCARGADO' THEN 1 ELSE 0 END as descargado " +
+		             "CASE WHEN r.estado = 'DESCARGADO' THEN 1 ELSE 0 END as descargadoValor " +
 		             "FROM EmpresaComunicacion ec " +
 		             "JOIN Ofrecimiento o ON ec.id = o.empresa_id " +
 		             "JOIN EvaluacionReportaje er ON o.evento_id = er.evento_id " +
