@@ -67,9 +67,6 @@ public class EmpresaController {
             view.getTabMultimedia().setModel(tmodelMedia);
             SwingUtil.autoAdjustColumns(view.getTabMultimedia());
             
-            // Actualizamos la BD a DESCARGADO al leerlo
-            model.marcarComoDescargado(idEvento);
-            
         } else {
             limpiarTextos();
             view.getTxtCuerpo().setText("No se encontró el contenido de este reportaje.");
@@ -129,6 +126,7 @@ public class EmpresaController {
             try {
                 // Escribimos el archivo en el disco
                 java.nio.file.Files.writeString(fileToSave.toPath(), json.toString(), java.nio.charset.StandardCharsets.UTF_8);
+                model.marcarComoDescargado(idEvento);
                 JOptionPane.showMessageDialog(view.getFrame(), "Reportaje descargado con éxito en:\n" + fileToSave.getAbsolutePath());
             } catch (java.io.IOException ex) {
                 JOptionPane.showMessageDialog(view.getFrame(), "Error al guardar el archivo: " + ex.getMessage());
