@@ -29,9 +29,6 @@ import java.awt.event.ActionEvent;
 public class SwingMain {
     private JFrame frame;
 
-    /**
-     * Launch the application.
-     */
     public static void main(String[] args) {
         EventQueue.invokeLater(new Runnable() { //NOSONAR codigo autogenerado
             public void run() {
@@ -45,20 +42,14 @@ public class SwingMain {
         });
     }
 
-    /**
-     * Create the application.
-     */
     public SwingMain() {
         initialize();
     }
 
-    /**
-     * Initialize the contents of the frame.
-     */
     private void initialize() {
         frame = new JFrame();
         frame.setTitle("Main Menu");
-        frame.setBounds(0, 0, 350, 600); 
+        frame.setBounds(0, 0, 350, 650); 
         frame.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         frame.getContentPane().setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.Y_AXIS));
         
@@ -202,13 +193,14 @@ public class SwingMain {
             controller.initView();
         });
         frame.getContentPane().add(btnInformeReportajes);
-     // Eventos Freelance
+        
+        // Eventos Freelance (Botón nuevo de tu compañero)
         JButton btnFreelance = new JButton("Eventos Freelance");
         btnFreelance.addActionListener(new ActionListener() { 
             public void actionPerformed(ActionEvent e) {
-                FreelanceModel m = new FreelanceModel();
-                FreelanceView v = new FreelanceView();
-                FreelanceController c = new FreelanceController(m, v);
+                adrian_interesFreelance_34116.FreelanceModel m = new adrian_interesFreelance_34116.FreelanceModel();
+                adrian_interesFreelance_34116.FreelanceView v = new adrian_interesFreelance_34116.FreelanceView();
+                adrian_interesFreelance_34116.FreelanceController c = new adrian_interesFreelance_34116.FreelanceController(m, v);
                 c.initController();
                 c.initView();
             }
@@ -217,6 +209,5 @@ public class SwingMain {
 
     } 
     
-
     public JFrame getFrame() { return this.frame; }
-} 
+}
