@@ -28,7 +28,6 @@ public class ModificaEntregaModel {
     }
 
     public ReportajeEdicionDTO getUltimaVersion(int idReportero) {
-        // AÑADIDO: Ahora recupera r.revision_solicitada
         String sql = "SELECT r.id as reportaje_id, r.reportero_entrega_id, r.revision_solicitada, r.titulo, v.subtitulo, v.cuerpo " +
                      "FROM Reportaje r " +
                      "INNER JOIN VersionReportaje v ON r.id = v.reportaje_id " +
@@ -84,23 +83,28 @@ public class ModificaEntregaModel {
         db.executeUpdate(sql, ruta);
     }
 
-    // --- NUEVOS MÉTODOS REVISIÓN (HU #34112) ---
-    
-    // Carga todos los reporteros MENOS el autor, para que no se revise a sí mismo
-    public List<ReporteroDisplayDTO> getListaRevisoresDisponibles(int idAutorOriginal) {
-        String sql = "SELECT id, nombre FROM Reportero WHERE id != ?";
-        return db.executeQueryPojo(ReporteroDisplayDTO.class, sql, idAutorOriginal);
-    }
-
-    // Actualiza el reportaje y crea la entrada en la tabla Revision
-    public void solicitarRevision(int idReportaje, int idRevisor) {
-        // 1. Bloquear el reportaje
+    // --- MÉTODOS REVISIÓN AUTOMÁTICA ---
+    public void solicitarRevisionAutomatica(int idReportaje, int idEvento, int idAutor) {
+        // 1. Bloqueamos el reportaje en la base de datos
         String sqlUpdate = "UPDATE Reportaje SET revision_solicitada = TRUE WHERE id = ?";
         db.executeUpdate(sqlUpdate, idReportaje);
 
-        // 2. Crear la revisión pendiente
+        // 2. Buscamos todos los reporteros asignados a este evento
+        String sqlReporteros = "SELECT reportero_id FROM Asignacion WHERE evento_id = ?";
+        List<Object[]> asignados = db.executeQueryArray(sqlReporteros, idEvento);
+        
+        boolean estaSolo = (asignados.size() == 1);
         int nuevoIdRevision = getUltimoId("Revision") + 1;
         String sqlInsert = "INSERT INTO Revision (id, reportaje_id, revisor_id, estado) VALUES (?, ?, ?, 'PENDIENTE')";
-        db.executeUpdate(sqlInsert, nuevoIdRevision, idReportaje, idRevisor);
+
+        // 3. Repartimos las revisiones a todos menos al autor (salvo que esté solo)
+        for (Object[] row : asignados) {
+            int idRevisor = Integer.parseInt(row[0].toString());
+            
+            if (estaSolo || idRevisor != idAutor) {
+                db.executeUpdate(sqlInsert, nuevoIdRevision, idReportaje, idRevisor);
+                nuevoIdRevision++;
+            }
+        }
     }
 }

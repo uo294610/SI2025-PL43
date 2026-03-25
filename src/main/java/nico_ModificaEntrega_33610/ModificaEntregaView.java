@@ -30,9 +30,8 @@ public class ModificaEntregaView {
     private JButton btnEliminarVideo;
     private JButton btnFijarVidDefinitivo;
 
-    // --- NUEVOS COMPONENTES REVISIÓN (HU #34112) ---
+    // --- COMPONENTES REVISIÓN ---
     private JPanel panelRevision;
-    private JComboBox<ReporteroDisplayDTO> cbRevisores;
     private JButton btnSolicitarRevision;
 
     public ModificaEntregaView() {
@@ -122,14 +121,11 @@ public class ModificaEntregaView {
         btnGuardarCambio.setVisible(false);
         frame.getContentPane().add(btnGuardarCambio, "cell 0 4, alignx left");
 
-        // Nuevo Panel de Revisión
-        panelRevision = new JPanel(new MigLayout("", "[grow]", "[][][]"));
+        // Nuevo Panel de Revisión Limpio (Sin ComboBox)
+        panelRevision = new JPanel(new MigLayout("", "[grow]", "[]"));
         panelRevision.setBorder(BorderFactory.createTitledBorder("Gestión de Revisión"));
-        panelRevision.add(new JLabel("Asignar Revisor:"), "cell 0 0");
-        cbRevisores = new JComboBox<ReporteroDisplayDTO>();
-        panelRevision.add(cbRevisores, "cell 0 1, growx");
         btnSolicitarRevision = new JButton("Solicitar Revisión");
-        panelRevision.add(btnSolicitarRevision, "cell 0 2, alignx right");
+        panelRevision.add(btnSolicitarRevision, "align center");
         panelRevision.setVisible(false); // Oculto por defecto
         frame.getContentPane().add(panelRevision, "cell 0 5, growx");
 
@@ -162,8 +158,6 @@ public class ModificaEntregaView {
     public JButton getBtnEliminarVideo() { return btnEliminarVideo; }
     public JButton getBtnFijarVidDefinitivo() { return btnFijarVidDefinitivo; }
     
-    // Getters de la nueva historia
     public JPanel getPanelRevision() { return panelRevision; }
-    public JComboBox<ReporteroDisplayDTO> getCbRevisores() { return cbRevisores; }
     public JButton getBtnSolicitarRevision() { return btnSolicitarRevision; }
 }

@@ -55,7 +55,6 @@ public class ModificaEntregaController {
         view.getBtnEliminarVideo().addActionListener(e -> eliminarMultimedia(view.getTabVideos()));
         view.getBtnFijarVidDefinitivo().addActionListener(e -> fijarDefinitivo(view.getTabVideos()));
 
-        // Evento nuevo de Revisión
         view.getBtnSolicitarRevision().addActionListener(e -> procesarSolicitudRevision());
     }
 
@@ -114,16 +113,12 @@ public class ModificaEntregaController {
             view.getAreaCuerpo().setText(reportajeActual.getCuerpo());
 
             recargarTablasMultimedia();
-            cargarRevisores(idRepActual); // Rellenamos el desplegable de compañeros
 
-            // --- LÓGICA DE BLOQUEO DE LA HU #34112 ---
             if (reportajeActual.isRevision_solicitada()) {
-                // REGLA: Si ya solicitó revisión, todo se congela
                 view.getLblPermisoModificar().setText("🔒 Solicitaste Revisión: No puedes modificar.");
                 view.getLblPermisoModificar().setForeground(Color.RED);
                 congelarEdicion(true);
             } else {
-                // REGLA: No hay revisión solicitada, comprobamos permisos normales
                 if (idRepActual == reportajeActual.getReportero_entrega_id()) {
                     view.getLblPermisoModificar().setText("✓ Eres el autor. Puedes modificar y pedir revisión.");
                     view.getLblPermisoModificar().setForeground(Color.GREEN.darker());
@@ -149,7 +144,6 @@ public class ModificaEntregaController {
         view.getBtnEliminarVideo().setEnabled(!congelar);
         view.getBtnFijarVidDefinitivo().setEnabled(!congelar);
         
-        // El panel de solicitar revisión solo se ve si ERES el autor y NO está congelado
         view.getPanelRevision().setVisible(!congelar);
     }
 
@@ -304,33 +298,23 @@ public class ModificaEntregaController {
         }
     }
     
-    // --- MÉTODOS DE LA NUEVA HU (#34112) ---
-
-    private void cargarRevisores(int idAutorOriginal) {
-        List<ReporteroDisplayDTO> revisores = model.getListaRevisoresDisponibles(idAutorOriginal);
-        view.getCbRevisores().removeAllItems();
-        for (ReporteroDisplayDTO rev : revisores) {
-            view.getCbRevisores().addItem(rev);
-        }
-    }
-
+    // --- LÓGICA DE REVISIÓN AUTOMÁTICA ---
     private void procesarSolicitudRevision() {
-        ReporteroDisplayDTO revisor = (ReporteroDisplayDTO) view.getCbRevisores().getSelectedItem();
-        if (revisor == null) {
-            JOptionPane.showMessageDialog(view.getFrame(), "Debes seleccionar a un compañero de la lista.");
-            return;
-        }
-
-        int idRevisor = Integer.parseInt(revisor.getId());
+        int fila = view.getTabEventos().getSelectedRow();
+        if (fila < 0) return;
+        
+        int idEvento = (int) view.getTabEventos().getValueAt(fila, 0);
+        ReporteroDisplayDTO repCombo = (ReporteroDisplayDTO) view.getCbReporteros().getSelectedItem();
+        int idAutor = Integer.parseInt(repCombo.getId());
         int idReportaje = reportajeActual.getReportaje_id();
 
         int confirm = JOptionPane.showConfirmDialog(view.getFrame(), 
-            "Al solicitar revisión, el reportaje quedará BLOQUEADO y no podrás hacer más modificaciones.\n¿Deseas continuar?", 
+            "Al solicitar revisión, el reportaje quedará BLOQUEADO y se notificará a los compañeros del evento.\n¿Deseas continuar?", 
             "Aviso Importante", JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
-            model.solicitarRevision(idReportaje, idRevisor);
-            JOptionPane.showMessageDialog(view.getFrame(), "Revisión solicitada a " + revisor.toString() + " con éxito.");
+            model.solicitarRevisionAutomatica(idReportaje, idEvento, idAutor);
+            JOptionPane.showMessageDialog(view.getFrame(), "Revisión solicitada a los compañeros con éxito.");
             
             // Recargamos el evento para que aplique la congelación de botones
             seleccionarEvento(); 
