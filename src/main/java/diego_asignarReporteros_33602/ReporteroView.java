@@ -9,11 +9,13 @@ public class ReporteroView {
     private JButton btnCargarEventos;
     private JTable tabEventos;
     private JTable tabReporteros;
-    private JTable tabReporterosAsignados; // NUEVA TABLA
+    private JTable tabReporterosAsignados; 
     private JButton btnAsignar;
     private JRadioButton rbSinAsignar;
     private JRadioButton rbConAsignar;
     private JButton btnEliminar;
+    private JCheckBox chkFiltroTematica;
+    private JComboBox<String> cbTipoReportero;
     
     public ReporteroView() {
         initialize();
@@ -22,7 +24,7 @@ public class ReporteroView {
     private void initialize() {
         frame = new JFrame();
         frame.setTitle("Gestión de Asignaciones de Reporteros");
-        frame.setBounds(0, 0, 650, 700);
+        frame.setBounds(0, 0, 680, 700);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.getContentPane().setLayout(new MigLayout("", "[grow]", "[][][][grow][][grow][][grow][]"));
 
@@ -31,10 +33,9 @@ public class ReporteroView {
         txtAgenciaId = new JTextField("1"); 
         frame.getContentPane().add(txtAgenciaId, "cell 0 0, width 50!");
         
-        // 1. FILTRO (NUEVO)
-        rbSinAsignar = new JRadioButton("Eventos SIN reporteros", true); // Seleccionado por defecto
+        rbSinAsignar = new JRadioButton("Eventos SIN reporteros", true); 
         rbConAsignar = new JRadioButton("Eventos CON reporteros");
-        ButtonGroup bg = new ButtonGroup(); // Agrupa para que solo se pueda elegir uno
+        ButtonGroup bg = new ButtonGroup(); 
         bg.add(rbSinAsignar);
         bg.add(rbConAsignar);
         frame.getContentPane().add(rbSinAsignar, "cell 0 1");
@@ -50,8 +51,15 @@ public class ReporteroView {
         tabEventos.setDefaultEditor(Object.class, null); 
         frame.getContentPane().add(new JScrollPane(tabEventos), "cell 0 3,grow");
 
-        // Tabla de Reporteros Disponibles
-        frame.getContentPane().add(new JLabel("2. Disponibles (Ctrl+Click para varios):"), "cell 0 4");
+        // Tabla de Reporteros Disponibles + Checkbox
+        frame.getContentPane().add(new JLabel("2. Disponibles (Ctrl+Click para varios):"), "flowx, cell 0 4");
+        
+        cbTipoReportero = new JComboBox<>(new String[]{"Todos", "Básico", "Reportero gráfico", "Camarógrafo"});
+        frame.getContentPane().add(cbTipoReportero, "cell 0 4");
+
+        chkFiltroTematica = new JCheckBox("Filtrar por temática", true);
+        frame.getContentPane().add(chkFiltroTematica, "cell 0 4");
+        
         tabReporteros = new JTable();
         tabReporteros.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         tabReporteros.setDefaultEditor(Object.class, null);
@@ -61,7 +69,7 @@ public class ReporteroView {
         btnAsignar = new JButton("Asignar Reportero(s) ↓");
         frame.getContentPane().add(btnAsignar, "cell 0 6, align center");
 
-        // Tabla de Reporteros Asignados (YA SE PUEDEN SELECCIONAR)
+        // Tabla de Reporteros Asignados
         frame.getContentPane().add(new JLabel("3. YA Asignados (Selecciona para eliminar):"), "cell 0 7");
         tabReporterosAsignados = new JTable();
         tabReporterosAsignados.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -73,7 +81,7 @@ public class ReporteroView {
         frame.getContentPane().add(btnEliminar, "cell 0 9, align right");
     }
 
-    // Getters para el controlador
+    // Getters
     public JFrame getFrame() { return frame; }
     public JTextField getTxtAgenciaId() { return txtAgenciaId; }
     public JButton getBtnCargarEventos() { return btnCargarEventos; }
@@ -81,8 +89,8 @@ public class ReporteroView {
     public JTable getTabReporteros() { return tabReporteros; }
     public JTable getTabReporterosAsignados() { return tabReporterosAsignados; }
     public JButton getBtnAsignar() { return btnAsignar; }
-    
-    // Getters NUEVOS
     public JRadioButton getRbSinAsignar() { return rbSinAsignar; }
     public JButton getBtnEliminar() { return btnEliminar; }
+    public JCheckBox getChkFiltroTematica() { return chkFiltroTematica; }
+    public JComboBox<String> getCbTipoReportero() { return cbTipoReportero; }
 }

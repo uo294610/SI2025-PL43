@@ -19,21 +19,19 @@ public class ReporteroController {
     }
 
     public void initController() {
-        // Cargar eventos (ahora leerá el filtro)
         view.getBtnCargarEventos().addActionListener(e -> SwingUtil.exceptionWrapper(() -> getEventos()));
 
-        // Cargar reporteros al seleccionar evento
         view.getTabEventos().addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
                 SwingUtil.exceptionWrapper(() -> actualizarTablasReporteros());
             }
         });
-
-        // Asignar
-        view.getBtnAsignar().addActionListener(e -> SwingUtil.exceptionWrapper(() -> asignarReporteros()));
         
-        // Eliminar (NUEVO)
+        // NUEVO: Que se actualice la lista de reporteros automáticamente al hacer clic en el CheckBox
+        view.getChkFiltroTematica().addActionListener(e -> SwingUtil.exceptionWrapper(() -> actualizarTablasReporteros()));
+        view.getCbTipoReportero().addActionListener(e -> SwingUtil.exceptionWrapper(() -> actualizarTablasReporteros()));
+        view.getBtnAsignar().addActionListener(e -> SwingUtil.exceptionWrapper(() -> asignarReporteros()));
         view.getBtnEliminar().addActionListener(e -> SwingUtil.exceptionWrapper(() -> eliminarReporteros()));
     }
 
@@ -48,18 +46,16 @@ public class ReporteroController {
         int idAgencia = Integer.parseInt(view.getTxtAgenciaId().getText());
         List<EventoDTO> eventos;
         
-        // LEEMOS EL FILTRO PARA DECIDIR QUÉ MÉTODO DEL MODELO LLAMAR
         if (view.getRbSinAsignar().isSelected()) {
             eventos = model.getEventosSinAsignar(idAgencia);
         } else {
             eventos = model.getEventosConAsignacion(idAgencia);
         }
         
-        TableModel tmodel = SwingUtil.getTableModelFromPojos(eventos, new String[] { "id", "nombre", "fecha" });
+        TableModel tmodel = SwingUtil.getTableModelFromPojos(eventos, new String[] { "id", "nombre", "fecha", "tematica" });
         view.getTabEventos().setModel(tmodel);
         SwingUtil.autoAdjustColumns(view.getTabEventos());
         
-        // Limpiamos las tablas de abajo
         view.getTabReporteros().setModel(new DefaultTableModel());
         view.getTabReporterosAsignados().setModel(new DefaultTableModel());
     }
@@ -71,16 +67,24 @@ public class ReporteroController {
         int idAgencia = Integer.parseInt(view.getTxtAgenciaId().getText());
         int idEvento = Integer.parseInt(view.getTabEventos().getValueAt(row, 0).toString());
         String fechaEvento = view.getTabEventos().getValueAt(row, 2).toString(); 
+        
+        boolean filtrarTematica = view.getChkFiltroTematica().isSelected();
+        // NUEVO: Obtenemos el tipo seleccionado ("Todos", "Básico", etc.)
+        String tipoFiltro = view.getCbTipoReportero().getSelectedItem().toString();
 
-        // 1. Cargar disponibles
-        List<ReporteroDTO> reporteros = model.getReporterosDisponibles(idAgencia, fechaEvento);
-        TableModel tmodelDisp = SwingUtil.getTableModelFromPojos(reporteros, new String[] { "id", "nombre" });
+        // 1. Cargar disponibles (pasando el nuevo parámetro tipoFiltro)
+        List<ReporteroDTO> reporteros = model.getReporterosDisponibles(idAgencia, fechaEvento, idEvento, filtrarTematica, tipoFiltro);
+        
+        // AÑADIDO "tipo" a la vista de la tabla
+        TableModel tmodelDisp = SwingUtil.getTableModelFromPojos(reporteros, new String[] { "id", "nombre", "tipo", "tematica" });
         view.getTabReporteros().setModel(tmodelDisp);
         SwingUtil.autoAdjustColumns(view.getTabReporteros());
 
         // 2. Cargar asignados
         List<ReporteroDTO> asignados = model.getReporterosAsignados(idEvento);
-        TableModel tmodelAsig = SwingUtil.getTableModelFromPojos(asignados, new String[] { "id", "nombre" });
+        
+        // AÑADIDO "tipo" a la vista de la tabla
+        TableModel tmodelAsig = SwingUtil.getTableModelFromPojos(asignados, new String[] { "id", "nombre", "tipo", "tematica" });
         view.getTabReporterosAsignados().setModel(tmodelAsig);
         SwingUtil.autoAdjustColumns(view.getTabReporterosAsignados());
     }
@@ -105,7 +109,6 @@ public class ReporteroController {
         actualizarTablasReporteros(); 
     }
 
-    // NUEVO MÉTODO
     private void eliminarReporteros() {
         int rowEvento = view.getTabEventos().getSelectedRow();
         int[] rowsReporterosAsignados = view.getTabReporterosAsignados().getSelectedRows();
@@ -117,7 +120,6 @@ public class ReporteroController {
 
         int idEvento = Integer.parseInt(view.getTabEventos().getValueAt(rowEvento, 0).toString());
 
-        // Recorremos los que queremos borrar
         for (int row : rowsReporterosAsignados) {
             int idReportero = Integer.parseInt(view.getTabReporterosAsignados().getValueAt(row, 0).toString());
             model.eliminarAsignacion(idEvento, idReportero);

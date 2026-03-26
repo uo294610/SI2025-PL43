@@ -3,10 +3,9 @@ package adrian_distribuirReportajes_33606;
 public class EventoEntregadoDTO {
 	private String id;
 	private String nombreEvento;
-	private String estado; // Para cumplir el prototipo
+	private String estado; 
 
 	public EventoEntregadoDTO() {}
-
 	public String getId() { return id; }
 	public void setId(String id) { this.id = id; }
 	public String getNombreEvento() { return nombreEvento; }

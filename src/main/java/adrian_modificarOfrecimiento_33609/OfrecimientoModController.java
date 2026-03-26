@@ -10,14 +10,13 @@ public class OfrecimientoModController {
 	private OfrecimientoModModel model;
 	private OfrecimientoModView view;
 	private List<EmpresaModDTO> empresasActuales;
-	private List<EventoModDTO> eventosActuales; // Para guardar la lista y acceder al tematicaId
+	private List<EventoModDTO> eventosActuales;
 
 	public OfrecimientoModController(OfrecimientoModModel m, OfrecimientoModView v) {
 		this.model = m; this.view = v;
 	}
 
 	public void initController() {
-		// Buscador 
 		view.getTxtBuscar().addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyReleased(KeyEvent e) {
@@ -29,12 +28,11 @@ public class OfrecimientoModController {
 			}
 		});
 
-		// Evento al seleccionar una fila de la tabla superior
 		view.getTabEv().getSelectionModel().addListSelectionListener(e -> {
 			if (!e.getValueIsAdjusting()) {
 				int f = view.getTabEv().getSelectedRow();
 				if (f >= 0) {
-					String nombreTematica = view.getTabEv().getValueAt(f, 4).toString(); // Columna 4 es Temática
+					String nombreTematica = view.getTabEv().getValueAt(f, 4).toString(); 
 					view.getLblTematicaEvento().setText("Temática detectada: " + nombreTematica);
 					cargarEmpresas();
 				}
@@ -48,19 +46,15 @@ public class OfrecimientoModController {
 			cargarEmpresas();
 		});
 
-		// Acción del Checkbox
 		view.getChkFiltrarTematica().addActionListener(e -> cargarEmpresas());
-		
 		view.getBtnOfrecer().addActionListener(e -> ejecutarOfrecer());
 		view.getBtnQuitar().addActionListener(e -> ejecutarQuitar());
 	}
 
 	public void initView() {
 		eventosActuales = model.getEventosConReportero();
-		// Añadimos "tematica" a las columnas para que se vea
 		view.getTabEv().setModel(SwingUtil.getTableModelFromPojos(eventosActuales, new String[]{"id","nombre","fecha","reportero", "tematica"}));
 		
-		// Por defecto empieza en "Con Ofrecimiento" (índice 0), así que desactivamos el botón de ofrecer
 		view.getCbFiltro().setSelectedIndex(0);
 		view.getBtnOfrecer().setEnabled(false);
 		view.getFrame().setVisible(true);
@@ -70,25 +64,22 @@ public class OfrecimientoModController {
 		int vistaFila = view.getTabEv().getSelectedRow();
 		if (vistaFila < 0) return;
 
-		// Convertimos el índice por si se ha usado el buscador
 		int modeloFila = view.getTabEv().convertRowIndexToModel(vistaFila);
 		EventoModDTO evSeleccionado = eventosActuales.get(modeloFila);
-		
 		String idEv = evSeleccionado.getId();
-		int tematicaId = evSeleccionado.getTematicaId();
 		
 		boolean sinOfrecimiento = view.getCbFiltro().getSelectedIndex() == 1;
 		boolean filtrarPorTematica = view.getChkFiltrarTematica().isSelected();
 
+		// Ya no pasamos el tematicaId, el SQL se encarga de cruzar los datos
 		if (sinOfrecimiento) {
-			if (filtrarPorTematica) empresasActuales = model.getEmpresasSinOfrecimientoPorTematica(idEv, tematicaId);
+			if (filtrarPorTematica) empresasActuales = model.getEmpresasSinOfrecimientoPorTematica(idEv);
 			else empresasActuales = model.getEmpresasSinOfrecimiento(idEv);
 		} else {
-			if (filtrarPorTematica) empresasActuales = model.getEmpresasConOfrecimientoPorTematica(idEv, tematicaId);
+			if (filtrarPorTematica) empresasActuales = model.getEmpresasConOfrecimientoPorTematica(idEv);
 			else empresasActuales = model.getEmpresasConOfrecimiento(idEv);
 		}
 		
-		// Añadimos "especialidad" a las columnas de la tabla de abajo
 		view.getTabEmp().setModel(SwingUtil.getTableModelFromPojos(empresasActuales, new String[]{"id","nombre","estado","especialidad"}));
 	}
 
