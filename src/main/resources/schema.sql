@@ -8,14 +8,16 @@ DROP TABLE IF EXISTS EvaluacionReportaje;
 DROP TABLE IF EXISTS ReportajeTematica;
 DROP TABLE IF EXISTS Reportaje;
 DROP TABLE IF EXISTS EventoTematica;
+DROP TABLE IF EXISTS InteresFreelance;
 DROP TABLE IF EXISTS Evento;
 DROP TABLE IF EXISTS ReporteroTematica;
 DROP TABLE IF EXISTS Reportero;
 DROP TABLE IF EXISTS EmpresaTematica; 
+DROP TABLE IF EXISTS TarifaPlana;
 DROP TABLE IF EXISTS EmpresaComunicacion;
 DROP TABLE IF EXISTS AgenciaPrensa;
 DROP TABLE IF EXISTS Tematica;
-DROP TABLE IF EXISTS InteresFreelance;
+DROP TABLE IF EXISTS TarifaDieta;
 
 CREATE TABLE Tematica (
     id INT PRIMARY KEY NOT NULL,
@@ -29,7 +31,8 @@ CREATE TABLE AgenciaPrensa (
 
 CREATE TABLE EmpresaComunicacion (
     id INT PRIMARY KEY NOT NULL,
-    nombre VARCHAR(64) NOT NULL
+    nombre VARCHAR(64) NOT NULL,
+    acepta_embargos BOOLEAN DEFAULT TRUE
 );
 
 CREATE TABLE EmpresaTematica (
@@ -40,11 +43,23 @@ CREATE TABLE EmpresaTematica (
     FOREIGN KEY (tematica_id) REFERENCES Tematica(id)
 );
 
+CREATE TABLE TarifaPlana (
+    empresa_id INT NOT NULL,
+    agencia_id INT NOT NULL,
+    cuota_mensual DECIMAL(10, 2) NOT NULL,
+    al_corriente_pago BOOLEAN DEFAULT TRUE,
+    PRIMARY KEY (empresa_id, agencia_id),
+    FOREIGN KEY (empresa_id) REFERENCES EmpresaComunicacion(id),
+    FOREIGN KEY (agencia_id) REFERENCES AgenciaPrensa(id)
+);
+
 CREATE TABLE Reportero (
     id INT PRIMARY KEY NOT NULL,
     nombre VARCHAR(64) NOT NULL,
     agencia_id INT, 
     tipo VARCHAR(32) NOT NULL, 
+    pais VARCHAR(64) NOT NULL,
+    provincia VARCHAR(64) NOT NULL,
     FOREIGN KEY (agencia_id) REFERENCES AgenciaPrensa(id)
 );
 
@@ -59,10 +74,22 @@ CREATE TABLE ReporteroTematica (
 CREATE TABLE Evento (
     id INT PRIMARY KEY NOT NULL,
     nombre VARCHAR(128) NOT NULL,
-    fecha DATE NOT NULL,
+    fecha DATE NOT NULL,        
+    fecha_fin DATE NOT NULL,     
+    pais VARCHAR(64) NOT NULL,
+    provincia VARCHAR(64) NOT NULL,
     precio DECIMAL(10, 2) NOT NULL,
     agencia_id INT NOT NULL,
+    asignacion_finalizada BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (agencia_id) REFERENCES AgenciaPrensa(id)
+);
+
+CREATE TABLE TarifaDieta (
+    pais VARCHAR(64) NOT NULL,
+    provincia VARCHAR(64) NOT NULL,
+    coste_alojamiento DECIMAL(10, 2) NOT NULL,
+    coste_manutencion DECIMAL(10, 2) NOT NULL,
+    PRIMARY KEY (pais, provincia)
 );
 
 CREATE TABLE EventoTematica (
@@ -73,12 +100,22 @@ CREATE TABLE EventoTematica (
     FOREIGN KEY (tematica_id) REFERENCES Tematica(id)
 );
 
+CREATE TABLE InteresFreelance (
+    reportero_id INT NOT NULL,
+    evento_id INT NOT NULL,
+    estado VARCHAR(32) NOT NULL, 
+    PRIMARY KEY (reportero_id, evento_id),
+    FOREIGN KEY (reportero_id) REFERENCES Reportero(id),
+    FOREIGN KEY (evento_id) REFERENCES Evento(id)
+);
+
 CREATE TABLE Reportaje (
     id INT PRIMARY KEY NOT NULL,
     titulo VARCHAR(128) UNIQUE NOT NULL, 
     reportero_entrega_id INT NOT NULL,  
     estado VARCHAR(32) NOT NULL, 
     revision_solicitada BOOLEAN DEFAULT FALSE,
+    fecha_fin_embargo TIMESTAMP,
     FOREIGN KEY (reportero_entrega_id) REFERENCES Reportero(id)
 );
 
@@ -129,6 +166,7 @@ CREATE TABLE VersionReportaje (
 CREATE TABLE Asignacion (
     evento_id INT NOT NULL,
     reportero_id INT NOT NULL,
+    rol VARCHAR(32) DEFAULT 'Base',
     PRIMARY KEY (evento_id, reportero_id),
     FOREIGN KEY (evento_id) REFERENCES Evento(id),
     FOREIGN KEY (reportero_id) REFERENCES Reportero(id)
@@ -140,6 +178,8 @@ CREATE TABLE Ofrecimiento (
     empresa_id INT NOT NULL,
     decision VARCHAR(16),
     acceso BOOLEAN DEFAULT FALSE,
+    tipo_acceso VARCHAR(32) DEFAULT 'COMPLETO',
+    estado_pago VARCHAR(16) DEFAULT 'PENDIENTE',
     FOREIGN KEY (evento_id) REFERENCES Evento(id),
     FOREIGN KEY (empresa_id) REFERENCES EmpresaComunicacion(id)
 );
@@ -153,13 +193,4 @@ CREATE TABLE Imagen (
     tipo VARCHAR(16) NOT NULL, 
     FOREIGN KEY (reportero_id) REFERENCES Reportero(id),
     FOREIGN KEY (reportaje_id) REFERENCES Reportaje(id)
-);
-
-CREATE TABLE InteresFreelance (
-    reportero_id INT NOT NULL,
-    evento_id INT NOT NULL,
-    estado VARCHAR(32) NOT NULL, 
-    PRIMARY KEY (reportero_id, evento_id),
-    FOREIGN KEY (reportero_id) REFERENCES Reportero(id),
-    FOREIGN KEY (evento_id) REFERENCES Evento(id)
 );
