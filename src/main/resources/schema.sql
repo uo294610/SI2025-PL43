@@ -17,7 +17,8 @@ DROP TABLE IF EXISTS TarifaPlana;
 DROP TABLE IF EXISTS EmpresaComunicacion;
 DROP TABLE IF EXISTS AgenciaPrensa;
 DROP TABLE IF EXISTS Tematica;
-DROP TABLE IF EXISTS TarifaDieta;
+DROP TABLE IF EXISTS Provincia;
+DROP TABLE IF EXISTS Pais;
 
 CREATE TABLE Tematica (
     id INT PRIMARY KEY NOT NULL,
@@ -53,14 +54,28 @@ CREATE TABLE TarifaPlana (
     FOREIGN KEY (agencia_id) REFERENCES AgenciaPrensa(id)
 );
 
+CREATE TABLE Pais (
+    id INT PRIMARY KEY NOT NULL,
+    nombre VARCHAR(64) NOT NULL UNIQUE,
+    coste_manutencion DECIMAL(10, 2) NOT NULL
+);
+
+CREATE TABLE Provincia (
+    id INT PRIMARY KEY NOT NULL,
+    nombre VARCHAR(64) NOT NULL,
+    pais_id INT NOT NULL,
+    coste_alojamiento DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (pais_id) REFERENCES Pais(id)
+);
+
 CREATE TABLE Reportero (
     id INT PRIMARY KEY NOT NULL,
     nombre VARCHAR(64) NOT NULL,
     agencia_id INT, 
     tipo VARCHAR(32) NOT NULL, 
-    pais VARCHAR(64) NOT NULL,
-    provincia VARCHAR(64) NOT NULL,
-    FOREIGN KEY (agencia_id) REFERENCES AgenciaPrensa(id)
+    provincia_id INT NOT NULL, 
+    FOREIGN KEY (agencia_id) REFERENCES AgenciaPrensa(id),
+    FOREIGN KEY (provincia_id) REFERENCES Provincia(id)
 );
 
 CREATE TABLE ReporteroTematica (
@@ -76,20 +91,12 @@ CREATE TABLE Evento (
     nombre VARCHAR(128) NOT NULL,
     fecha DATE NOT NULL,        
     fecha_fin DATE NOT NULL,     
-    pais VARCHAR(64) NOT NULL,
-    provincia VARCHAR(64) NOT NULL,
     precio DECIMAL(10, 2) NOT NULL,
     agencia_id INT NOT NULL,
+    provincia_id INT NOT NULL,
     asignacion_finalizada BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (agencia_id) REFERENCES AgenciaPrensa(id)
-);
-
-CREATE TABLE TarifaDieta (
-    pais VARCHAR(64) NOT NULL,
-    provincia VARCHAR(64) NOT NULL,
-    coste_alojamiento DECIMAL(10, 2) NOT NULL,
-    coste_manutencion DECIMAL(10, 2) NOT NULL,
-    PRIMARY KEY (pais, provincia)
+    FOREIGN KEY (agencia_id) REFERENCES AgenciaPrensa(id),
+    FOREIGN KEY (provincia_id) REFERENCES Provincia(id)
 );
 
 CREATE TABLE EventoTematica (
