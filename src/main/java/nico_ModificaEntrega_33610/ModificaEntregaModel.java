@@ -83,13 +83,10 @@ public class ModificaEntregaModel {
         db.executeUpdate(sql, ruta);
     }
 
-    // --- MÉTODOS REVISIÓN AUTOMÁTICA ---
     public void solicitarRevisionAutomatica(int idReportaje, int idEvento, int idAutor) {
-        // 1. Bloqueamos el reportaje en la base de datos
         String sqlUpdate = "UPDATE Reportaje SET revision_solicitada = TRUE WHERE id = ?";
         db.executeUpdate(sqlUpdate, idReportaje);
 
-        // 2. Buscamos todos los reporteros asignados a este evento
         String sqlReporteros = "SELECT reportero_id FROM Asignacion WHERE evento_id = ?";
         List<Object[]> asignados = db.executeQueryArray(sqlReporteros, idEvento);
         
@@ -97,14 +94,49 @@ public class ModificaEntregaModel {
         int nuevoIdRevision = getUltimoId("Revision") + 1;
         String sqlInsert = "INSERT INTO Revision (id, reportaje_id, revisor_id, estado) VALUES (?, ?, ?, 'PENDIENTE')";
 
-        // 3. Repartimos las revisiones a todos menos al autor (salvo que esté solo)
         for (Object[] row : asignados) {
             int idRevisor = Integer.parseInt(row[0].toString());
-            
             if (estaSolo || idRevisor != idAutor) {
                 db.executeUpdate(sqlInsert, nuevoIdRevision, idReportaje, idRevisor);
                 nuevoIdRevision++;
             }
         }
+    }
+
+    public boolean isReporteroResponsable(int idReportero, int idEvento) {
+        String sql = "SELECT rol FROM Asignacion WHERE reportero_id = ? AND evento_id = ?";
+        List<Object[]> result = db.executeQueryArray(sql, idReportero, idEvento);
+        if (result != null && !result.isEmpty() && result.get(0)[0] != null) {
+            return "Responsable".equalsIgnoreCase(result.get(0)[0].toString());
+        }
+        return false;
+    }
+
+    public List<Object[]> getRevisionesReportaje(int idReportaje) {
+        String sql = "SELECT rep.nombre, rev.estado, " +
+                     "(SELECT texto FROM Comentario c WHERE c.revision_id = rev.id ORDER BY fecha_hora DESC LIMIT 1) as comentario " +
+                     "FROM Revision rev " +
+                     "INNER JOIN Reportero rep ON rev.revisor_id = rep.id " +
+                     "WHERE rev.reportaje_id = ?";
+        return db.executeQueryArray(sql, idReportaje);
+    }
+
+    public void finalizarReportaje(int idReportaje) {
+        String sql = "UPDATE Reportaje SET estado = 'FINALIZADO' WHERE id = ?";
+        db.executeUpdate(sql, idReportaje);
+    }
+
+    public void actualizarTituloReportaje(int idReportaje, String nuevoTitulo) {
+        String sql = "UPDATE Reportaje SET titulo = ? WHERE id = ?";
+        db.executeUpdate(sql, nuevoTitulo, idReportaje);
+    }
+    
+    public boolean isReportajeFinalizado(int idReportaje) {
+        String sql = "SELECT estado FROM Reportaje WHERE id = ?";
+        List<Object[]> result = db.executeQueryArray(sql, idReportaje);
+        if (result != null && !result.isEmpty() && result.get(0)[0] != null) {
+            return "FINALIZADO".equals(result.get(0)[0].toString());
+        }
+        return false;
     }
 }

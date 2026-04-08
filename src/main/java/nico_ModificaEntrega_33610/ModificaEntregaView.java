@@ -4,6 +4,7 @@ import javax.swing.*;
 import net.miginfocom.swing.MigLayout;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Color;
 import nico_EntregarReportEvento.ReporteroDisplayDTO;
 
 public class ModificaEntregaView {
@@ -30,20 +31,24 @@ public class ModificaEntregaView {
     private JButton btnEliminarVideo;
     private JButton btnFijarVidDefinitivo;
 
-    // --- COMPONENTES REVISIÓN ---
-    private JPanel panelRevision;
     private JButton btnSolicitarRevision;
+
+    // --- NUEVOS COMPONENTES (HU 34107 - Finalizar) ---
+    private JTable tabRevisionesCompaneros;
+    private JLabel lblEstadoFinalizacion;
+    private JButton btnFinalizarReportaje;
 
     public ModificaEntregaView() {
         initialize();
     }
 
     private void initialize() {
-        frame = new JFrame("Modificar Reportaje y Gestionar Revisión (#33610 + #34112)");
-        frame.setBounds(100, 100, 1100, 850); 
+        frame = new JFrame("Modificar Reportaje y Gestionar Revisión");
+        frame.setBounds(100, 100, 1150, 900); 
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.getContentPane().setLayout(new MigLayout("", "[380px,grow][650px,grow]", "[][][grow][][][]"));
+        frame.getContentPane().setLayout(new MigLayout("", "[450px,grow][650px,grow]", "[][][grow][][][]"));
 
+        // --- CABECERA ---
         frame.getContentPane().add(new JLabel("Reportero Activo:"), "cell 0 0, split 2, alignx left");
         cbReporteros = new JComboBox<ReporteroDisplayDTO>();
         frame.getContentPane().add(cbReporteros, "cell 0 0, growx");
@@ -59,16 +64,37 @@ public class ModificaEntregaView {
         panelFiltro.add(rdbtnEntregados);
         frame.getContentPane().add(panelFiltro, "cell 1 0, alignx left");
 
-        frame.getContentPane().add(new JLabel("Eventos Asignados:"), "cell 0 1, gaptop 10");
-
+        // --- COLUMNA IZQUIERDA (Eventos y Revisiones) ---
+        JPanel panelIzquierdo = new JPanel(new MigLayout("insets 0", "[grow]", "[][grow][][grow][][][]"));
+        
+        panelIzquierdo.add(new JLabel("Eventos Asignados:"), "cell 0 0");
         tabEventos = new JTable();
         tabEventos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        frame.getContentPane().add(new JScrollPane(tabEventos), "cell 0 2, grow"); 
+        panelIzquierdo.add(new JScrollPane(tabEventos), "cell 0 1, grow"); 
 
+        panelIzquierdo.add(new JLabel("Revisiones de compañeros (Lectura):"), "cell 0 2, gaptop 15");
+        tabRevisionesCompaneros = new JTable();
+        panelIzquierdo.add(new JScrollPane(tabRevisionesCompaneros), "cell 0 3, grow");
+
+        lblEstadoFinalizacion = new JLabel("Estado: -");
+        lblEstadoFinalizacion.setFont(new Font("Tahoma", Font.ITALIC, 12));
+        panelIzquierdo.add(lblEstadoFinalizacion, "cell 0 4, gaptop 5");
+
+        btnSolicitarRevision = new JButton("Solicitar Revisión");
+        panelIzquierdo.add(btnSolicitarRevision, "cell 0 5, gaptop 10, alignx left");
+
+        btnFinalizarReportaje = new JButton("Finalizar Reportaje");
+        btnFinalizarReportaje.setFont(new Font("Tahoma", Font.BOLD, 12));
+        btnFinalizarReportaje.setEnabled(false);
+        panelIzquierdo.add(btnFinalizarReportaje, "cell 0 6, gaptop 15, growx");
+
+        frame.getContentPane().add(panelIzquierdo, "cell 0 1 1 3, grow");
+
+        // --- COLUMNA DERECHA (Edición) ---
         JPanel panelDerecho = new JPanel(new MigLayout("insets 0", "[grow]", "[][grow]"));
         
         JPanel panelForm = new JPanel(new MigLayout("", "[][grow]", "[][][grow]"));
-        panelForm.setBorder(BorderFactory.createTitledBorder("Contenido del Reportaje"));
+        panelForm.setBorder(BorderFactory.createTitledBorder("Contenido del Reportaje (Editable)"));
         panelForm.add(new JLabel("Título (único):"), "cell 0 0");
         txtTitulo = new JTextField();
         panelForm.add(txtTitulo, "cell 1 0, growx");
@@ -110,31 +136,23 @@ public class ModificaEntregaView {
         panelMultimedia.add(panelBotonesVid, "cell 1 3, aligny top");
 
         panelDerecho.add(panelMultimedia, "cell 0 1, grow");
-        frame.getContentPane().add(panelDerecho, "cell 1 2 1 3, grow");
+        frame.getContentPane().add(panelDerecho, "cell 1 1 1 3, grow");
 
-        // --- PANEL DE EDICIÓN Y REVISIÓN (IZQUIERDA ABAJO) ---
+        // --- PANEL INFERIOR ---
         lblPermisoModificar = new JLabel("¿Puede modificar?: -");
         lblPermisoModificar.setFont(new Font("Tahoma", Font.BOLD, 12));
-        frame.getContentPane().add(lblPermisoModificar, "cell 0 3");
+        frame.getContentPane().add(lblPermisoModificar, "cell 1 4, alignx left");
         
         btnGuardarCambio = new JButton("Guardar Cambio");
         btnGuardarCambio.setVisible(false);
-        frame.getContentPane().add(btnGuardarCambio, "cell 0 4, alignx left");
-
-        // Nuevo Panel de Revisión Limpio (Sin ComboBox)
-        panelRevision = new JPanel(new MigLayout("", "[grow]", "[]"));
-        panelRevision.setBorder(BorderFactory.createTitledBorder("Gestión de Revisión"));
-        btnSolicitarRevision = new JButton("Solicitar Revisión");
-        panelRevision.add(btnSolicitarRevision, "align center");
-        panelRevision.setVisible(false); // Oculto por defecto
-        frame.getContentPane().add(panelRevision, "cell 0 5, growx");
+        frame.getContentPane().add(btnGuardarCambio, "cell 1 5, alignx left");
 
         JPanel panelAccionesFinales = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         btnEntregar = new JButton("Entregar");
         btnCancelar = new JButton("Cancelar");
         panelAccionesFinales.add(btnEntregar);
         panelAccionesFinales.add(btnCancelar);
-        frame.getContentPane().add(panelAccionesFinales, "cell 1 5, growx");
+        frame.getContentPane().add(panelAccionesFinales, "cell 1 6, growx");
     }
 
     public JFrame getFrame() { return frame; }
@@ -157,7 +175,9 @@ public class ModificaEntregaView {
     public JButton getBtnAnadirVideo() { return btnAnadirVideo; }
     public JButton getBtnEliminarVideo() { return btnEliminarVideo; }
     public JButton getBtnFijarVidDefinitivo() { return btnFijarVidDefinitivo; }
-    
-    public JPanel getPanelRevision() { return panelRevision; }
     public JButton getBtnSolicitarRevision() { return btnSolicitarRevision; }
+    
+    public JTable getTabRevisionesCompaneros() { return tabRevisionesCompaneros; }
+    public JLabel getLblEstadoFinalizacion() { return lblEstadoFinalizacion; }
+    public JButton getBtnFinalizarReportaje() { return btnFinalizarReportaje; }
 }

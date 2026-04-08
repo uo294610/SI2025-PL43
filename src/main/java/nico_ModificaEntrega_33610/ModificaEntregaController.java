@@ -6,6 +6,7 @@ import java.util.List;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import giis.demo.util.SwingUtil;
 import nico_EntregarReportEvento.EventoResumenDTO;
@@ -16,6 +17,7 @@ public class ModificaEntregaController {
     private ModificaEntregaModel model;
     private ModificaEntregaView view;
     private ReportajeEdicionDTO reportajeActual;
+    private int idEventoSeleccionado = -1;
 
     public ModificaEntregaController(ModificaEntregaModel m, ModificaEntregaView v) {
         this.model = m;
@@ -56,6 +58,7 @@ public class ModificaEntregaController {
         view.getBtnFijarVidDefinitivo().addActionListener(e -> fijarDefinitivo(view.getTabVideos()));
 
         view.getBtnSolicitarRevision().addActionListener(e -> procesarSolicitudRevision());
+        view.getBtnFinalizarReportaje().addActionListener(e -> finalizarReportaje());
     }
 
     private void cargarReporteros() {
@@ -71,7 +74,7 @@ public class ModificaEntregaController {
         if (isPendiente) {
             view.getBtnEntregar().setVisible(true);
             view.getBtnGuardarCambio().setVisible(false);
-            view.getPanelRevision().setVisible(false);
+            view.getBtnSolicitarRevision().setVisible(false);
             view.getLblPermisoModificar().setText("Modo: Nueva Entrega");
             view.getTxtTitulo().setEditable(true);
         } else {
@@ -99,10 +102,12 @@ public class ModificaEntregaController {
         int fila = view.getTabEventos().getSelectedRow();
         if (fila < 0 || view.getRdbtnPendientes().isSelected()) {
             limpiarTablasMultimedia();
-            view.getPanelRevision().setVisible(false);
+            view.getBtnSolicitarRevision().setVisible(false);
+            limpiarTablaRevisiones();
             return;
         }
 
+        idEventoSeleccionado = (int) view.getTabEventos().getValueAt(fila, 0);
         ReporteroDisplayDTO repCombo = (ReporteroDisplayDTO) view.getCbReporteros().getSelectedItem();
         int idRepActual = Integer.parseInt(repCombo.getId());
         reportajeActual = model.getUltimaVersion(idRepActual); 
@@ -113,8 +118,24 @@ public class ModificaEntregaController {
             view.getAreaCuerpo().setText(reportajeActual.getCuerpo());
 
             recargarTablasMultimedia();
+            cargarRevisionesCompaneros(idRepActual, idEventoSeleccionado);
+            
+            boolean isResponsable = model.isReporteroResponsable(idRepActual, idEventoSeleccionado);
+            boolean isFinalizado = model.isReportajeFinalizado(reportajeActual.getReportaje_id());
 
-            if (reportajeActual.isRevision_solicitada()) {
+            if (isFinalizado) {
+                view.getLblPermisoModificar().setText("🔒 Reportaje FINALIZADO. Edición bloqueada.");
+                view.getLblPermisoModificar().setForeground(Color.RED);
+                congelarEdicion(true);
+            } else if (isResponsable) {
+                view.getLblPermisoModificar().setText("👑 Responsable: Tienes permisos totales (incluye Título).");
+                view.getLblPermisoModificar().setForeground(new Color(0, 102, 204));
+                congelarEdicion(false);
+                
+                if (reportajeActual.isRevision_solicitada()) {
+                    view.getBtnSolicitarRevision().setVisible(false);
+                }
+            } else if (reportajeActual.isRevision_solicitada()) {
                 view.getLblPermisoModificar().setText("🔒 Solicitaste Revisión: No puedes modificar.");
                 view.getLblPermisoModificar().setForeground(Color.RED);
                 congelarEdicion(true);
@@ -132,7 +153,52 @@ public class ModificaEntregaController {
         }
     }
 
+    private void cargarRevisionesCompaneros(int idReportero, int idEvento) {
+        boolean isResponsable = model.isReporteroResponsable(idReportero, idEvento);
+        
+        if (!isResponsable) {
+            limpiarTablaRevisiones();
+            view.getLblEstadoFinalizacion().setText("Estado: No eres el Responsable de este evento.");
+            view.getLblEstadoFinalizacion().setForeground(Color.GRAY);
+            view.getBtnFinalizarReportaje().setEnabled(false);
+            return;
+        }
+
+        List<Object[]> revisiones = model.getRevisionesReportaje(reportajeActual.getReportaje_id());
+        DefaultTableModel tableModel = new DefaultTableModel(new Object[]{"Revisor", "Estado", "Último Comentario"}, 0);
+        boolean todosFinalizados = true;
+        
+        for (Object[] rev : revisiones) {
+            tableModel.addRow(new Object[]{rev[0], rev[1], rev[2] != null ? rev[2] : ""});
+            if (!"FINALIZADA".equals(rev[1])) {
+                todosFinalizados = false;
+            }
+        }
+        
+        view.getTabRevisionesCompaneros().setModel(tableModel);
+        SwingUtil.autoAdjustColumns(view.getTabRevisionesCompaneros());
+
+        if (model.isReportajeFinalizado(reportajeActual.getReportaje_id())) {
+            view.getLblEstadoFinalizacion().setText("Estado: 🏆 FINALIZADO");
+            view.getLblEstadoFinalizacion().setForeground(new Color(0, 153, 51));
+            view.getBtnFinalizarReportaje().setEnabled(false);
+        } else if (revisiones.isEmpty()) {
+            view.getLblEstadoFinalizacion().setText("Estado: Aún no se ha solicitado revisión.");
+            view.getLblEstadoFinalizacion().setForeground(Color.BLACK);
+            view.getBtnFinalizarReportaje().setEnabled(false);
+        } else if (todosFinalizados) {
+            view.getLblEstadoFinalizacion().setText("Estado: ✅ Listo para finalizar");
+            view.getLblEstadoFinalizacion().setForeground(Color.GREEN.darker());
+            view.getBtnFinalizarReportaje().setEnabled(true);
+        } else {
+            view.getLblEstadoFinalizacion().setText("Estado: ⚠️ Esperando revisiones finalizadas");
+            view.getLblEstadoFinalizacion().setForeground(Color.ORANGE.darker());
+            view.getBtnFinalizarReportaje().setEnabled(false);
+        }
+    }
+
     private void congelarEdicion(boolean congelar) {
+        view.getTxtTitulo().setEditable(!congelar);
         view.getTxtSubtitulo().setEditable(!congelar);
         view.getAreaCuerpo().setEditable(!congelar);
         view.getBtnGuardarCambio().setVisible(!congelar);
@@ -144,12 +210,16 @@ public class ModificaEntregaController {
         view.getBtnEliminarVideo().setEnabled(!congelar);
         view.getBtnFijarVidDefinitivo().setEnabled(!congelar);
         
-        view.getPanelRevision().setVisible(!congelar);
+        view.getBtnSolicitarRevision().setVisible(!congelar);
+    }
+
+    private void limpiarTablaRevisiones() {
+        view.getTabRevisionesCompaneros().setModel(new DefaultTableModel(new Object[]{"Revisor", "Estado", "Último Comentario"}, 0));
     }
 
     private void limpiarTablasMultimedia() {
-        view.getTabImagenes().setModel(new javax.swing.table.DefaultTableModel());
-        view.getTabVideos().setModel(new javax.swing.table.DefaultTableModel());
+        view.getTabImagenes().setModel(new DefaultTableModel());
+        view.getTabVideos().setModel(new DefaultTableModel());
     }
 
     private void recargarTablasMultimedia() {
@@ -232,33 +302,46 @@ public class ModificaEntregaController {
 
     private void guardarModificacion() {
         if (reportajeActual == null) return;
+        
+        String nuevoTit = view.getTxtTitulo().getText().trim();
         String nuevoSub = view.getTxtSubtitulo().getText().trim();
         String nuevoCuerpo = view.getAreaCuerpo().getText().trim();
+        
+        boolean tituloCambiado = !nuevoTit.equals(reportajeActual.getTitulo());
         String cambios = "";
-        if (!nuevoSub.equals(reportajeActual.getSubtitulo())) cambios += "subtítulo";
+        
+        if (tituloCambiado) cambios += "título";
+        if (!nuevoSub.equals(reportajeActual.getSubtitulo())) {
+            if (!cambios.isEmpty()) cambios += ", ";
+            cambios += "subtítulo";
+        }
         if (!nuevoCuerpo.equals(reportajeActual.getCuerpo())) {
             if (!cambios.isEmpty()) cambios += " y "; 
             cambios += "cuerpo";
         }
         
         if (cambios.isEmpty()) {
-            JOptionPane.showMessageDialog(view.getFrame(), "No has modificado el texto.");
+            JOptionPane.showMessageDialog(view.getFrame(), "No has modificado nada.");
             return;
         }
 
-        VersionReportajeEntity nuevaVersion = new VersionReportajeEntity();
-        nuevaVersion.setId(model.getUltimoId("VersionReportaje") + 1);
-        nuevaVersion.setReportaje_id(reportajeActual.getReportaje_id());
-        nuevaVersion.setSubtitulo(nuevoSub);
-        nuevaVersion.setCuerpo(nuevoCuerpo);
-        nuevaVersion.setFecha_hora(new java.sql.Timestamp(System.currentTimeMillis()));
-        nuevaVersion.setQue_cambio("Se modificó: " + cambios);
-
         try {
+            if (tituloCambiado) {
+                model.actualizarTituloReportaje(reportajeActual.getReportaje_id(), nuevoTit);
+            }
+
+            VersionReportajeEntity nuevaVersion = new VersionReportajeEntity();
+            nuevaVersion.setId(model.getUltimoId("VersionReportaje") + 1);
+            nuevaVersion.setReportaje_id(reportajeActual.getReportaje_id());
+            nuevaVersion.setSubtitulo(nuevoSub);
+            nuevaVersion.setCuerpo(nuevoCuerpo);
+            nuevaVersion.setFecha_hora(new java.sql.Timestamp(System.currentTimeMillis()));
+            nuevaVersion.setQue_cambio("Se modificó: " + cambios);
+
             model.insertarNuevaVersion(nuevaVersion);
             JOptionPane.showMessageDialog(view.getFrame(), "Cambios guardados.\n" + "Registro: " + nuevaVersion.getQue_cambio());
-            limpiarFormulario();
-            view.getTabEventos().clearSelection();
+            
+            seleccionarEvento();
         } catch (Exception e) {
             JOptionPane.showMessageDialog(view.getFrame(), "Error al guardar: " + e.getMessage());
         }
@@ -298,26 +381,35 @@ public class ModificaEntregaController {
         }
     }
     
-    // --- LÓGICA DE REVISIÓN AUTOMÁTICA ---
     private void procesarSolicitudRevision() {
-        int fila = view.getTabEventos().getSelectedRow();
-        if (fila < 0) return;
-        
-        int idEvento = (int) view.getTabEventos().getValueAt(fila, 0);
+        if (idEventoSeleccionado == -1) return;
         ReporteroDisplayDTO repCombo = (ReporteroDisplayDTO) view.getCbReporteros().getSelectedItem();
         int idAutor = Integer.parseInt(repCombo.getId());
         int idReportaje = reportajeActual.getReportaje_id();
 
         int confirm = JOptionPane.showConfirmDialog(view.getFrame(), 
-            "Al solicitar revisión, el reportaje quedará BLOQUEADO y se notificará a los compañeros del evento.\n¿Deseas continuar?", 
-            "Aviso Importante", JOptionPane.YES_NO_OPTION);
+            "Al solicitar revisión, el reportaje quedará BLOQUEADO y se notificará a los compañeros.\n¿Deseas continuar?", 
+            "Aviso", JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
-            model.solicitarRevisionAutomatica(idReportaje, idEvento, idAutor);
-            JOptionPane.showMessageDialog(view.getFrame(), "Revisión solicitada a los compañeros con éxito.");
-            
-            // Recargamos el evento para que aplique la congelación de botones
+            model.solicitarRevisionAutomatica(idReportaje, idEventoSeleccionado, idAutor);
+            JOptionPane.showMessageDialog(view.getFrame(), "Revisión solicitada.");
             seleccionarEvento(); 
+        }
+    }
+
+    private void finalizarReportaje() {
+        if (reportajeActual == null) return;
+        
+        int confirm = JOptionPane.showConfirmDialog(view.getFrame(), 
+            "¿Seguro que quieres finalizar definitivamente este reportaje? Ya no se podrán hacer más modificaciones.", 
+            "Finalizar Reportaje", JOptionPane.YES_NO_OPTION);
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            model.finalizarReportaje(reportajeActual.getReportaje_id());
+            JOptionPane.showMessageDialog(view.getFrame(), "¡Reportaje finalizado con éxito!");
+            
+            seleccionarEvento();
         }
     }
 
@@ -326,7 +418,11 @@ public class ModificaEntregaController {
         view.getTxtSubtitulo().setText("");
         view.getAreaCuerpo().setText("");
         reportajeActual = null;
+        idEventoSeleccionado = -1;
         limpiarTablasMultimedia();
-        view.getPanelRevision().setVisible(false);
+        limpiarTablaRevisiones();
+        view.getBtnSolicitarRevision().setVisible(false);
+        view.getBtnFinalizarReportaje().setEnabled(false);
+        view.getLblEstadoFinalizacion().setText("Estado: -");
     }
 }
