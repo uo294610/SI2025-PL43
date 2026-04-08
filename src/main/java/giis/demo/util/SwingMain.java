@@ -13,7 +13,6 @@ import alex_GestionarOfrecimientos.*;
 import alex_InformeEvento_33613.*;
 import alex_InformeReportajes.*;
 import alex_DietasReportero.*;
-import alex_InformeAgenciaTematica.*;
 import adrian_distribuirReportajes_33606.*;
 import adrian_interesFreelance_34116.*;
 import javax.swing.BoxLayout;
@@ -219,15 +218,7 @@ public class SwingMain {
         });
         frame.getContentPane().add(btnDietasReportero);
         
-        // Botón para el informe ecónomico económico para agencias
-        JButton btnInformeAgencia = new JButton("Informe Económico por Temática (Agencia)");
-        btnInformeAgencia.addActionListener(e -> {
-            InformeAgenciaController controller = new InformeAgenciaController(new InformeAgenciaModel(), new InformeAgenciaView());
-            controller.initController();
-            controller.initView();
-        });
-        frame.getContentPane().add(btnInformeAgencia, "growx, height 40!");
-    } 
+    }
     
     public JFrame getFrame() { return this.frame; }
 }
