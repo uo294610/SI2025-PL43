@@ -9,11 +9,11 @@ public class OfrecimientoModView {
 	private JComboBox<String> cbFiltro;
 	private JButton btnQuitar, btnOfrecer;
 	private JTextField txtBuscar;
-	private JCheckBox chkFiltrarTematica; // NUEVO
-	private JLabel lblTematicaEvento;     // NUEVO
+	private JCheckBox chkFiltrarTematica; 
+	private JLabel lblTematicaEvento;     
 
 	public OfrecimientoModView() {
-		frame = new JFrame("Gestión de Ofrecimientos (#33604 / #34110)");
+		frame = new JFrame("Gestión de Ofrecimientos (Sprint 3 - HU #34307)");
 		frame.setBounds(100, 100, 950, 650);
 		frame.getContentPane().setLayout(new MigLayout("", "[grow]", "[][][grow][][][grow][]"));
 

@@ -53,7 +53,8 @@ public class OfrecimientoModController {
 
 	public void initView() {
 		eventosActuales = model.getEventosConReportero();
-		view.getTabEv().setModel(SwingUtil.getTableModelFromPojos(eventosActuales, new String[]{"id","nombre","fecha","reportero", "tematica"}));
+		// Añadimos la columna embargo S3
+		view.getTabEv().setModel(SwingUtil.getTableModelFromPojos(eventosActuales, new String[]{"id","nombre","fecha","reportero", "tematica", "embargo"}));
 		
 		view.getCbFiltro().setSelectedIndex(0);
 		view.getBtnOfrecer().setEnabled(false);
@@ -68,19 +69,22 @@ public class OfrecimientoModController {
 		EventoModDTO evSeleccionado = eventosActuales.get(modeloFila);
 		String idEv = evSeleccionado.getId();
 		
+		// HU #34307: Comprobamos si el evento seleccionado tiene embargo activo
+		boolean embargoActivo = "SÍ (ACTIVO)".equals(evSeleccionado.getEmbargo());
+		
 		boolean sinOfrecimiento = view.getCbFiltro().getSelectedIndex() == 1;
 		boolean filtrarPorTematica = view.getChkFiltrarTematica().isSelected();
 
-		// Ya no pasamos el tematicaId, el SQL se encarga de cruzar los datos
 		if (sinOfrecimiento) {
-			if (filtrarPorTematica) empresasActuales = model.getEmpresasSinOfrecimientoPorTematica(idEv);
-			else empresasActuales = model.getEmpresasSinOfrecimiento(idEv);
+			if (filtrarPorTematica) empresasActuales = model.getEmpresasSinOfrecimientoPorTematica(idEv, embargoActivo);
+			else empresasActuales = model.getEmpresasSinOfrecimiento(idEv, embargoActivo);
 		} else {
-			if (filtrarPorTematica) empresasActuales = model.getEmpresasConOfrecimientoPorTematica(idEv);
-			else empresasActuales = model.getEmpresasConOfrecimiento(idEv);
+			if (filtrarPorTematica) empresasActuales = model.getEmpresasConOfrecimientoPorTematica(idEv, embargoActivo);
+			else empresasActuales = model.getEmpresasConOfrecimiento(idEv, embargoActivo);
 		}
 		
-		view.getTabEmp().setModel(SwingUtil.getTableModelFromPojos(empresasActuales, new String[]{"id","nombre","estado","especialidad"}));
+		// Añadimos la columna aceptaEmbargos S3
+		view.getTabEmp().setModel(SwingUtil.getTableModelFromPojos(empresasActuales, new String[]{"id","nombre","estado","especialidad", "aceptaEmbargos"}));
 	}
 
 	private void ejecutarOfrecer() {
