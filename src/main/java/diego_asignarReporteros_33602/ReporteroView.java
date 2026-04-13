@@ -17,6 +17,10 @@ public class ReporteroView {
     private JCheckBox chkFiltroTematica;
     private JComboBox<String> cbTipoReportero;
     
+    // NUEVOS BOTONES
+    private JButton btnHacerResponsable;
+    private JButton btnFinalizarAsignacion;
+    
     public ReporteroView() {
         initialize();
     }
@@ -24,9 +28,9 @@ public class ReporteroView {
     private void initialize() {
         frame = new JFrame();
         frame.setTitle("Gestión de Asignaciones de Reporteros");
-        frame.setBounds(0, 0, 680, 700);
+        frame.setBounds(0, 0, 850, 750); 
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.getContentPane().setLayout(new MigLayout("", "[grow]", "[][][][grow][][grow][][grow][]"));
+        frame.getContentPane().setLayout(new MigLayout("", "[grow]", "[][][][grow][][grow][][grow][][]"));
 
         // Cabecera: ID Agencia y Filtro
         frame.getContentPane().add(new JLabel("ID Agencia:"), "flowx,cell 0 0");
@@ -51,13 +55,13 @@ public class ReporteroView {
         tabEventos.setDefaultEditor(Object.class, null); 
         frame.getContentPane().add(new JScrollPane(tabEventos), "cell 0 3,grow");
 
-        // Tabla de Reporteros Disponibles + Checkbox
+        // Tabla de Reporteros Disponibles + Checkbox y Desplegable
         frame.getContentPane().add(new JLabel("2. Disponibles (Ctrl+Click para varios):"), "flowx, cell 0 4");
         
         cbTipoReportero = new JComboBox<>(new String[]{"Todos", "Básico", "Reportero gráfico", "Camarógrafo"});
         frame.getContentPane().add(cbTipoReportero, "cell 0 4");
 
-        chkFiltroTematica = new JCheckBox("Filtrar por temática", true);
+        chkFiltroTematica = new JCheckBox("Filtrar por coincidencia de temática", true);
         frame.getContentPane().add(chkFiltroTematica, "cell 0 4");
         
         tabReporteros = new JTable();
@@ -79,6 +83,13 @@ public class ReporteroView {
         // Botón Eliminar
         btnEliminar = new JButton("Eliminar Reportero(s) ↑");
         frame.getContentPane().add(btnEliminar, "cell 0 9, align right");
+
+        // --- NUEVOS BOTONES PARA LA HU ---
+        btnHacerResponsable = new JButton("Hacer Responsable al seleccionado");
+        frame.getContentPane().add(btnHacerResponsable, "flowx, cell 0 10, align left");
+
+        btnFinalizarAsignacion = new JButton("FINALIZAR ASIGNACIÓN");
+        frame.getContentPane().add(btnFinalizarAsignacion, "cell 0 10, align right");
     }
 
     // Getters
@@ -93,4 +104,6 @@ public class ReporteroView {
     public JButton getBtnEliminar() { return btnEliminar; }
     public JCheckBox getChkFiltroTematica() { return chkFiltroTematica; }
     public JComboBox<String> getCbTipoReportero() { return cbTipoReportero; }
+    public JButton getBtnHacerResponsable() { return btnHacerResponsable; }
+    public JButton getBtnFinalizarAsignacion() { return btnFinalizarAsignacion; }
 }
