@@ -3,8 +3,9 @@ package alex_GestionarOfrecimientos;
 import java.awt.Component;
 import java.util.List;
 import javax.swing.*;
-import giis.demo.util.SwingUtil;
-import java.awt.Color;
+import javax.swing.table.DefaultTableModel;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class OfrecimientosController {
     private OfrecimientosModel model;
@@ -21,6 +22,7 @@ public class OfrecimientosController {
         view.getChkFiltroEmpresa().addActionListener(e -> recargarComboTematicas());
         
         view.getCbTematicas().addActionListener(e -> cargarTabla());
+        view.getCbFiltroEmbargo().addActionListener(e -> cargarTabla());
         view.getRdPendientes().addActionListener(e -> cargarTabla());
         view.getRdDecididos().addActionListener(e -> cargarTabla());
         
@@ -61,7 +63,6 @@ public class OfrecimientosController {
         if (empresa == null) return;
         
         boolean filtroActivo = view.getChkFiltroEmpresa().isSelected();
-        view.getCbTematicas().setEnabled(filtroActivo);
 
         List<Object[]> tematicas;
         if (filtroActivo) {
@@ -96,35 +97,57 @@ public class OfrecimientosController {
         try {
             String txtMin = view.getTxtPrecioMin().getText().trim();
             if (!txtMin.isEmpty()) minPrecio = Double.parseDouble(txtMin);
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(view.getFrame(), "Formato de precio mínimo incorrecto.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+        } catch (NumberFormatException e) { return; }
 
         try {
             String txtMax = view.getTxtPrecioMax().getText().trim();
             if (!txtMax.isEmpty()) maxPrecio = Double.parseDouble(txtMax);
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(view.getFrame(), "Formato de precio máximo incorrecto.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+        } catch (NumberFormatException e) { return; }
 
-        if (minPrecio != null && maxPrecio != null && minPrecio > maxPrecio) {
-            JOptionPane.showMessageDialog(view.getFrame(), 
-                "El precio mínimo no puede ser mayor que el precio máximo.", 
-                "Rango de precios incorrecto", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+        String filtroEmbargo = view.getCbFiltroEmbargo().getSelectedItem().toString();
 
         listaActual = model.getOfrecimientos(
             (int) emp[0], view.getChkFiltroEmpresa().isSelected(), 
             (int) tem[0], view.getRdPendientes().isSelected(),
-            minPrecio, maxPrecio
+            minPrecio, maxPrecio, filtroEmbargo
         );
 
-        String[] columnasDTO = {"id", "nombreEvento", "nombreAgencia", "fechaEvento", "nombreTematica", "precio", "decision"};
-        view.getTablaOfrecimientos().setModel(SwingUtil.getTableModelFromPojos(listaActual, columnasDTO));
-        
+        String[] columnas = {"id", "evento", "agencia", "precio", "temática", "embargo", "fin embargo"};
+        DefaultTableModel tm = new DefaultTableModel(columnas, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) { return false; }
+        };
+
+        DateTimeFormatter dbFmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormatter outFmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        for (OfrecimientosDTO dto : listaActual) {
+            String estadoEmbargoStr = "No";
+            String finEmbargoStr = "-";
+            
+            if (dto.getFechaFinEmbargo() != null) {
+                if ("PARCIAL".equalsIgnoreCase(dto.getTipoAcceso())) estadoEmbargoStr = "Parcial";
+                else estadoEmbargoStr = "Sí";
+                
+                try {
+                    LocalDateTime ldt = LocalDateTime.parse(dto.getFechaFinEmbargo().substring(0, 19), dbFmt);
+                    finEmbargoStr = ldt.format(outFmt);
+                } catch (Exception e) { finEmbargoStr = dto.getFechaFinEmbargo(); }
+            }
+
+            Object[] fila = {
+                dto.getId(),
+                dto.getNombreEvento(),
+                dto.getNombreAgencia(),
+                String.format("%,.0f €", dto.getPrecio()),
+                dto.getNombreTematica(),
+                estadoEmbargoStr,
+                finEmbargoStr
+            };
+            tm.addRow(fila);
+        }
+
+        view.getTablaOfrecimientos().setModel(tm);
         comprobarEstadoFila();
     }
 
@@ -135,39 +158,59 @@ public class OfrecimientosController {
             view.getBtnAceptar().setEnabled(false);
             view.getBtnRechazar().setEnabled(false);
             view.getBtnEliminar().setEnabled(false);
-            view.setMensajeDecision("Seleccione un ofrecimiento para ver su estado.", false);
-            view.getDetalleEvento().setModel(new javax.swing.table.DefaultTableModel());
+            view.getTxtDetalleEvento().setText("\n  Seleccione un evento de la tabla.");
             return;
         }
 
-        OfrecimientosDTO seleccionado = listaActual.get(fila);
+        OfrecimientosDTO dto = listaActual.get(fila);
         
-        String[] columnasDetalle = {"id", "nombreEvento", "nombreAgencia", "fechaEvento", "nombreTematica", "precio", "decision"};
-        view.getDetalleEvento().setModel(SwingUtil.getRecordModelFromPojo(seleccionado, columnasDetalle));
-        SwingUtil.autoAdjustColumns(view.getDetalleEvento());
-
-        boolean estaBloqueado = seleccionado.isAcceso();
-
+        boolean estaBloqueado = dto.isAcceso() && "COMPLETO".equalsIgnoreCase(dto.getTipoAcceso());
         view.getBtnAceptar().setEnabled(!estaBloqueado);
         view.getBtnRechazar().setEnabled(!estaBloqueado);
         view.getBtnEliminar().setEnabled(!estaBloqueado);
 
-        if (estaBloqueado) {
-            view.setMensajeDecision("BLOQUEADO: Acceso ya concedido por la agencia. No se puede modificar.", true);
+        // Construir el texto del JTextArea
+        StringBuilder sb = new StringBuilder();
+        String tituloRep = dto.getTituloReportaje() != null ? dto.getTituloReportaje() : "Reportaje sin asignar";
+        
+        sb.append(String.format(" Título: %s (%s)\n", tituloRep, dto.getNombreEvento()));
+        sb.append(String.format(" Agencia: %-30s Precio: %,.0f €\n\n", dto.getNombreAgencia(), dto.getPrecio()));
+
+        if (dto.getFechaFinEmbargo() != null) {
+            String accesoTxt = "PARCIAL".equalsIgnoreCase(dto.getTipoAcceso()) ? "Acceso Parcial" : "Bloqueado";
+            sb.append(" ESTADO DE EMBARGO: ").append(accesoTxt).append(".\n");
+            
+            try {
+                DateTimeFormatter dbFmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                LocalDateTime ldt = LocalDateTime.parse(dto.getFechaFinEmbargo().substring(0, 19), dbFmt);
+                sb.append(" Fin de restricción: ").append(ldt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy 'a las' HH:mm'h'"))).append(".\n\n");
+            } catch (Exception e) {
+                sb.append(" Fin de restricción: ").append(dto.getFechaFinEmbargo()).append(".\n\n");
+            }
+
+            if (!estaBloqueado) {
+                sb.append(" * Tienes permiso para revisar parte del contenido y tomar una decisión.\n");
+            } else {
+                sb.append(" * BLOQUEADO: Acceso COMPLETO concedido. No se puede modificar.\n");
+            }
         } else {
-            view.setMensajeDecision("Editable: Puede modificar o eliminar la decisión libremente.", false);
+            sb.append(" ESTADO DE EMBARGO: Sin embargo.\n\n");
+            if (estaBloqueado) {
+                sb.append(" * BLOQUEADO: Acceso COMPLETO concedido. No se puede modificar.\n");
+            } else {
+                sb.append(" * Evento libre de restricciones. Puedes tomar una decisión.\n");
+            }
         }
+
+        view.getTxtDetalleEvento().setText(sb.toString());
+        view.getTxtDetalleEvento().setCaretPosition(0);
     }
 
     private void procesarDecision(String estado) {
         int fila = view.getTablaOfrecimientos().getSelectedRow();
-        if (fila == -1) {
-            JOptionPane.showMessageDialog(view.getFrame(), "Por favor, selecciona un ofrecimiento de la tabla.");
-            return;
-        }
+        if (fila == -1) return;
 
         int idOfrecimiento = (int) view.getTablaOfrecimientos().getValueAt(fila, 0);
-        
         try {
             model.actualizarDecision(idOfrecimiento, estado);
             JOptionPane.showMessageDialog(view.getFrame(), "Decisión actualizada correctamente.");
@@ -181,9 +224,7 @@ public class OfrecimientosController {
         @Override
         public Component getListCellRendererComponent(JList<?> l, Object v, int i, boolean s, boolean f) {
             super.getListCellRendererComponent(l, v, i, s, f);
-            if (v instanceof Object[]) {
-                setText(((Object[]) v)[1].toString());
-            }
+            if (v instanceof Object[]) setText(((Object[]) v)[1].toString());
             return this;
         }
     }

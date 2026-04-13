@@ -22,15 +22,20 @@ public class OfrecimientosModel {
         return db.executeQueryArray(sql, idEmpresa);
     }
 
-    public List<OfrecimientosDTO> getOfrecimientos(int idEmpresa, boolean soloEmpresa, int idTematica, boolean soloPendientes, Double minPrecio, Double maxPrecio) {
+    public List<OfrecimientosDTO> getOfrecimientos(int idEmpresa, boolean soloEmpresa, int idTematica, boolean soloPendientes, Double minPrecio, Double maxPrecio, String filtroEmbargo) {
         StringBuilder sql = new StringBuilder(
             "SELECT o.id, ev.nombre AS nombreEvento, a.nombre AS nombreAgencia, " +
-            "ev.fecha AS fechaEvento, t.nombre AS nombreTematica, ev.precio AS precio, o.decision, o.acceso " +
+            "ev.fecha AS fechaEvento, GROUP_CONCAT(DISTINCT t.nombre) AS nombreTematica, ev.precio AS precio, " +
+            "o.decision, o.acceso, o.tipo_acceso AS tipoAcceso, o.estado_pago AS estadoPago, " +
+            "MAX(r.fecha_fin_embargo) AS fechaFinEmbargo, " + 
+            "GROUP_CONCAT(DISTINCT r.titulo) AS tituloReportaje " + 
             "FROM Ofrecimiento o " +
             "JOIN Evento ev ON o.evento_id = ev.id " +
             "JOIN AgenciaPrensa a ON ev.agencia_id = a.id " +
             "JOIN EventoTematica etm ON ev.id = etm.evento_id " +
             "JOIN Tematica t ON etm.tematica_id = t.id " +
+            "LEFT JOIN EvaluacionReportaje er ON ev.id = er.evento_id " +
+            "LEFT JOIN Reportaje r ON er.reportaje_id = r.id " +
             "WHERE o.empresa_id = ? "
         );
 
@@ -60,6 +65,14 @@ public class OfrecimientosModel {
         if (maxPrecio != null) {
             sql.append("AND ev.precio <= ? ");
             params.add(maxPrecio);
+        }
+
+        sql.append("GROUP BY o.id, ev.nombre, a.nombre, ev.fecha, ev.precio, o.decision, o.acceso, o.tipo_acceso, o.estado_pago ");
+
+        if ("Embargados".equals(filtroEmbargo)) {
+            sql.append("HAVING MAX(r.fecha_fin_embargo) IS NOT NULL ");
+        } else if ("Sin embargo".equals(filtroEmbargo)) {
+            sql.append("HAVING MAX(r.fecha_fin_embargo) IS NULL ");
         }
 
         sql.append("ORDER BY ev.fecha ASC");
