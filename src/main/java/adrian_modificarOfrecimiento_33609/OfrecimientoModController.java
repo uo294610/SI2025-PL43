@@ -32,8 +32,21 @@ public class OfrecimientoModController {
 			if (!e.getValueIsAdjusting()) {
 				int f = view.getTabEv().getSelectedRow();
 				if (f >= 0) {
-					String nombreTematica = view.getTabEv().getValueAt(f, 4).toString(); 
-					view.getLblTematicaEvento().setText("Temática detectada: " + nombreTematica);
+					int modeloFila = view.getTabEv().convertRowIndexToModel(f);
+					EventoModDTO evSeleccionado = eventosActuales.get(modeloFila);
+					
+					view.getLblTematicaEvento().setText("Temática detectada: " + evSeleccionado.getTematica());
+					
+					// HU #XXXXX: Bloquear si la asignación no está finalizada
+					boolean sinOfrecimiento = view.getCbFiltro().getSelectedIndex() == 1;
+					if (sinOfrecimiento && !evSeleccionado.isAsignacionFinalizada()) {
+						view.getBtnOfrecer().setEnabled(false);
+						view.getBtnOfrecer().setToolTipText("Debe finalizar la asignación de reporteros primero.");
+					} else if (sinOfrecimiento && evSeleccionado.isAsignacionFinalizada()) {
+						view.getBtnOfrecer().setEnabled(true);
+						view.getBtnOfrecer().setToolTipText(null);
+					}
+					
 					cargarEmpresas();
 				}
 			}
@@ -41,19 +54,30 @@ public class OfrecimientoModController {
 		
 		view.getCbFiltro().addActionListener(e -> {
 			boolean sinOfrecimiento = view.getCbFiltro().getSelectedIndex() == 1;
-			view.getBtnOfrecer().setEnabled(sinOfrecimiento);
 			view.getBtnQuitar().setEnabled(!sinOfrecimiento);
+			
+			// Re-evaluar el bloqueo del botón ofrecer
+			int f = view.getTabEv().getSelectedRow();
+			if (f >= 0 && sinOfrecimiento) {
+				int modeloFila = view.getTabEv().convertRowIndexToModel(f);
+				boolean finalizada = eventosActuales.get(modeloFila).isAsignacionFinalizada();
+				view.getBtnOfrecer().setEnabled(finalizada);
+			} else {
+				view.getBtnOfrecer().setEnabled(false);
+			}
+			
 			cargarEmpresas();
 		});
 
 		view.getChkFiltrarTematica().addActionListener(e -> cargarEmpresas());
+		view.getChkTarifaPlana().addActionListener(e -> cargarEmpresas()); // NUEVO LISTENER
 		view.getBtnOfrecer().addActionListener(e -> ejecutarOfrecer());
 		view.getBtnQuitar().addActionListener(e -> ejecutarQuitar());
 	}
 
 	public void initView() {
 		eventosActuales = model.getEventosConReportero();
-		view.getTabEv().setModel(SwingUtil.getTableModelFromPojos(eventosActuales, new String[]{"id","nombre","fecha","reportero", "tematica"}));
+		view.getTabEv().setModel(SwingUtil.getTableModelFromPojos(eventosActuales, new String[]{"id","nombre","fecha","reportero", "tematica", "embargo"}));
 		
 		view.getCbFiltro().setSelectedIndex(0);
 		view.getBtnOfrecer().setEnabled(false);
@@ -67,20 +91,23 @@ public class OfrecimientoModController {
 		int modeloFila = view.getTabEv().convertRowIndexToModel(vistaFila);
 		EventoModDTO evSeleccionado = eventosActuales.get(modeloFila);
 		String idEv = evSeleccionado.getId();
+		String idAgencia = evSeleccionado.getAgenciaId();
 		
+		boolean embargoActivo = "SÍ (ACTIVO)".equals(evSeleccionado.getEmbargo());
 		boolean sinOfrecimiento = view.getCbFiltro().getSelectedIndex() == 1;
 		boolean filtrarPorTematica = view.getChkFiltrarTematica().isSelected();
+		boolean soloTarifaPlana = view.getChkTarifaPlana().isSelected();
 
-		// Ya no pasamos el tematicaId, el SQL se encarga de cruzar los datos
 		if (sinOfrecimiento) {
-			if (filtrarPorTematica) empresasActuales = model.getEmpresasSinOfrecimientoPorTematica(idEv);
-			else empresasActuales = model.getEmpresasSinOfrecimiento(idEv);
+			if (filtrarPorTematica) empresasActuales = model.getEmpresasSinOfrecimientoPorTematica(idEv, embargoActivo, idAgencia, soloTarifaPlana);
+			else empresasActuales = model.getEmpresasSinOfrecimiento(idEv, embargoActivo, idAgencia, soloTarifaPlana);
 		} else {
-			if (filtrarPorTematica) empresasActuales = model.getEmpresasConOfrecimientoPorTematica(idEv);
-			else empresasActuales = model.getEmpresasConOfrecimiento(idEv);
+			if (filtrarPorTematica) empresasActuales = model.getEmpresasConOfrecimientoPorTematica(idEv, embargoActivo, idAgencia, soloTarifaPlana);
+			else empresasActuales = model.getEmpresasConOfrecimiento(idEv, embargoActivo, idAgencia, soloTarifaPlana);
 		}
 		
-		view.getTabEmp().setModel(SwingUtil.getTableModelFromPojos(empresasActuales, new String[]{"id","nombre","estado","especialidad"}));
+		// Añadida la columna tarifaPlana
+		view.getTabEmp().setModel(SwingUtil.getTableModelFromPojos(empresasActuales, new String[]{"id","nombre","estado","especialidad", "aceptaEmbargos", "tarifaPlana", "estadoPago"}));
 	}
 
 	private void ejecutarOfrecer() {
@@ -88,7 +115,17 @@ public class OfrecimientoModController {
 		int fEmp = view.getTabEmp().getSelectedRow();
 		if (fEv < 0 || fEmp < 0) return;
 
-		model.insertarOfrecimiento(view.getTabEv().getValueAt(fEv, 0).toString(), empresasActuales.get(fEmp).getId());
+		EmpresaModDTO empresa = empresasActuales.get(fEmp);
+
+		// NUEVO HU: Validación de morosos
+		if ("SÍ".equals(empresa.getTarifaPlana()) && !empresa.isAlCorrientePago()) {
+			JOptionPane.showMessageDialog(view.getFrame(), 
+				"No se puede ofrecer reportajes a " + empresa.getNombre() + ".\nMotivo: Tiene una Tarifa Plana contratada pero NO está al corriente de pago.", 
+				"Bloqueo por Impago", JOptionPane.ERROR_MESSAGE);
+			return; // Cancelamos el proceso
+		}
+
+		model.insertarOfrecimiento(view.getTabEv().getValueAt(fEv, 0).toString(), empresa.getId());
 		JOptionPane.showMessageDialog(null, "Ofrecimiento enviado con éxito.");
 		cargarEmpresas();
 	}

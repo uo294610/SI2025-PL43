@@ -20,6 +20,8 @@ public class ReporteroController {
 
     public void initController() {
         view.getBtnCargarEventos().addActionListener(e -> SwingUtil.exceptionWrapper(() -> getEventos()));
+        view.getChkFiltroTematica().addActionListener(e -> SwingUtil.exceptionWrapper(() -> actualizarTablasReporteros()));
+        view.getCbTipoReportero().addActionListener(e -> SwingUtil.exceptionWrapper(() -> actualizarTablasReporteros()));
 
         view.getTabEventos().addMouseListener(new MouseAdapter() {
             @Override
@@ -27,12 +29,11 @@ public class ReporteroController {
                 SwingUtil.exceptionWrapper(() -> actualizarTablasReporteros());
             }
         });
-        
-        // NUEVO: Que se actualice la lista de reporteros automáticamente al hacer clic en el CheckBox
-        view.getChkFiltroTematica().addActionListener(e -> SwingUtil.exceptionWrapper(() -> actualizarTablasReporteros()));
-        view.getCbTipoReportero().addActionListener(e -> SwingUtil.exceptionWrapper(() -> actualizarTablasReporteros()));
+
         view.getBtnAsignar().addActionListener(e -> SwingUtil.exceptionWrapper(() -> asignarReporteros()));
         view.getBtnEliminar().addActionListener(e -> SwingUtil.exceptionWrapper(() -> eliminarReporteros()));
+        view.getBtnHacerResponsable().addActionListener(e -> SwingUtil.exceptionWrapper(() -> hacerResponsable()));
+        view.getBtnFinalizarAsignacion().addActionListener(e -> SwingUtil.exceptionWrapper(() -> finalizarAsignacion()));
     }
 
     public void initView() {
@@ -52,7 +53,7 @@ public class ReporteroController {
             eventos = model.getEventosConAsignacion(idAgencia);
         }
         
-        TableModel tmodel = SwingUtil.getTableModelFromPojos(eventos, new String[] { "id", "nombre", "fecha", "tematica" });
+        TableModel tmodel = SwingUtil.getTableModelFromPojos(eventos, new String[] { "id", "nombre", "fecha", "fechaFin", "tematica", "asignacionFinalizada" });
         view.getTabEventos().setModel(tmodel);
         SwingUtil.autoAdjustColumns(view.getTabEventos());
         
@@ -66,25 +67,27 @@ public class ReporteroController {
 
         int idAgencia = Integer.parseInt(view.getTxtAgenciaId().getText());
         int idEvento = Integer.parseInt(view.getTabEventos().getValueAt(row, 0).toString());
-        String fechaEvento = view.getTabEventos().getValueAt(row, 2).toString(); 
         
+        String fechaInicio = view.getTabEventos().getValueAt(row, 2).toString(); 
+        String fechaFin = view.getTabEventos().getValueAt(row, 3).toString(); 
+        boolean finalizada = Boolean.parseBoolean(view.getTabEventos().getValueAt(row, 5).toString());
+        
+        // Bloqueo si el evento está finalizado
+        view.getBtnAsignar().setEnabled(!finalizada);
+        view.getBtnEliminar().setEnabled(!finalizada);
+        view.getBtnHacerResponsable().setEnabled(!finalizada);
+        view.getBtnFinalizarAsignacion().setEnabled(!finalizada);
+
         boolean filtrarTematica = view.getChkFiltroTematica().isSelected();
-        // NUEVO: Obtenemos el tipo seleccionado ("Todos", "Básico", etc.)
         String tipoFiltro = view.getCbTipoReportero().getSelectedItem().toString();
 
-        // 1. Cargar disponibles (pasando el nuevo parámetro tipoFiltro)
-        List<ReporteroDTO> reporteros = model.getReporterosDisponibles(idAgencia, fechaEvento, idEvento, filtrarTematica, tipoFiltro);
-        
-        // AÑADIDO "tipo" a la vista de la tabla
+        List<ReporteroDTO> reporteros = model.getReporterosDisponibles(idAgencia, fechaInicio, fechaFin, idEvento, filtrarTematica, tipoFiltro);
         TableModel tmodelDisp = SwingUtil.getTableModelFromPojos(reporteros, new String[] { "id", "nombre", "tipo", "tematica" });
         view.getTabReporteros().setModel(tmodelDisp);
         SwingUtil.autoAdjustColumns(view.getTabReporteros());
 
-        // 2. Cargar asignados
         List<ReporteroDTO> asignados = model.getReporterosAsignados(idEvento);
-        
-        // AÑADIDO "tipo" a la vista de la tabla
-        TableModel tmodelAsig = SwingUtil.getTableModelFromPojos(asignados, new String[] { "id", "nombre", "tipo", "tematica" });
+        TableModel tmodelAsig = SwingUtil.getTableModelFromPojos(asignados, new String[] { "id", "nombre", "tipo", "tematica", "rol" });
         view.getTabReporterosAsignados().setModel(tmodelAsig);
         SwingUtil.autoAdjustColumns(view.getTabReporterosAsignados());
     }
@@ -94,18 +97,15 @@ public class ReporteroController {
         int[] rowsReporteros = view.getTabReporteros().getSelectedRows();
 
         if (rowEvento < 0 || rowsReporteros.length == 0) {
-            JOptionPane.showMessageDialog(view.getFrame(), "Debe seleccionar 1 evento y al menos 1 reportero de la lista de disponibles.");
+            JOptionPane.showMessageDialog(view.getFrame(), "Debe seleccionar 1 evento y al menos 1 reportero disponible.");
             return;
         }
 
         int idEvento = Integer.parseInt(view.getTabEventos().getValueAt(rowEvento, 0).toString());
-
         for (int row : rowsReporteros) {
             int idReportero = Integer.parseInt(view.getTabReporteros().getValueAt(row, 0).toString());
             model.asignarReportero(idEvento, idReportero);
         }
-
-        JOptionPane.showMessageDialog(view.getFrame(), "Asignación realizada.");
         actualizarTablasReporteros(); 
     }
 
@@ -114,18 +114,60 @@ public class ReporteroController {
         int[] rowsReporterosAsignados = view.getTabReporterosAsignados().getSelectedRows();
 
         if (rowEvento < 0 || rowsReporterosAsignados.length == 0) {
-            JOptionPane.showMessageDialog(view.getFrame(), "Debe seleccionar 1 evento y al menos 1 reportero de la lista de ASIGNADOS.");
+            JOptionPane.showMessageDialog(view.getFrame(), "Debe seleccionar 1 evento y al menos 1 reportero ASIGNADO.");
             return;
         }
 
         int idEvento = Integer.parseInt(view.getTabEventos().getValueAt(rowEvento, 0).toString());
-
         for (int row : rowsReporterosAsignados) {
             int idReportero = Integer.parseInt(view.getTabReporterosAsignados().getValueAt(row, 0).toString());
             model.eliminarAsignacion(idEvento, idReportero);
         }
-
-        JOptionPane.showMessageDialog(view.getFrame(), "Reportero(s) eliminado(s) del evento.");
         actualizarTablasReporteros(); 
+    }
+
+    private void hacerResponsable() {
+        int rowEvento = view.getTabEventos().getSelectedRow();
+        int[] rowsAsignados = view.getTabReporterosAsignados().getSelectedRows();
+
+        if (rowEvento < 0 || rowsAsignados.length != 1) {
+            JOptionPane.showMessageDialog(view.getFrame(), "Para designar a un responsable, seleccione EXACTAMENTE UN reportero de la lista de asignados.");
+            return;
+        }
+
+        int idEvento = Integer.parseInt(view.getTabEventos().getValueAt(rowEvento, 0).toString());
+        int idReportero = Integer.parseInt(view.getTabReporterosAsignados().getValueAt(rowsAsignados[0], 0).toString());
+        
+        model.setResponsable(idEvento, idReportero);
+        actualizarTablasReporteros();
+    }
+
+    private void finalizarAsignacion() {
+        int rowEvento = view.getTabEventos().getSelectedRow();
+        if (rowEvento < 0) return;
+
+        int countResponsables = 0;
+        int countBases = 0;
+
+        for (int i = 0; i < view.getTabReporterosAsignados().getRowCount(); i++) {
+            String rol = view.getTabReporterosAsignados().getValueAt(i, 4).toString();
+            if (rol.equals("Responsable")) countResponsables++;
+            if (rol.equals("Base")) countBases++;
+        }
+
+        if (countResponsables != 1 || countBases < 1) {
+            JOptionPane.showMessageDialog(view.getFrame(), 
+                "ERROR: Para finalizar la asignación debe existir obligatoriamente:\n" +
+                "- Exactamente 1 reportero Responsable.\n" +
+                "- Al menos 1 reportero Base.", 
+                "Reglas de Asignación", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        int idEvento = Integer.parseInt(view.getTabEventos().getValueAt(rowEvento, 0).toString());
+        model.finalizarAsignacion(idEvento);
+        
+        JOptionPane.showMessageDialog(view.getFrame(), "¡Asignación finalizada con éxito! Ya no se podrán hacer modificaciones.");
+        getEventos(); 
     }
 }

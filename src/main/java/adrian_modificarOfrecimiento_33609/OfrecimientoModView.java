@@ -9,12 +9,15 @@ public class OfrecimientoModView {
 	private JComboBox<String> cbFiltro;
 	private JButton btnQuitar, btnOfrecer;
 	private JTextField txtBuscar;
-	private JCheckBox chkFiltrarTematica; // NUEVO
-	private JLabel lblTematicaEvento;     // NUEVO
+	private JCheckBox chkFiltrarTematica; 
+	private JLabel lblTematicaEvento;      
+	
+	// NUEVO CHECKBOX
+	private JCheckBox chkTarifaPlana;
 
 	public OfrecimientoModView() {
-		frame = new JFrame("Gestión de Ofrecimientos (#33604 / #34110)");
-		frame.setBounds(100, 100, 950, 650);
+		frame = new JFrame("Gestión de Ofrecimientos (Tarifas y Embargos)");
+		frame.setBounds(100, 100, 1100, 650); // Un poco más ancha para las nuevas columnas
 		frame.getContentPane().setLayout(new MigLayout("", "[grow]", "[][][grow][][][grow][]"));
 
 		frame.getContentPane().add(new JLabel("1. Selecciona un Evento:"), "split 3");
@@ -36,6 +39,11 @@ public class OfrecimientoModView {
 		
 		chkFiltrarTematica = new JCheckBox("Filtrar solo empresas de esta temática");
 		pnlFiltros.add(chkFiltrarTematica, "gapleft 10");
+		
+		// NUEVO COMPONENTE
+		chkTarifaPlana = new JCheckBox("Solo con Tarifa Plana");
+		pnlFiltros.add(chkTarifaPlana, "gapleft 10");
+		
 		frame.getContentPane().add(pnlFiltros, "growx, wrap");
 
 		frame.getContentPane().add(new JLabel("2. Listado de Empresas:"), "wrap");
@@ -58,4 +66,5 @@ public class OfrecimientoModView {
 	public JTextField getTxtBuscar() { return txtBuscar; }
 	public JCheckBox getChkFiltrarTematica() { return chkFiltrarTematica; }
 	public JLabel getLblTematicaEvento() { return lblTematicaEvento; }
+	public JCheckBox getChkTarifaPlana() { return chkTarifaPlana; } // GETTER NUEVO
 }

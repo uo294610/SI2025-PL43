@@ -4,6 +4,7 @@ public class EventoEntregadoDTO {
 	private String id;
 	private String nombreEvento;
 	private String estado; 
+	private String embargo; 
 
 	public EventoEntregadoDTO() {}
 	public String getId() { return id; }
@@ -12,4 +13,6 @@ public class EventoEntregadoDTO {
 	public void setNombreEvento(String nombreEvento) { this.nombreEvento = nombreEvento; }
 	public String getEstado() { return estado; }
 	public void setEstado(String estado) { this.estado = estado; }
+	public String getEmbargo() { return embargo; }
+	public void setEmbargo(String embargo) { this.embargo = embargo; }
 }
