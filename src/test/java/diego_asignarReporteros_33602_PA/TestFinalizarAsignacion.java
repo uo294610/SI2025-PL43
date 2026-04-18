@@ -60,7 +60,7 @@ public class TestFinalizarAsignacion {
 	// /////////////////////////////////////////////////////////////
 	
 	/**
-	 * CP1 (Camino Feliz): 1 Responsable y 1 Base.
+	 * CP1 (Exito): 1 Responsable y 1 Base.
 	 * Cubre CE2 y CE5.
 	 * No debe lanzar excepción y debe marcar el evento como finalizado (TRUE).
 	 */
