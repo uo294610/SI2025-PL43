@@ -1,4 +1,4 @@
-package diego_asignarReporteros_33602;
+package diego_asignarReporteros_33602_PA;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;

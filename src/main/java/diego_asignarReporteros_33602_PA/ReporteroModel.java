@@ -1,8 +1,9 @@
-package diego_asignarReporteros_33602;
+package diego_asignarReporteros_33602_PA;
 
 import java.util.List;
 import java.util.ArrayList; 
 import giis.demo.util.Database;
+import giis.demo.util.ApplicationException;
 
 public class ReporteroModel {
     private Database db = new Database();
@@ -91,5 +92,27 @@ public class ReporteroModel {
 
     public void finalizarAsignacion(int idEvento) {
         db.executeUpdate("UPDATE Evento SET asignacion_finalizada = 1 WHERE id = ?", idEvento);
+    }
+    
+    // NUEVO MÉTODO CON LA LÓGICA DE NEGOCIO PARA PODER TESTEARLA
+    public void validarYFinalizarAsignacion(int idEvento) {
+        String sql = "SELECT rol FROM Asignacion WHERE evento_id = ?";
+        List<Object[]> roles = db.executeQueryArray(sql, idEvento);
+        
+        int countResponsables = 0;
+        int countBases = 0;
+        
+        for (Object[] row : roles) {
+            String rol = (String) row[0];
+            if ("Responsable".equals(rol)) countResponsables++;
+            if ("Base".equals(rol)) countBases++;
+        }
+        
+        if (countResponsables != 1 || countBases < 1) {
+            // CAMBIO: Ahora lanza la excepción estándar de vuestro proyecto
+            throw new giis.demo.util.ApplicationException("Debe haber exactamente 1 Responsable y al menos 1 Base.");
+        }
+        
+        finalizarAsignacion(idEvento);
     }
 }
