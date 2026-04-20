@@ -10,12 +10,19 @@ public class FreelanceView {
 	private JRadioButton rbInteresado, rbNoInteresado, rbEnDuda;
 	private ButtonGroup bgInteres;
 	private JButton btnGuardar;
+	private JComboBox<Object> cbFreelances;
 
 	public FreelanceView() {
 		frame = new JFrame("Bolsa de Eventos Freelance (#34116)");
 		frame.setBounds(100, 100, 800, 500);
 		frame.getContentPane().setLayout(new MigLayout("", "[grow]", "[][][grow][][]"));
-
+		
+		JPanel pnlLogin = new JPanel(new MigLayout("ins 0", "[][grow]", "[]"));
+		pnlLogin.add(new JLabel("Seleccionar Reportero:"));
+		cbFreelances = new JComboBox<>();
+		pnlLogin.add(cbFreelances, "growx");
+		frame.getContentPane().add(pnlLogin, "wrap, growx, gapbottom 10");
+		
 		lblCabecera = new JLabel("Cargando perfil...");
 		frame.getContentPane().add(lblCabecera, "wrap, gapbottom 10");
 
@@ -54,4 +61,5 @@ public class FreelanceView {
 	public JRadioButton getRbEnDuda() { return rbEnDuda; }
 	public JButton getBtnGuardar() { return btnGuardar; }
 	public ButtonGroup getBgInteres() { return bgInteres; }
+	public JComboBox<Object> getCbFreelances() { return cbFreelances; }
 }

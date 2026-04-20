@@ -27,6 +27,11 @@ public class FreelanceModel {
 		             "GROUP BY e.id, e.nombre, e.fecha, i.estado";
 		return db.executeQueryPojo(EventoFreelanceDTO.class, sql, reporteroId, reporteroId);
 	}
+	
+	public List<Object[]> getListaFreelances() {
+	    String sql = "SELECT id, nombre FROM Reportero WHERE agencia_id IS NULL ORDER BY nombre";
+	    return db.executeQueryArray(sql);
+	}
 
 	public void guardarInteres(int reporteroId, String eventoId, String estado) {
 		// Borramos si ya existía para no tener duplicados, y luego insertamos la nueva decisión
