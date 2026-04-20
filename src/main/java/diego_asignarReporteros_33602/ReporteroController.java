@@ -22,6 +22,7 @@ public class ReporteroController {
         view.getBtnCargarEventos().addActionListener(e -> SwingUtil.exceptionWrapper(() -> getEventos()));
         view.getChkFiltroTematica().addActionListener(e -> SwingUtil.exceptionWrapper(() -> actualizarTablasReporteros()));
         view.getCbTipoReportero().addActionListener(e -> SwingUtil.exceptionWrapper(() -> actualizarTablasReporteros()));
+        view.getChkSoloFreelance().addActionListener(e -> SwingUtil.exceptionWrapper(() -> actualizarTablasReporteros()));
 
         view.getTabEventos().addMouseListener(new MouseAdapter() {
             @Override
@@ -72,7 +73,6 @@ public class ReporteroController {
         String fechaFin = view.getTabEventos().getValueAt(row, 3).toString(); 
         boolean finalizada = Boolean.parseBoolean(view.getTabEventos().getValueAt(row, 5).toString());
         
-        // Bloqueo si el evento está finalizado
         view.getBtnAsignar().setEnabled(!finalizada);
         view.getBtnEliminar().setEnabled(!finalizada);
         view.getBtnHacerResponsable().setEnabled(!finalizada);
@@ -80,14 +80,16 @@ public class ReporteroController {
 
         boolean filtrarTematica = view.getChkFiltroTematica().isSelected();
         String tipoFiltro = view.getCbTipoReportero().getSelectedItem().toString();
+        boolean soloFreelance = view.getChkSoloFreelance().isSelected(); 
 
-        List<ReporteroDTO> reporteros = model.getReporterosDisponibles(idAgencia, fechaInicio, fechaFin, idEvento, filtrarTematica, tipoFiltro);
-        TableModel tmodelDisp = SwingUtil.getTableModelFromPojos(reporteros, new String[] { "id", "nombre", "tipo", "tematica" });
+        // Pasamos el booleano al modelo
+        List<ReporteroDTO> reporteros = model.getReporterosDisponibles(idAgencia, fechaInicio, fechaFin, idEvento, filtrarTematica, tipoFiltro, soloFreelance);
+        TableModel tmodelDisp = SwingUtil.getTableModelFromPojos(reporteros, new String[] { "id", "nombre", "tipo", "tematica", "estadoInteres" });
         view.getTabReporteros().setModel(tmodelDisp);
         SwingUtil.autoAdjustColumns(view.getTabReporteros());
 
         List<ReporteroDTO> asignados = model.getReporterosAsignados(idEvento);
-        TableModel tmodelAsig = SwingUtil.getTableModelFromPojos(asignados, new String[] { "id", "nombre", "tipo", "tematica", "rol" });
+        TableModel tmodelAsig = SwingUtil.getTableModelFromPojos(asignados, new String[] { "id", "nombre", "tipo", "tematica", "rol", "estadoInteres" });
         view.getTabReporterosAsignados().setModel(tmodelAsig);
         SwingUtil.autoAdjustColumns(view.getTabReporterosAsignados());
     }
@@ -148,11 +150,26 @@ public class ReporteroController {
 
         int countResponsables = 0;
         int countBases = 0;
+        boolean hayDudas = false; 
 
         for (int i = 0; i < view.getTabReporterosAsignados().getRowCount(); i++) {
             String rol = view.getTabReporterosAsignados().getValueAt(i, 4).toString();
+            String interes = view.getTabReporterosAsignados().getValueAt(i, 5).toString(); 
+            
             if (rol.equals("Responsable")) countResponsables++;
             if (rol.equals("Base")) countBases++;
+            
+            if (interes.equalsIgnoreCase("En duda")) {
+                hayDudas = true;
+            }
+        }
+
+       
+        if (hayDudas) {
+            JOptionPane.showMessageDialog(view.getFrame(), 
+                "Error al finalizar la asignación.\n\nTienes a un freelance con estado 'En duda'.\nDebe aceptar y cambiar su estado para poder cerrar el equipo.", 
+                "Asignación Bloqueada", JOptionPane.ERROR_MESSAGE);
+            return;
         }
 
         if (countResponsables != 1 || countBases < 1) {

@@ -16,8 +16,8 @@ public class ReporteroView {
     private JButton btnEliminar;
     private JCheckBox chkFiltroTematica;
     private JComboBox<String> cbTipoReportero;
+    private JCheckBox chkSoloFreelance;
     
-    // NUEVOS BOTONES
     private JButton btnHacerResponsable;
     private JButton btnFinalizarAsignacion;
     
@@ -28,7 +28,7 @@ public class ReporteroView {
     private void initialize() {
         frame = new JFrame();
         frame.setTitle("Gestión de Asignaciones de Reporteros");
-        frame.setBounds(0, 0, 850, 750); 
+        frame.setBounds(0, 0, 900, 750); 
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.getContentPane().setLayout(new MigLayout("", "[grow]", "[][][][grow][][grow][][grow][][]"));
 
@@ -55,7 +55,7 @@ public class ReporteroView {
         tabEventos.setDefaultEditor(Object.class, null); 
         frame.getContentPane().add(new JScrollPane(tabEventos), "cell 0 3,grow");
 
-        // Tabla de Reporteros Disponibles + Checkbox y Desplegable
+        // Tabla de Reporteros Disponibles + Filtros
         frame.getContentPane().add(new JLabel("2. Disponibles (Ctrl+Click para varios):"), "flowx, cell 0 4");
         
         cbTipoReportero = new JComboBox<>(new String[]{"Todos", "Básico", "Reportero gráfico", "Camarógrafo"});
@@ -63,6 +63,9 @@ public class ReporteroView {
 
         chkFiltroTematica = new JCheckBox("Filtrar por coincidencia de temática", true);
         frame.getContentPane().add(chkFiltroTematica, "cell 0 4");
+
+        chkSoloFreelance = new JCheckBox("Solo Freelance");
+        frame.getContentPane().add(chkSoloFreelance, "cell 0 4");
         
         tabReporteros = new JTable();
         tabReporteros.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -84,7 +87,6 @@ public class ReporteroView {
         btnEliminar = new JButton("Eliminar Reportero(s) ↑");
         frame.getContentPane().add(btnEliminar, "cell 0 9, align right");
 
-        // --- NUEVOS BOTONES PARA LA HU ---
         btnHacerResponsable = new JButton("Hacer Responsable al seleccionado");
         frame.getContentPane().add(btnHacerResponsable, "flowx, cell 0 10, align left");
 
@@ -92,7 +94,6 @@ public class ReporteroView {
         frame.getContentPane().add(btnFinalizarAsignacion, "cell 0 10, align right");
     }
 
-    // Getters
     public JFrame getFrame() { return frame; }
     public JTextField getTxtAgenciaId() { return txtAgenciaId; }
     public JButton getBtnCargarEventos() { return btnCargarEventos; }
@@ -106,4 +107,5 @@ public class ReporteroView {
     public JComboBox<String> getCbTipoReportero() { return cbTipoReportero; }
     public JButton getBtnHacerResponsable() { return btnHacerResponsable; }
     public JButton getBtnFinalizarAsignacion() { return btnFinalizarAsignacion; }
+    public JCheckBox getChkSoloFreelance() { return chkSoloFreelance; }
 }
