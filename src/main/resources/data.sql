@@ -71,9 +71,19 @@ INSERT INTO EventoTematica (evento_id, tematica_id) VALUES
     (107, 4), (108, 1), (108, 2), (109, 2), (110, 4), (111, 1), (111, 2);
 
 INSERT INTO Asignacion (evento_id, reportero_id, rol) VALUES 
-    (100, 10, 'Responsable'), (100, 11, 'Base'), (101, 12, 'Responsable'), (102, 13, 'Responsable'),
-    (104, 15, 'Responsable'), (106, 16, 'Responsable'), (106, 17, 'Base'), (108, 19, 'Responsable'),
-    (110, 21, 'Responsable');
+    (100, 10, 'Responsable'), (100, 11, 'Base'), 
+    
+    (101, 12, 'Responsable'), (101, 23, 'Base'), 
+    
+    (102, 13, 'Responsable'), 
+    
+    (104, 15, 'Responsable'), (104, 13, 'Base'), 
+    
+    (106, 16, 'Responsable'), (106, 17, 'Base'), 
+    
+    (108, 19, 'Responsable'), (108, 20, 'Base'),
+    
+    (110, 21, 'Responsable'), (110, 24, 'Base');
 
 INSERT INTO Reportaje (id, titulo, reportero_entrega_id, estado, revision_solicitada, fecha_fin_embargo) VALUES 
     (300, 'Crónica de una final épica', 10, 'FINALIZADO', TRUE, NULL),
