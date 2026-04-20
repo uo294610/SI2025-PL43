@@ -87,10 +87,10 @@ INSERT INTO Asignacion (evento_id, reportero_id, rol) VALUES
 
 INSERT INTO Reportaje (id, titulo, reportero_entrega_id, estado, revision_solicitada, fecha_fin_embargo) VALUES 
     (300, 'Crónica de una final épica', 10, 'FINALIZADO', TRUE, NULL),
-    (301, 'Glamour en la alfombra roja', 12, 'NODESCARGADO', FALSE, NULL),
+    (301, 'Glamour en la alfombra roja', 12, 'FINALIZADO', FALSE, NULL),
     (302, 'Decisiones clave en la cumbre', 16, 'DESCARGADO', TRUE, NULL),
     (303, 'El futuro de la red', 21, 'FINALIZADO', FALSE, NULL),
-    (304, 'Luces, cámara y taquilla', 15, 'NODESCARGADO', TRUE, '2026-12-31 23:59:59');
+    (304, 'Luces, cámara y taquilla', 15, 'FINALIZADO', TRUE, '2026-12-31 23:59:59');
 
 INSERT INTO ReportajeTematica (reportaje_id, tematica_id) VALUES
     (300, 1), (301, 2), (302, 3), (302, 1), (303, 4), (304, 2);
@@ -116,13 +116,12 @@ INSERT INTO VersionReportaje (id, reportaje_id, subtitulo, cuerpo, fecha_hora, q
 
 INSERT INTO Ofrecimiento (id, evento_id, empresa_id, decision, acceso, tipo_acceso, estado_pago) VALUES 
     (500, 100, 200, 'ACEPTADO', TRUE, 'COMPLETO', 'PAGADO'), 
-    (501, 100, 201, NULL, FALSE, 'NINGUNO', 'PENDIENTE'),
+    (501, 100, 201, 'ACEPTADO', FALSE, 'NINGUNO', 'PENDIENTE'),
     (502, 101, 202, 'ACEPTADO', TRUE, 'COMPLETO', 'PAGADO'),
-    (503, 101, 203, 'RECHAZADO', FALSE, 'NINGUNO', 'PENDIENTE'), 
+    (503, 101, 203, 'ACEPTADO', FALSE, 'NINGUNO', 'PENDIENTE'), 
     (504, 106, 204, 'ACEPTADO', TRUE, 'COMPLETO', 'PAGADO'),
     (505, 110, 202, 'ACEPTADO', TRUE, 'COMPLETO', 'PAGADO'),
-    (506, 104, 200, 'ACEPTADO', TRUE, 'PARCIAL', 'PAGADO'), 
-    (507, 104, 201, 'RECHAZADO', FALSE, 'NINGUNO', 'PENDIENTE'); 
+    (506, 104, 200, 'ACEPTADO', FALSE, 'NINGUNO', 'PAGADO'); 
 
 INSERT INTO Imagen (id, reportero_id, reportaje_id, ruta_archivo, estado, tipo) VALUES
     (600, 11, 300, '/img/champions_final_01.jpg', 'DEFINITIVA', 'imagen'),
