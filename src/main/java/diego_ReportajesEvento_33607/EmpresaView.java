@@ -20,9 +20,9 @@ public class EmpresaView {
     }
 
     private void initialize() {
-    	frame = new JFrame();
+        frame = new JFrame();
         frame.setTitle("Lector de Reportajes (Empresas)");
-        frame.setBounds(0, 0, 700, 680);
+        frame.setBounds(0, 0, 750, 700); 
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); 
         frame.getContentPane().setLayout(new MigLayout("", "[grow]", "[][][grow][][][][grow][][grow][]"));
 
@@ -60,7 +60,9 @@ public class EmpresaView {
         tabMultimedia.setRowSelectionAllowed(false); 
         tabMultimedia.setDefaultEditor(Object.class, null);
         frame.getContentPane().add(new JScrollPane(tabMultimedia), "cell 0 8,grow");
+        
         btnDescargarJson = new JButton("Descargar Reportaje (.json)");
+        btnDescargarJson.setEnabled(false); 
         frame.getContentPane().add(btnDescargarJson, "cell 0 9, align right");
     }
 
