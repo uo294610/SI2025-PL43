@@ -1,4 +1,4 @@
-package giis.demo.tkrun.ut;
+package PA_pruebas_UO297089;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
