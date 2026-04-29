@@ -139,4 +139,41 @@ public class ModificaEntregaModel {
         }
         return false;
     }
+    
+    // Método de negocio para la Práctica de Pruebas (HU Entregar Reportaje)
+    public void validarYEntregarReportaje(int idEvento, int idReportero, String titulo, String subtitulo, String cuerpo) {
+        // Regla 1: Validar si el reportero está asignado al evento
+        String sqlAsignacion = "SELECT count(*) FROM Asignacion WHERE evento_id = ? AND reportero_id = ?";
+        List<Object[]> asignacion = db.executeQueryArray(sqlAsignacion, idEvento, idReportero);
+        if (Integer.parseInt(asignacion.get(0)[0].toString()) == 0) {
+            throw new IllegalStateException("El reportero no está asignado a este evento.");
+        }
+
+        // Regla 2: Validar si ya ha entregado un reportaje previo para este mismo evento
+        String sqlPrevio = "SELECT count(*) FROM Reportaje r " +
+                           "INNER JOIN EvaluacionReportaje er ON r.id = er.reportaje_id " +
+                           "WHERE er.evento_id = ? AND r.reportero_entrega_id = ?";
+        List<Object[]> previo = db.executeQueryArray(sqlPrevio, idEvento, idReportero);
+        if (Integer.parseInt(previo.get(0)[0].toString()) > 0) {
+            throw new IllegalStateException("El reportero ya ha entregado un reportaje para este evento.");
+        }
+
+        // Si pasa las validaciones de negocio, procedemos a insertar (Éxito)
+        int nuevoIdReportaje = getUltimoId("Reportaje") + 1;
+        insertarReportaje(nuevoIdReportaje, titulo, idReportero);
+        
+        // Generamos el ID de la evaluación para que no salte el error NOT_NULL
+        int nuevoIdEvaluacion = getUltimoId("EvaluacionReportaje") + 1;
+        db.executeUpdate("INSERT INTO EvaluacionReportaje (id, reportaje_id, evento_id, estado) VALUES (?, ?, ?, 'PENDIENTE')", nuevoIdEvaluacion, nuevoIdReportaje, idEvento);
+
+        // Insertamos la versión
+        VersionReportajeEntity nuevaVersion = new VersionReportajeEntity();
+        nuevaVersion.setId(getUltimoId("VersionReportaje") + 1);
+        nuevaVersion.setReportaje_id(nuevoIdReportaje);
+        nuevaVersion.setSubtitulo(subtitulo);
+        nuevaVersion.setCuerpo(cuerpo);
+        nuevaVersion.setFecha_hora(new java.sql.Timestamp(System.currentTimeMillis()));
+        nuevaVersion.setQue_cambio("Versión inicial");
+        insertarNuevaVersion(nuevaVersion);
+    }
 }
