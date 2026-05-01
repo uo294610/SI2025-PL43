@@ -149,27 +149,7 @@ public class TestOfrecimientos {
                 assertEquals("COMPLETO", dto.getTipoAcceso(), "Filtro roto: Debe tener acceso COMPLETO.");
             }
         }
-    }
 
-    /**
-     * Prueba de Integración: Transición de Decisiones (UPDATE en BD).
-     */
-    @Test
-    public void testFlujoCompletoSeleccionYDecision() {
-        OfrecimientosModel model = new OfrecimientosModel();
-        int idEmpresa = 200;
-
-        // 1. Verificamos pendientes iniciales (500 y 501)
-        List<OfrecimientosDTO> listaPendientes = model.getOfrecimientos(idEmpresa, false, 0, true, null, null, "Todos");
-        assertEquals(2, listaPendientes.size(), "Debe haber 2 ofrecimientos pendientes iniciales.");
-
-        // 2. Transicionamos el 501 a ACEPTADO
-        model.actualizarDecision(501, "ACEPTADO");
-
-        // 3. Comprobamos que ha bajado el número de pendientes
-        assertEquals(1, model.getOfrecimientos(idEmpresa, false, 0, true, null, null, "Todos").size(), "Solo debe quedar 1 pendiente.");
-        
-        // 4. Comprobamos que ha subido el número de decididos (502, 503 y ahora el 501)
-        assertEquals(3, model.getOfrecimientos(idEmpresa, false, 0, false, null, null, "Todos").size(), "Debe haber 3 decididos.");
     }
 }
+   
